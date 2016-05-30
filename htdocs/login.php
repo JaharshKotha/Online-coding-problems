@@ -1,3 +1,7 @@
+<?php
+session_start();
+
+?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <script>
@@ -9,6 +13,7 @@ $('.message a').click(function(){
 <head>
 <link rel="stylesheet" type="text/css" href="master.css">
 </head>
+
 <div class="login-page">
   <div class="form">
   <form action="action.php" method="POST" class="login-form">
@@ -16,13 +21,14 @@ $('.message a').click(function(){
  <input type="password" name ="passwd" placeholder="password"><br>
 <input type="submit" value="SUBMIT">
 </form>
+
 <?php
 if(isset($_SESSION['login_fail']))
 {
 	echo "<h7>Authentication failure ! We dont recognze you.</h7> ";
 }
-?>
-  </div>
+?> 
+</div>
 </div>
 </Html>
 

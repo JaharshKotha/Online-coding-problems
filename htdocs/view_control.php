@@ -10,38 +10,32 @@ $("#tog_name").click(function(){
     $("#tog_section").toggle();
 });
 
-$(".removeButton").click(function(){
+$(".save").click(function(){
+	var coloumns="";
+	var table="";
+	var db="";
 	
-	var trParent = $(this).parent().parent();
-	var tds = trParent.find("td");             // Finds all children <td> elements
-
-$.each(tds, function() {  
-
-    
-   $("#hidden-type").val($(this).text());
-   return false;
-});
+	$(document).find("."+$(this).attr("data-attr")).each(function(){
+		if($(this).find("input").is(":checked"))
+		coloumns+=$(this).text()+",";
 	
+			db= $(this).attr("data-attr");
+								table = $(this).attr("class");
+
+				
+
+	});
+	if(coloumns.length>0)
+coloumns = coloumns.substring(0,coloumns.length - 1);
+		
+	$("#dbn").val(db);
+$("#tn").val(table);
+$("#cols").val(coloumns);
+$("#insert_view_control").submit();
    
-	$("#export-form").submit();
 });
 
 
-$(".removeMember").click(function(){
-	
-	var trParent = $(this).parent().parent();
-	var tds = trParent.find("td");             // Finds all children <td> elements
-
-$.each(tds, function() {  
-
-    
-   $("#mem_id").val($(this).text());
-   return false;
-});
-	
-   
-	$("#remove_mem").submit();
-});
 
 
  });
@@ -5720,7 +5714,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 
 </style>
-<body style="background-color:#66AA99">
+
 
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
    <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
@@ -5728,7 +5722,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
          <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
             <div data-reactid=".d.0.0.0.1.0" class="Entity">
                <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="/dash.php">Hi, <?php echo $_SESSION['uname'];?> </a></h2>
+                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name">Hi, <?php echo $_SESSION['uname'];?> </h2>
                   <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Admin page</h4>
                </div>
                <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
@@ -5753,7 +5747,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
             <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
             <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="/admin/" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
             <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="/logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
+            <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
          </ul>
       </div>
    </div>
@@ -5773,18 +5767,26 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
    </header>
   
 
-
-<div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1" >
-<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink" style="height:100%;">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script>
+$('.message a').click(function(){
+   $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
+});
+</script>
+<div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1">
+<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink">
    <ul data-reactid=".2.1.0.0" class="AdminList-items pt1">
-      <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration selected" href="#">General</a></li>
-      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="/admin_add_a_new_member.php">Add a new member</a></li>
-      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="/admin_create_new_connection.php">Create new DB connection</a></li>
-	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="/view_control.php">View Control</a></li>
+     <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration" href="/admin.php">General</a></li>
+      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="/admin_create_new_team.php">Create Your Team</a></li>
+      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration " href="/admin_create_new_connection.php">Create new DB connection</a></li>
+	   <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration selected" href="/view_control.php">View Control</a></li>
    </ul>
 </div>
-<div class="px2" data-reactid=".2.1.1" style="padding-left:25em ;  background-color:#66AA99">
-<h4 style="color:black;"> Your existing connections </h4><br>
+<div class="px2" data-reactid=".2.1.1" style="padding-left:25em">
+<Html>
+<head>
+<link rel="stylesheet" type="text/css" href="master.css">
+</head>
 <style>
 table,td {
     border: 1px solid black;
@@ -5794,55 +5796,86 @@ table {
     border-spacing: 15px;
 }
 </style>
-<?php
+<div class="login-page">
+  <?php
 
 $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
 
-$u ="'".$_SESSION['uname']."'";
-$s = "select *from creat_connections where admin_uname=$u";
-$r = pg_query($con,$s);
-echo '<table>';
-echo '<tr><th>con_id</th><th>Host</th>';
-echo '<th>Port</th>';
-echo '<th>Database name</th>';
-echo '<th>  </th><tr>';
-while($row = pg_fetch_array($r))
-{
-	echo '<tr><td style="all:unset;">'.$row[0].'</td><td>'.$row[2].'</td> <td>'.$row[3].'</td><td>'.$row[6].'</td><td><input type="submit" class ="removeButton" value="remove"></td></tr>';
-}
-echo '</table>';
-?>
 
-<br><br><br><h4 style="color:black;"> Your existing team</h4><br>
-<?php
 $u ="'".$_SESSION['uname']."'";
-$s = "select *from LOGIN where admin_uname=$u";
+$s = "select db_name from creat_connections where admin_uname=$u;";
 $r = pg_query($con,$s);
-echo '<table>';
-echo '<th>id</th><th>Member\'s First Name </th>';
-echo '<th> Member\'s privilege  </th><th> </th><tr>';
+echo 'Databases on the server<br>';
+$array = array();
 while($row = pg_fetch_array($r))
 {
-	echo '<tr><td style="all:unset;">'.$row[0].'</td><td>'.$row[5].'</td> <td >'.$row[3].'</td>';
-	if(trim($row[3])!=trim("Admin"))
+	if(trim($row[0])!= trim("postgres"))
 	{
-		echo '<td><input type="submit" class ="removeMember" value="remove"></td></tr>';
+	$array[]=$row[0];
 	}
+	
 }
-echo '</table>';
+
+$con2 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+$z= "select * from table_view_control where admin_name=$u;";
+$zr = $r = pg_query($con2,$z);
+$tc =array();
+while($zo=pg_fetch_array($r))
+{
+	
+	$tc[$zo[1]]=array();
+	$tc[$zo[1]][]=$zo[2];
+	
+}
+
+
+for($i=0;$i<sizeof($array);$i++)
+{
+	
+$con1 = pg_connect("host=localhost port=5421 dbname=$array[$i] user=postgres password=plz");
+$flg=0;
+
+$s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN('pg_catalog', 'information_schema');";
+$r = pg_query($con1,$s);
+while($ro = pg_fetch_array($r))
+{
+$all_check_col=explode(",",$tc[$ro[0]][0]);
+echo '<br><h3>'.$ro[0].':</h3><br><br>';
+$t_name="'".$ro[0]."'";
+$t = "SELECT column_name FROM information_schema.columns WHERE table_name = $t_name;";
+$t_r = pg_query($con1,$t);
+echo '<table><tr>';
+while($t_row = pg_fetch_array($t_r))
+{
+	for($j=0;$j<sizeof($all_check_col);$j++)
+	{
+	if($all_check_col[$j]==$t_row[0])
+	{$flg=1;}
+	}
+	if($flg==1)
+	{
+	echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'" checked="checked"></td>';
+	}
+	else
+	{
+		echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'"></td>';
+	}
+	$flg=0;
+}
+echo '<input type="submit" value="save" placeholder="save" class="save" data-attr="'.$ro[0].'"></tr></table><br>';
+
+}
+}
+
 ?>
+</div>
+<form action="insert_view_control.php" method="post" id="insert_view_control">
+  <input type="hidden" value='' id="dbn" name="dbn"/>
+ <input type="hidden" value='' id="tn" name="tn"/>
+ <input type="hidden" value='' id="cols" name="cols"/>
 
-
-
-
+ </form>
+</Html>
 </div>
 </div>
 </div>
-<form action="remove_connection.php" method="post" id="export-form">
-                        <input type="hidden" value='' id="hidden-type" name="con_id"/>
-                    </form>
-					
-					<form action="remove_member.php" method="post" id="remove_mem">
-                        <input type="hidden" value='' id="mem_id" name="memid"/>
-                    </form>
-</body>

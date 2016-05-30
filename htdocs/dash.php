@@ -1,5 +1,6 @@
 <?php session_start();
 ob_start();
+								 
 ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
@@ -5693,40 +5694,61 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-   <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
-      <div data-reactid=".d.0.0.0">
-         <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
-            <div data-reactid=".d.0.0.0.1.0" class="Entity">
-               <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
+   <header data-reactid=".d.0.0" class="DashboardHeader relative z2" >
+  <div mb-react-component="Navbar" ng-controller="Nav" class="Nav ng-scope">
+    <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3" style=" background-color:green;">
+        <ul class="pl4 pr1 flex align-center">
+		 <li>
+		 <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
 			    <?php
-			 $a=trim("A");
-			 $p=trim("P");
+			 $a=trim("Admin");
+			 $p=trim("Privileged");
 			 $b=trim($_SESSION['utype']);
 			 if($a == $b)
 				{
-					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name">Hi,'.$_SESSION['uname'].'(Admin)'.'</h2>';	
+					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,'.$_SESSION['uname'].'(Admin)'.'</h2>';	
 				}
 			 else if($p == $b)
 			 {
-					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name">Hi,'.$_SESSION['uname'].'(Privileged)'.'</h2>';
+					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,'.$_SESSION['uname'].'(Privileged)'.'</h2>';
 			 }
 			 else 
 			 {
-					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name">Hi,'.$_SESSION['uname'].'</h2>';
+					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,'.$_SESSION['uname'].'</h2>';
 			 }
 			 
 			 
 			 ?>
-                  
-                  <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Home page</h4>
+                   
+                  <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3" style="color:white;">Your Home page</h4>
+				  
                </div>
-               <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
-            </div>
-            <div data-reactid=".d.0.0.0.1.1" class="flex align-center flex-align-right">
-               <span data-reactid=".d.0.0.0.1.1.$0" class="Header-buttonSection flex align-center">
-                  
-				  <div data-reactid=".0.0.5.0" class="inline-block text-white" >
-   <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
+			   </li>
+            <li class="pl3">
+                <div>
+                    <div class="NavDropdown inline-block cursor-pointer">
+                        <span>
+                        <a   class="NavDropdown-button NavItem text-white text-bold cursor-pointer px2 flex align-center transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Dashboard Dropdown;Toggle">
+                           <span   class="NavDropdown-button-layer">
+                              <span  >Dashboards</span>
+                        <svg name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="ml1">
+                            <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z " />
+                        </svg>
+                        </span>
+                        </a>
+                        </span>
+                    </div>
+                </div>
+            </li>
+            <li class="pl1"><a href="/card/" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Questions">Questions</a>
+            </li>
+            <li class="pl1"><a href="/pulse/" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Pulses">Pulses</a>
+            </li>
+            <li class="pl3"><a href="/q" class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show">Question</span></a>
+            </li>
+            <li class="flex-align-right transition-background">
+			 <div data-reactid=".0.0.5.0" class="inline-block text-white" >
+                <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
       <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
          <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
             <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
@@ -5741,7 +5763,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
          <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
             <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
              <?php
-			 $a=trim("A");
+			 $a=trim("Admin");
 			 $b=trim($_SESSION['utype']);
 			 
 			 if($a == $b)
@@ -5759,21 +5781,15 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 		 </ul>
       </div>
    </div>
+   </div>
+            </li>
+        </ul>
+    </nav>
 </div>
-                  
-                  
-                  <span data-reactid=".d.0.0.0.1.1.$0.$3" class="Header-button">
-                     <span data-reactid=".d.0.0.0.1.1.$0.$3.0" data-metabase-event="Dashboard;Fullscreen Mode;true">
-                        
-                        <span data-reactid=".d.0.0.0.1.1.$0.$3.0.1" class="hide"></span>
-                     </span>
-                  </span>
-               </span>
-            </div>
-         </div>
-      </div>
+
+     
    </header>
-   <h3 style="padding-left:5em"> Some of the most frequent queries </h3><br>
+   <h3 style="padding-left:5em"><br> Some of the most frequent queries </h3><br>
    <div data-reactid=".d.0.1" class="wrapper">
       <div data-reactid=".d.0.1.0" class="flex layout-centered">
          <div data-reactid=".d.0.1.0.0" style="position: relative; width: 1441px; height: 472px; margin-left: -3px; margin-right: -3px;" class="DashboardGrid">
@@ -5795,8 +5811,9 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
                            <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
 						   
                               <?php
-							  $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-							  $con1 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+							
+							 $con = pg_connect("host=localhost port=5421 dbname=dummy_db user=postgres password=plz");
+							  $con1 = pg_connect("host=localhost port=5421 dbname=dummy_db user=postgres password=plz");
 								$s = "select * from dummy_1;";
 								$x ="SELECT * FROM information_schema.columns WHERE table_name = 'dummy_1';";
 								$col = pg_query($con,$x);
@@ -5824,6 +5841,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 								}
 								
 								echo '</tbody></table>';
+								
 								
 
 							  ?>
@@ -5860,270 +5878,50 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
                      <div data-reactid=".d.0.1.0.0.0:$2.0.0.1" class="flex-full relative flex flex-column">
                         <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0" class="flex-full relative border-bottom">
                            <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
-                              <table data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">
-                                 <thead data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0">
-                                    <tr data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0">
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$0" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$0.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$0.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$0.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$0.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$0.0.1.0">Date </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$1" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$1.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$1.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$1.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$1.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$1.0.1.0">ID</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$2" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$2.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$2.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$2.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$2.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$2.0.1.0">Id Mk</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$3" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$3.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$3.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$3.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$3.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$3.0.1.0">Id Ve</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$4" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$4.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$4.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$4.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$4.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$4.0.1.0">Name </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$5" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$5.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$5.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$5.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$5.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$5.0.1.0">BTC selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$6" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$6.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$6.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$6.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$6.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$6.0.1.0">Category</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$7" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$7.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$7.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$7.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$7.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$7.0.1.0">Classification</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$8" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$8.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$8.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$8.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$8.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$8.0.1.0">CVE</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$9" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$9.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$9.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$9.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$9.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$9.0.1.0">Date inserted </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$10" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$10.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$10.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$10.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$10.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$10.0.1.0">Description </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$11" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$11.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$11.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$11.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$11.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$11.0.1.0">Escrow info</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$12" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$12.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$12.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$12.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$12.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$12.0.1.0">EUR selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$13" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$13.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$13.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$13.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$13.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$13.0.1.0">Last view date</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$14" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$14.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$14.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$14.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$14.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$14.0.1.0">Ms Item</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$15" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$15.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$15.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$15.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$15.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$15.0.1.0">Quantity left </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$16" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$16.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$16.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$16.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$16.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$16.0.1.0">Quantity sold</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$17" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$17.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$17.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$17.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$17.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$17.0.1.0">Reviews </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$18" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$18.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$18.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$18.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$18.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$18.0.1.0">Shipped from </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$19" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$19.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$19.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$19.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$19.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$19.0.1.0">Shipped to </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$20" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$20.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$20.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$20.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$20.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$20.0.1.0">Successfull transactions</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$21" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$21.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$21.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$21.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$21.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$21.0.1.0">Terms and conditions</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$22" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$22.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$22.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$22.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$22.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$22.0.1.0">USD selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$23" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$23.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$23.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$23.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$23.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$23.0.1.0">Vendor rating</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$24" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$24.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$24.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$24.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$24.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.0.0.$24.0.1.0">Views </span></div>
-                                          </div>
-                                       </th>
-                                    </tr>
-                                 </thead>
-                                 <tbody data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1">
-                                    <tr data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0">
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$0" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, February 10, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$1" class="px1 border-bottom" style="white-space:nowrap;">83936</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$2" class="px1 border-bottom" style="white-space:nowrap;">2</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$3" class="px1 border-bottom" style="white-space:nowrap;">38</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$4" class="px1 border-bottom" style="white-space:nowrap;">★USA CC WITH KNOWN BALANCES ★ - [1000 $-30.000 $]</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$5" class="px1 border-bottom" style="white-space:nowrap;">0.0000</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$6" class="px1 border-bottom" style="white-space:nowrap;">Digital goods</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$7" class="px1 border-bottom" style="white-space:nowrap;">0.000078</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$8" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$9" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, February 10, 2016 9:14 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$10" class="px1 border-bottom" style="white-space:nowrap;">THESE ARE NOT PHYSICAL CARDS. INFO IS SENT ONLINE  NO PHYSICAL SHIPPING INVOLVED.  If you think buying this listing  please read first very carefully the rules below. THIS IS REQUIRED.  UPD: Unfortunately  increased number of AB users came with an increased number of scammers and a lot of people who don't know what they are doing when it comes to carding. That's why now this listing comes with FE  even if i really tried to avoid it (because of aditional costs and other things). But also now buyer's filter won't be so severe  and more people will be able to get this. Also i'll be more receptive to replacements  even if 99 % of times people ask to replace them a live card. ★★★★★ 1. I am selling 100 % live cards with known balance on them. The thing you must understand is that many times people think that problem is in their card  not in their skills. Many cards sold here on Alphabay are LIVE with decent amounts on them. People just struggle to card the right way or don't have the right strategy and carding setup for a specific site they are aiming.  And knowing how many beginners are considering themselves to be professionals  nobody is blaming their skills  because it's easier to blame cards.  But on the other hand  here also are sold used cards  refurbished  and that's why i'm coming with this listing  to give you a 100 % working card with money. Because of this  if you don't have a big buyer history here and didn't spend some money on Alphabay  i'll cancel your order. Why? Because of the problem i described above. I don't like unhappy customers  and having some history of spending here means you have some experience  and know how to cashout a card. *************************************** 2. If you are a beginner  but really want to try these cards  i suggest you first to look on the next listing  cause in the end you will be 100 % able to cashout such cards better than somebody who has even years of experience: http://pwoah7foa6au2pul.onion/listing.php?id=1381 New update: 2 Free cards (one 1000 $-10.000 $ and one 10.000-30.000 $) will come in the "Carding School" package. Limited offer *************************************** 3. NO REPLACEMENT. These are 100 % live cards  with balance checked using a special method  and in case of any problems i'm ready to provide required proofs for balance confirmation. So there aren't reasons why you will need a replace and any attempts to ask it means you are a scammer. My customers for other things who bought from me constantly  are welcomed to buy this listing. Looking to build a permanent base of customers who know how to cashout US CC  and after  this listing will get private and i'll work only with them. ************************************** 4. I suggest to not go for more than 7-10 % from the balance available in one transaction. 10 % is the maximum limit i recommend  better less. Again  if you are not a beginner  you know that big transactions trigger bank antifraud systems and they cancel your card and call the card holder  especially if cardholder makes online payments very rare. If on card is only 3500 $ available credit for example  than you can go for a 600-700 $ transactionwhich is more than 10 %. But if on cards are 50k $  a 5000 $ purchase may kill the card. Hope you get the idea. If you call the bank and preauthorize the transaction  then you can go for bigger amounts of course. ************************************** 5. I don't respond for card being attached to Paypal  having 3d secure  and other things. Only thing i guarantee is a LIVE card with the exact amount on it. Soon i'll offer NON-VBV (no 3-d secure) guarantee  but they willcost a little more. At the moment  card may not be VBV or may be  i don't know this. ************************************** 6. If you received the card  i suggest to use it right away or in the next days. Cardholder also spends money  so if you will use the card after 1 month  the amount on it may be different. ************************************** So if you are tired of cards being sold to you after they were cashed out (some vendors are doing this shit) and want a 100 % guarantee that the card is good  you are welcome to buy. Only thing you will need is the ability to card. Everything else is done for you.  Enjoy and let's make money. ********************************** Format: ********************************** Balance: Name: Card number: Expiration date: CVV: Billing address: Billing telephone:</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$11" class="px1 border-bottom" style="white-space:nowrap;">FE Listing 100%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$15" class="px1 border-bottom" style="white-space:nowrap;">Unlimited</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$16" class="px1 border-bottom" style="white-space:nowrap;">948</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$21" class="px1 border-bottom" style="white-space:nowrap;">This is a fixed-price listing; no bids are available. Sales are final  no Refund for whatever Reason  I am not responsible if Data Provided is already registered with Paypal / Bank or any other account</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$22" class="px1 border-bottom" style="white-space:nowrap;">0.00
-                                       </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$23" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$0.$24" class="px1 border-bottom" style="white-space:nowrap;">58552</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1">
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$0" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, February 10, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$1" class="px1 border-bottom" style="white-space:nowrap;">83990</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$2" class="px1 border-bottom" style="white-space:nowrap;">2</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$3" class="px1 border-bottom" style="white-space:nowrap;">930</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$4" class="px1 border-bottom" style="white-space:nowrap;">USA/UK/EU/CA/Asia/Worldwide CC+CVV -  Visa MasterCard Credit/Debit Card</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$5" class="px1 border-bottom" style="white-space:nowrap;">0.0000</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$6" class="px1 border-bottom" style="white-space:nowrap;">Digital goods</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$7" class="px1 border-bottom" style="white-space:nowrap;">0.00013</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$8" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$9" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, February 10, 2016 9:14 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$10" class="px1 border-bottom" style="white-space:nowrap;">IMPORTANT: No Replacement. No Refund.I sell only fresh cards  but i cannot guarantee they will 100% work well for your carding. Worldwide Cards - USA  UK  CA  DE  FR  AU  ES  JP  Asia  Others. Data format: Card Number | Month | Year | CVV | Holder Name | Card Type | Card Level | Country | Email Note: All my cards come with no billing address. Most of them are NON AVS (Address Verification System)  but I cannot verify or guarantee that. BINs list: http://pwoah7foa6au2pul.onion/forum/index.php?threads/looking-for-great-bins.1340/</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$11" class="px1 border-bottom" style="white-space:nowrap;">FE Listing 100%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$15" class="px1 border-bottom" style="white-space:nowrap;">Unlimited (120 automatic items)</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$16" class="px1 border-bottom" style="white-space:nowrap;">6428</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$18" class="px1 border-bottom" style="white-space:nowrap;">United Kingdom</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$21" class="px1 border-bottom" style="white-space:nowrap;">This is a fixed-price listing; no bids are available. No Replacement. No Refund.  You are purchasing this product because you agree to this policy  DO NOT bother to dispute.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$22" class="px1 border-bottom" style="white-space:nowrap;">0.00
-                                       </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$23" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0.0.1.$1.$24" class="px1 border-bottom" style="white-space:nowrap;">76786</td>
-                                    </tr>
-                                 </tbody>
-                              </table>
+                              
+							  
+							  <?php
+							  $con = pg_connect("host=localhost port=5421 dbname=dummy_db user=postgres password=plz");
+							  $con1 = pg_connect("host=localhost port=5421 dbname=dummy_db user=postgres password=plz");
+								$s = "select * from dummy_2;";
+								$x ="SELECT * FROM information_schema.columns WHERE table_name = 'dummy_2';";
+								$col = pg_query($con,$x);
+								echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
+								echo '<thead><tr>';
+								
+								$c3=0;
+								while($row_1 = pg_fetch_array($col))
+								{
+									echo '<th class="MB-DataTable-header cellData text-brand-hover">'.$row_1[3].'</th>';
+									$c3=$c3+1;
+								}
+								
+								echo '</tr></thead><tbody><tr>';
+								$r = pg_query($con1,$s);
+								$count = "SELECT count(*) FROM information_schema.columns WHERE table_name = 'dummy_2';";
+								$c = pg_query($con1,$count);
+								
+								  $con3 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+								 $table3_count = "SELECT * FROM dummy_2;";
+								 $r3 = pg_query($con3,$table3_count);
+								 //$c3 =pg_num_fields($r3);
+								 echo 'c3='.$c3;
+								 
+								
+								while($row = pg_fetch_array($r))
+								{
+									$i=0;
+									for($i=0;$i<$c3;$i++)
+									{
+										echo '<td class="px1 border-bottom" style="white-space:nowrap;">'.$row[$i].'</td>';
+									}
+									echo '</tr>';
+								}
+								
+								echo '</tbody></table>';
+								
+
+							  ?>
                            </div>
                         </div>
                         <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.1" class="p1 flex flex-no-shrink flex-align-right fullscreen-normal-text fullscreen-night-text">
@@ -6157,518 +5955,50 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
                      <div data-reactid=".d.0.1.0.0.0:$4.0.0.1" class="flex-full relative flex flex-column">
                         <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0" class="flex-full relative border-bottom">
                            <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
-                              <table data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">
-                                 <thead data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0">
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0">
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$0" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$0.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$0.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$0.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$0.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$0.0.1.0">Date </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$1" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$1.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$1.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$1.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$1.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$1.0.1.0">ID</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$2" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$2.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$2.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$2.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$2.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$2.0.1.0">Id Mk</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$3" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$3.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$3.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$3.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$3.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$3.0.1.0">Id Ve</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$4" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$4.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$4.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$4.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$4.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$4.0.1.0">Name </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$5" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$5.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$5.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$5.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$5.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$5.0.1.0">BTC selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$6" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$6.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$6.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$6.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$6.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$6.0.1.0">Category</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$7" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$7.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$7.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$7.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$7.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$7.0.1.0">Classification</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$8" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$8.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$8.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$8.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$8.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$8.0.1.0">CVE</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$9" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$9.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$9.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$9.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$9.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$9.0.1.0">Date inserted </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$10" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$10.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$10.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$10.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$10.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$10.0.1.0">Description </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$11" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$11.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$11.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$11.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$11.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$11.0.1.0">Escrow info</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$12" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$12.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$12.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$12.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$12.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$12.0.1.0">EUR selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$13" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$13.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$13.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$13.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$13.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$13.0.1.0">Last view date</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$14" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$14.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$14.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$14.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$14.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$14.0.1.0">Ms Item</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$15" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$15.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$15.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$15.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$15.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$15.0.1.0">Quantity left </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$16" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$16.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$16.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$16.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$16.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$16.0.1.0">Quantity sold</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$17" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$17.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$17.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$17.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$17.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$17.0.1.0">Reviews </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$18" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$18.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$18.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$18.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$18.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$18.0.1.0">Shipped from </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$19" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$19.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$19.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$19.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$19.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$19.0.1.0">Shipped to </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$20" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$20.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$20.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$20.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$20.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$20.0.1.0">Successfull transactions</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$21" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$21.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$21.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$21.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$21.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$21.0.1.0">Terms and conditions</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$22" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$22.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$22.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$22.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$22.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$22.0.1.0">USD selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$23" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$23.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$23.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$23.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$23.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$23.0.1.0">Vendor rating</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$24" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$24.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$24.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$24.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$24.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.0.0.$24.0.1.0">Views </span></div>
-                                          </div>
-                                       </th>
-                                    </tr>
-                                 </thead>
-                                 <tbody data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1">
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$0" class="px1 border-bottom" style="white-space:nowrap;">Thursday, October 15, 2015 6:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$1" class="px1 border-bottom" style="white-space:nowrap;">48676</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$2" class="px1 border-bottom" style="white-space:nowrap;">2</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$3" class="px1 border-bottom" style="white-space:nowrap;">164</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$4" class="px1 border-bottom" style="white-space:nowrap;">Xer Exploit Kit / traffic / LOADS</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$5" class="px1 border-bottom" style="white-space:nowrap;">0.3936</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$6" class="px1 border-bottom" style="white-space:nowrap;">Digital goods</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$7" class="px1 border-bottom" style="white-space:nowrap;">0.9</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-2426  CVE-2015-0313  CVE-2015-0311  CVE-2014-0556  CVE-2015-0317  CVE-2014-0515  CVE-2015-2444  CVE-MS14-0645  </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$9" class="px1 border-bottom" style="white-space:nowrap;">Friday, October 16, 2015 12:30 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$10" class="px1 border-bottom" style="white-space:nowrap;">Hello guys I'm selling Xer Exploit Pack
-                                          Exploit features:
-                                          Geolocation single hits traffic
-                                          Geolocation single exploited pc
-                                          Map geolocation traffic
-                                          Scan file
-                                          Scan domain
-                                          add and remove domain from panel
-                                          scan domain from SafeBrowser
-                                          In addition is possible to configure the automatic rotator  add domain/check if domain is detetect/ move to clean domain.
-                                          Exploit kit work good in IE traffic.
-                                          Usually exploit rate is 15/25 % in mix traffic depend traffic source.
-                                          In testing and also working good with in CA  USA  UK   FR traffic.
-                                          Inside:
-                                          CVE-2015-2426
-                                          CVE-2015-0313
-                                          CVE-2015-0311
-                                          CVE-2014-0556
-                                          CVE-2015-0317
-                                          CVE-2014-0515
-                                          CVE-2015-2444
-                                          CVE-MS14-0645
-                                          and two private exploit
-                                          I can offer HQ MSIE traffic or Fresh loads for your botnet.
-                                          If you have money and you want to fill up your botnet this is your service.
-                                          Thanks
-                                          Contact:
-                                          jabber/XMPP (OTR only) : infector@dukgo.com
-                                       </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$11" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$12" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$14" class="px1 border-bottom" style="white-space:nowrap;">CVE-MS14-0645</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$15" class="px1 border-bottom" style="white-space:nowrap;">Unlimited</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$22" class="px1 border-bottom" style="white-space:nowrap;">100.00</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$23" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$0.$24" class="px1 border-bottom" style="white-space:nowrap;">34</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$0" class="px1 border-bottom" style="white-space:nowrap;">Friday, December 11, 2015 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$1" class="px1 border-bottom" style="white-space:nowrap;">48675</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$2" class="px1 border-bottom" style="white-space:nowrap;">2</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$3" class="px1 border-bottom" style="white-space:nowrap;">1163</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$4" class="px1 border-bottom" style="white-space:nowrap;">Xer Exploit Kit / traffic / LOADS</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$5" class="px1 border-bottom" style="white-space:nowrap;">0.2347</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$6" class="px1 border-bottom" style="white-space:nowrap;">Digital goods</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$7" class="px1 border-bottom" style="white-space:nowrap;">0.91</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-2426  CVE-2015-0313  CVE-2015-0311  CVE-2014-0556  CVE-2015-0317  CVE-2014-0515  CVE-2015-2444  CVE-MS14-0645</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$9" class="px1 border-bottom" style="white-space:nowrap;">Friday, December 11, 2015 10:58 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$10" class="px1 border-bottom" style="white-space:nowrap;">Hello guys I'm selling Xer Exploit Pack
-                                          Exploit features:
-                                          Geolocation single hits traffic
-                                          Geolocation single exploited pc
-                                          Map geolocation traffic
-                                          Scan file
-                                          Scan domain
-                                          add and remove domain from panel
-                                          scan domain from SafeBrowser
-                                          In addition is possible to configure the automatic rotator  add domain/check if domain is detetect/ move to clean domain.
-                                          Exploit kit work good in IE traffic.
-                                          Usually exploit rate is 15/25 % in mix traffic depend traffic source.
-                                          In testing and also working good with in CA  USA  UK   FR traffic.
-                                          Inside:
-                                          CVE-2015-2426
-                                          CVE-2015-0313
-                                          CVE-2015-0311
-                                          CVE-2014-0556
-                                          CVE-2015-0317
-                                          CVE-2014-0515
-                                          CVE-2015-2444
-                                          CVE-MS14-0645
-                                          and two private exploit
-                                          I can offer HQ MSIE traffic or Fresh loads for your botnet.
-                                          If you have money and you want to fill up your botnet this is your service.
-                                          Thanks
-                                          Contact:
-                                          jabber/XMPP (OTR only) : infector@dukgo.com
-                                          Prices:
-                                          100$ DAY
-                                          600$ WEEK
-                                          2000$ MONTH
-                                       </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$11" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$12" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$15" class="px1 border-bottom" style="white-space:nowrap;">Unlimited</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$22" class="px1 border-bottom" style="white-space:nowrap;">100.00
-                                       </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$23" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$1.$24" class="px1 border-bottom" style="white-space:nowrap;">310</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$0" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, February 17, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$1" class="px1 border-bottom" style="white-space:nowrap;">100064</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$2" class="px1 border-bottom" style="white-space:nowrap;">12</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$3" class="px1 border-bottom" style="white-space:nowrap;">1161</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$4" class="px1 border-bottom" style="white-space:nowrap;">FUD MS OFFICE CVE-2015-1770</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$5" class="px1 border-bottom" style="white-space:nowrap;">5.0295</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$6" class="px1 border-bottom" style="white-space:nowrap;">Exploit Code</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$7" class="px1 border-bottom" style="white-space:nowrap;">0.76</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-1770 </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$9" class="px1 border-bottom" style="white-space:nowrap;">Thursday, February 18, 2016 3:22 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$10" class="px1 border-bottom" style="white-space:nowrap;">[FUD MS OFFICE CVE-2015-1770]Windows xp to windows 7: Works on office 2003 up to office 2013Windows 8/8.1/10 : Works from office 2003 up to office 2010Payload is embedded encrypted exeFUD and private, not the shit from HF....</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$11" class="px1 border-bottom" style="white-space:nowrap;">Yes, escrow by RealDeal is available.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$15" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$22" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$23" class="px1 border-bottom" style="white-space:nowrap;">100.0%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$2.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$0" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, March 2, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$1" class="px1 border-bottom" style="white-space:nowrap;">117614</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$2" class="px1 border-bottom" style="white-space:nowrap;">12</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$3" class="px1 border-bottom" style="white-space:nowrap;">1161</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$4" class="px1 border-bottom" style="white-space:nowrap;">FUD MS OFFICE CVE-2015-1770</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$5" class="px1 border-bottom" style="white-space:nowrap;">4.6485</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$6" class="px1 border-bottom" style="white-space:nowrap;">Exploit Code</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$7" class="px1 border-bottom" style="white-space:nowrap;">0.76</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-1770 </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$9" class="px1 border-bottom" style="white-space:nowrap;">Thursday, March 3, 2016 12:57 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$10" class="px1 border-bottom" style="white-space:nowrap;">[FUD MS OFFICE CVE-2015-1770]Windows xp to windows 7: Works on office 2003 up to office 2013Windows 8/8.1/10 : Works from office 2003 up to office 2010Payload is embedded encrypted exeFUD and private, not the shit from HF....</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$11" class="px1 border-bottom" style="white-space:nowrap;">Yes, escrow by RealDeal is available.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$15" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$22" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$23" class="px1 border-bottom" style="white-space:nowrap;">100.0%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$3.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$0" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, February 3, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$1" class="px1 border-bottom" style="white-space:nowrap;">16185</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$2" class="px1 border-bottom" style="white-space:nowrap;">12</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$3" class="px1 border-bottom" style="white-space:nowrap;">1161</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$4" class="px1 border-bottom" style="white-space:nowrap;">FUD MS OFFICE CVE-2015-1770</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$5" class="px1 border-bottom" style="white-space:nowrap;">5.3591</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$6" class="px1 border-bottom" style="white-space:nowrap;">Exploit Code</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$7" class="px1 border-bottom" style="white-space:nowrap;">0.76</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-1770 </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$9" class="px1 border-bottom" style="white-space:nowrap;">Thursday, February 4, 2016 1:36 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$10" class="px1 border-bottom" style="white-space:nowrap;">[FUD MS OFFICE CVE-2015-1770]Windows xp to windows 7: Works on office 2003 up to office 2013Windows 8/8.1/10 : Works from office 2003 up to office 2010Payload is embedded encrypted exeFUD and private, not the shit from HF....</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$11" class="px1 border-bottom" style="white-space:nowrap;">Yes, escrow by RealDeal is available.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$15" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$22" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$23" class="px1 border-bottom" style="white-space:nowrap;">100.0%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$4.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$0" class="px1 border-bottom" style="white-space:nowrap;">Monday, January 25, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$1" class="px1 border-bottom" style="white-space:nowrap;">68018</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$2" class="px1 border-bottom" style="white-space:nowrap;">12</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$3" class="px1 border-bottom" style="white-space:nowrap;">1161</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$4" class="px1 border-bottom" style="white-space:nowrap;">FUD MS OFFICE CVE-2015-1770</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$5" class="px1 border-bottom" style="white-space:nowrap;">5.1125</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$6" class="px1 border-bottom" style="white-space:nowrap;">Exploit Code</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$7" class="px1 border-bottom" style="white-space:nowrap;">0.76</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-1770 </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$9" class="px1 border-bottom" style="white-space:nowrap;">Tuesday, January 26, 2016 1:38 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$10" class="px1 border-bottom" style="white-space:nowrap;">[FUD MS OFFICE CVE-2015-1770]Windows xp to windows 7: Works on office 2003 up to office 2013Windows 8/8.1/10 : Works from office 2003 up to office 2010Payload is embedded encrypted exeFUD and private, not the shit from HF....</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$11" class="px1 border-bottom" style="white-space:nowrap;">Yes, escrow by RealDeal is available.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$15" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$22" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$23" class="px1 border-bottom" style="white-space:nowrap;">100.0%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$5.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$0" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, March 2, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$1" class="px1 border-bottom" style="white-space:nowrap;">117615</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$2" class="px1 border-bottom" style="white-space:nowrap;">12</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$3" class="px1 border-bottom" style="white-space:nowrap;">1161</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$4" class="px1 border-bottom" style="white-space:nowrap;">FUD MS WORD CVE-2015-1650</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$5" class="px1 border-bottom" style="white-space:nowrap;">4.6485</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$6" class="px1 border-bottom" style="white-space:nowrap;">Exploit Code</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$7" class="px1 border-bottom" style="white-space:nowrap;">0.99</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-1650 </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$9" class="px1 border-bottom" style="white-space:nowrap;">Thursday, March 3, 2016 12:57 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$10" class="px1 border-bottom" style="white-space:nowrap;">FUD Private exploit for CVE-2015-1650Works on all versions of office from 2003 to 2013On windows 8 and 10 only on office 2003 up to office 2010</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$11" class="px1 border-bottom" style="white-space:nowrap;">Yes, escrow by RealDeal is available.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$15" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$22" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$23" class="px1 border-bottom" style="white-space:nowrap;">100.0%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$6.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$0" class="px1 border-bottom" style="white-space:nowrap;">Monday, January 25, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$1" class="px1 border-bottom" style="white-space:nowrap;">68019</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$2" class="px1 border-bottom" style="white-space:nowrap;">12</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$3" class="px1 border-bottom" style="white-space:nowrap;">1161</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$4" class="px1 border-bottom" style="white-space:nowrap;">FUD MS WORD CVE-2015-1650</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$5" class="px1 border-bottom" style="white-space:nowrap;">5.1125</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$6" class="px1 border-bottom" style="white-space:nowrap;">Exploit Code</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$7" class="px1 border-bottom" style="white-space:nowrap;">0.99</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-1650 </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$9" class="px1 border-bottom" style="white-space:nowrap;">Tuesday, January 26, 2016 1:38 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$10" class="px1 border-bottom" style="white-space:nowrap;">FUD Private exploit for CVE-2015-1650Works on all versions of office from 2003 to 2013On windows 8 and 10 only on office 2003 up to office 2010</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$11" class="px1 border-bottom" style="white-space:nowrap;">Yes, escrow by RealDeal is available.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$15" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$22" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$23" class="px1 border-bottom" style="white-space:nowrap;">100.0%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$7.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8">
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$0" class="px1 border-bottom" style="white-space:nowrap;">Wednesday, February 3, 2016 5:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$1" class="px1 border-bottom" style="white-space:nowrap;">16210</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$2" class="px1 border-bottom" style="white-space:nowrap;">12</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$3" class="px1 border-bottom" style="white-space:nowrap;">1161</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$4" class="px1 border-bottom" style="white-space:nowrap;">FUD MS WORD CVE-2015-1650</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$5" class="px1 border-bottom" style="white-space:nowrap;">5.3591</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$6" class="px1 border-bottom" style="white-space:nowrap;">Exploit Code</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$7" class="px1 border-bottom" style="white-space:nowrap;">0.99</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$8" class="px1 border-bottom" style="white-space:nowrap;">CVE-2015-1650 </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$9" class="px1 border-bottom" style="white-space:nowrap;">Thursday, February 4, 2016 1:36 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$10" class="px1 border-bottom" style="white-space:nowrap;">FUD Private exploit for CVE-2015-1650Works on all versions of office from 2003 to 2013On windows 8 and 10 only on office 2003 up to office 2010</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$11" class="px1 border-bottom" style="white-space:nowrap;">Yes, escrow by RealDeal is available.</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$12" class="px1 border-bottom" style="white-space:nowrap;">{}</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$15" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$18" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$20" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$22" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$23" class="px1 border-bottom" style="white-space:nowrap;">100.0%</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0.0.1.$8.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                 </tbody>
-                              </table>
+                              
+							   <?php
+							 $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+							  $con1 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+								$s = "select * from dummy_3;";
+								$x ="SELECT * FROM information_schema.columns WHERE table_name = 'dummy_3';";
+								$col = pg_query($con,$x);
+								echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
+								echo '<thead><tr>';
+				
+								while($row_1 = pg_fetch_array($col))
+								{
+									echo '<th class="MB-DataTable-header cellData text-brand-hover">'.$row_1[3].'</th>';
+								}
+								
+								echo '</tr></thead><tbody><tr>';
+								$r = pg_query($con1,$s);
+								$count = "SELECT count(*) FROM information_schema.columns WHERE table_name = 'dummy_2';";
+								$c = pg_query($con1,$count);
+								
+								  $con3 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+								 $table3_count = "SELECT * FROM dummy_3;";
+								 $r3 = pg_query($con3,$table3_count);
+								 $c3 =pg_num_fields($r3);
+								 
+								
+								while($row = pg_fetch_array($r))
+								{
+									$i=0;
+									for($i=0;$i<$c3;$i++)
+									{
+										echo '<td class="px1 border-bottom" style="white-space:nowrap;">'.$row[$i].'</td>';
+									}
+									echo '</tr>';
+								}
+								
+								echo '</tbody></table>';
+
+							  ?>
+							  
+							  
+							  
+							  
+							  
                            </div>
                         </div>
                         <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.1" class="p1 flex flex-no-shrink flex-align-right fullscreen-normal-text fullscreen-night-text">
@@ -6702,279 +6032,45 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
                      <div data-reactid=".d.0.1.0.0.0:$3.0.0.1" class="flex-full relative flex flex-column">
                         <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0" class="flex-full relative border-bottom">
                            <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
-                              <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">
-                                 <thead data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0">
-                                    <tr data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0">
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$0" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$0.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$0.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$0.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$0.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$0.0.1.0">Date </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$1" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$1.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$1.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$1.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$1.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$1.0.1.0">ID</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$2" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$2.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$2.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$2.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$2.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$2.0.1.0">Id Mk</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$3" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$3.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$3.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$3.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$3.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$3.0.1.0">Id Ve</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$4" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$4.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$4.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$4.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$4.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$4.0.1.0">Name </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$5" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$5.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$5.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$5.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$5.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$5.0.1.0">BTC selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$6" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$6.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$6.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$6.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$6.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$6.0.1.0">Category</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$7" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$7.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$7.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$7.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$7.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$7.0.1.0">Classification</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$8" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$8.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$8.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$8.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$8.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$8.0.1.0">CVE</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$9" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$9.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$9.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$9.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$9.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$9.0.1.0">Date inserted </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$10" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$10.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$10.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$10.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$10.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$10.0.1.0">Description </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$11" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$11.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$11.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$11.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$11.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$11.0.1.0">Escrow info</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$12" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$12.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$12.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$12.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$12.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$12.0.1.0">EUR selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$13" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$13.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$13.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$13.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$13.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$13.0.1.0">Last view date</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$14" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$14.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$14.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$14.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$14.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$14.0.1.0">Ms Item</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$15" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$15.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$15.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$15.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$15.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$15.0.1.0">Quantity left </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$16" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$16.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$16.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$16.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$16.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$16.0.1.0">Quantity sold</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$17" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$17.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$17.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$17.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$17.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$17.0.1.0">Reviews </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$18" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$18.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$18.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$18.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$18.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$18.0.1.0">Shipped from </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$19" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$19.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$19.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$19.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$19.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$19.0.1.0">Shipped to </span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$20" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$20.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$20.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$20.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$20.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$20.0.1.0">Successfull transactions</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$21" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$21.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$21.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$21.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$21.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$21.0.1.0">Terms and conditions</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$22" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$22.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$22.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$22.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$22.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$22.0.1.0">USD selling price</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$23" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$23.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$23.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$23.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$23.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$23.0.1.0">Vendor rating</span></div>
-                                          </div>
-                                       </th>
-                                       <th data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$24" class="MB-DataTable-header cellData text-brand-hover">
-                                          <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$24.0" class="relative">
-                                             <svg data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$24.0.0" style="position:absolute;right:100%;margin-right:3px;" name="chevronup" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="Icon Icon-chevronup">
-                                                <path data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$24.0.0.0" d="M1 20 L16 6 L31 20 L27 24 L16 14 L5 24 z"/>
-                                             </svg>
-                                             <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$24.0.1" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" class=""><span data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.0.0.$24.0.1.0">Views </span></div>
-                                          </div>
-                                       </th>
-                                    </tr>
-                                 </thead>
-                                 <tbody data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1">
-                                    <tr data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0">
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$0" class="px1 border-bottom" style="white-space:nowrap;">Sunday, October 18, 2015 6:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$1" class="px1 border-bottom" style="white-space:nowrap;">11529</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$2" class="px1 border-bottom" style="white-space:nowrap;">4</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$3" class="px1 border-bottom" style="white-space:nowrap;">325</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$4" class="px1 border-bottom" style="white-space:nowrap;">☆-- Track1/Track2 Dumpz -- Make Your Own Cards --☆</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$5" class="px1 border-bottom" style="white-space:nowrap;">0.094504</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$6" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$7" class="px1 border-bottom" style="white-space:nowrap;">0.00053</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$8" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$9" class="px1 border-bottom" style="white-space:nowrap;">Monday, October 19, 2015 12:52 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$10" class="px1 border-bottom" style="white-space:nowrap;">☆-- Track1/Track2 Dumpz -- Make Your Own Cards --☆ You will get verified working as of the time i pull it out the database...  Track1/Track2 VISA, MASTERCARD, or AMEX for use with the good `ol MSR206 or like to make your own cards... (Please Specify at time of order or I will choose for you) and any other info that is included.
-                                          I have logins on several carding sites and just pull them out the database fresh when you order, they are verified working as of the time i send.
-                                          I cannot guarantee how much is on the actual card but these are all very good numbers.
-                                          Feel free to contact me for special orders, dumps or special BIN or ZIP orders.
-                                          Good Luck.... Get that $$$$
-                                          All sales are final. NO REFUNDS available. I offer a generous replacement policy on INVALID or DEAD cards. I am not responsible for Non-Sufficient Funds or Security Measures like Verified by Visa and MasterCard . All data sales guaranteed to be fresh and only sold to one client. The listings descriptions should be clear on what I am offering. If you have any questions it's better to ask before you buy. I will issue a full refund before order delivery if you change your mind. I reserve the right to refuse any sale for any reason.
-                                          My goal is to maintain 100% positive feedback through fast open communications and honest listing descriptions. If you have an issue with an order through my store I will do my very best to correct it. I will not however be a victim or a "feedback hostage" who caves in to scamers just to save my rating. Dumps plus all original guides related to carding and computer security. I do not sell physical items, only digital goods.
-                                          If you have questions or need assistance in carding please ask. I'm here to help as I can.
-                                       </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$11" class="px1 border-bottom" style="white-space:nowrap;">FE</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$12" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$15" class="px1 border-bottom" style="white-space:nowrap;">1000</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$18" class="px1 border-bottom" style="white-space:nowrap;">Online</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$20" class="px1 border-bottom" style="white-space:nowrap;">+30</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$22" class="px1 border-bottom" style="white-space:nowrap;">25</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$23" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$0.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                    <tr data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1">
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$0" class="px1 border-bottom" style="white-space:nowrap;">Sunday, October 18, 2015 6:00 PM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$1" class="px1 border-bottom" style="white-space:nowrap;">11531</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$2" class="px1 border-bottom" style="white-space:nowrap;">4</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$3" class="px1 border-bottom" style="white-space:nowrap;">325</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$4" class="px1 border-bottom" style="white-space:nowrap;">☆-- Almost FREE Vault Marketplace Invitation --☆</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$5" class="px1 border-bottom" style="white-space:nowrap;">0.011340</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$6" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$7" class="px1 border-bottom" style="white-space:nowrap;">0.011</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$8" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$9" class="px1 border-bottom" style="white-space:nowrap;">Monday, October 19, 2015 12:52 AM</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$10" class="px1 border-bottom" style="white-space:nowrap;">☆-- Almost FREE Vault Marketplace Invitation --☆You will receive one Invitation and login info for the Vault-Marketplace one of the largest suppliers of dumps, CVV, and other accounts online...
-                                          If your not exactly sure what this is take a look here..... 
-                                          http://i.imgur.com/P04Ma8D.jpg
-                                       </td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$11" class="px1 border-bottom" style="white-space:nowrap;">FE</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$12" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$13" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$14" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$15" class="px1 border-bottom" style="white-space:nowrap;">1000</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$16" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$17" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$18" class="px1 border-bottom" style="white-space:nowrap;">Online  Message</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$19" class="px1 border-bottom" style="white-space:nowrap;">Worldwide</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$20" class="px1 border-bottom" style="white-space:nowrap;">+30</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$21" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$22" class="px1 border-bottom" style="white-space:nowrap;">3</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$23" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                       <td data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0.1.$1.$24" class="px1 border-bottom" style="white-space:nowrap;">-</td>
-                                    </tr>
-                                 </tbody>
-                              </table>
+                              <?php
+						 $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+							  $con1 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+								$s = "select * from dummy_4;";
+								$x ="SELECT * FROM information_schema.columns WHERE table_name = 'dummy_4';";
+								$col = pg_query($con,$x);
+								echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
+								echo '<thead><tr>';
+				
+								while($row_1 = pg_fetch_array($col))
+								{
+									echo '<th class="MB-DataTable-header cellData text-brand-hover">'.$row_1[3].'</th>';
+								}
+								
+								echo '</tr></thead><tbody><tr>';
+								$r = pg_query($con1,$s);
+								$count = "SELECT count(*) FROM information_schema.columns WHERE table_name = 'dummy_2';";
+								$c = pg_query($con1,$count);
+								
+								  $con3 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+								 $table3_count = "SELECT * FROM dummy_4;";
+								 $r3 = pg_query($con3,$table3_count);
+								 $c3 =pg_num_fields($r3);
+								 
+								
+								while($row = pg_fetch_array($r))
+								{
+									$i=0;
+									for($i=0;$i<$c3;$i++)
+									{
+										echo '<td class="px1 border-bottom" style="white-space:nowrap;">'.$row[$i].'</td>';
+									}
+									echo '</tr>';
+								}
+								
+								echo '</tbody></table>';
+								
+
+							  ?>
                            </div>
                         </div>
                         <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.1" class="p1 flex flex-no-shrink flex-align-right fullscreen-normal-text fullscreen-night-text">

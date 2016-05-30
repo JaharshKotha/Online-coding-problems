@@ -10,38 +10,6 @@ $("#tog_name").click(function(){
     $("#tog_section").toggle();
 });
 
-$(".removeButton").click(function(){
-	
-	var trParent = $(this).parent().parent();
-	var tds = trParent.find("td");             // Finds all children <td> elements
-
-$.each(tds, function() {  
-
-    
-   $("#hidden-type").val($(this).text());
-   return false;
-});
-	
-   
-	$("#export-form").submit();
-});
-
-
-$(".removeMember").click(function(){
-	
-	var trParent = $(this).parent().parent();
-	var tds = trParent.find("td");             // Finds all children <td> elements
-
-$.each(tds, function() {  
-
-    
-   $("#mem_id").val($(this).text());
-   return false;
-});
-	
-   
-	$("#remove_mem").submit();
-});
 
 
  });
@@ -5720,7 +5688,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 
 </style>
-<body style="background-color:#66AA99">
+
 
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
    <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
@@ -5728,7 +5696,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
          <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
             <div data-reactid=".d.0.0.0.1.0" class="Entity">
                <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="/dash.php">Hi, <?php echo $_SESSION['uname'];?> </a></h2>
+                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name">Hi, <?php echo $_SESSION['uname'];?> </h2>
                   <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Admin page</h4>
                </div>
                <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
@@ -5773,76 +5741,46 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
    </header>
   
 
-
-<div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1" >
-<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink" style="height:100%;">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script>
+$('.message a').click(function(){
+   $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
+});
+</script>
+<div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1">
+<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink">
    <ul data-reactid=".2.1.0.0" class="AdminList-items pt1">
-      <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration selected" href="#">General</a></li>
-      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="/admin_add_a_new_member.php">Add a new member</a></li>
-      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="/admin_create_new_connection.php">Create new DB connection</a></li>
-	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="/view_control.php">View Control</a></li>
+     <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration" href="/admin.php">General</a></li>
+      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration selected" href="#">Add a new member</a></li>
+      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration  " href="/admin_create_new_connection.php">Create new DB connection</a></li>
    </ul>
 </div>
-<div class="px2" data-reactid=".2.1.1" style="padding-left:25em ;  background-color:#66AA99">
-<h4 style="color:black;"> Your existing connections </h4><br>
-<style>
-table,td {
-    border: 1px solid black;
-    padding: 5px;
-}
-table {
-    border-spacing: 15px;
-}
-</style>
-<?php
+<div class="px2" data-reactid=".2.1.1" style="padding-left:25em">
+<Html>
+<head>
+<link rel="stylesheet" type="text/css" href="master.css">
+</head>
+<div class="login-page">
+  <div class="form">
+  <h5> Hey <?php echo $_SESSION['uname'];?> would you like to a new member </h5><br><br>
+  <form action="insert_member.php" method="POST" class="login-form">
+<input type="text" name="fname" placeholder="First name"><br>
+ <input type="text" name ="uname" placeholder="Username"><br>
+ <input type="password" name ="passwd" placeholder="Password"><br>
+ <select name="utype">
+  <option value="Admin">Admin</option>
+  <option value="Privileged">Privileged</option>
+  <option value="Normal">Normal</option>
+</select>
+<div class="row">
+ <input type="submit" value="SUBMIT">
+ 
+</div>
+ </form>
 
-$con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-
-$u ="'".$_SESSION['uname']."'";
-$s = "select *from creat_connections where admin_uname=$u";
-$r = pg_query($con,$s);
-echo '<table>';
-echo '<tr><th>con_id</th><th>Host</th>';
-echo '<th>Port</th>';
-echo '<th>Database name</th>';
-echo '<th>  </th><tr>';
-while($row = pg_fetch_array($r))
-{
-	echo '<tr><td style="all:unset;">'.$row[0].'</td><td>'.$row[2].'</td> <td>'.$row[3].'</td><td>'.$row[6].'</td><td><input type="submit" class ="removeButton" value="remove"></td></tr>';
-}
-echo '</table>';
-?>
-
-<br><br><br><h4 style="color:black;"> Your existing team</h4><br>
-<?php
-$u ="'".$_SESSION['uname']."'";
-$s = "select *from LOGIN where admin_uname=$u";
-$r = pg_query($con,$s);
-echo '<table>';
-echo '<th>id</th><th>Member\'s First Name </th>';
-echo '<th> Member\'s privilege  </th><th> </th><tr>';
-while($row = pg_fetch_array($r))
-{
-	echo '<tr><td style="all:unset;">'.$row[0].'</td><td>'.$row[5].'</td> <td >'.$row[3].'</td>';
-	if(trim($row[3])!=trim("Admin"))
-	{
-		echo '<td><input type="submit" class ="removeMember" value="remove"></td></tr>';
-	}
-}
-echo '</table>';
-?>
-
-
-
-
+  </div>
+</div>
+</Html>
 </div>
 </div>
 </div>
-<form action="remove_connection.php" method="post" id="export-form">
-                        <input type="hidden" value='' id="hidden-type" name="con_id"/>
-                    </form>
-					
-					<form action="remove_member.php" method="post" id="remove_mem">
-                        <input type="hidden" value='' id="mem_id" name="memid"/>
-                    </form>
-</body>

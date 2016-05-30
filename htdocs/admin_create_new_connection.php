@@ -5763,10 +5763,12 @@ $('.message a').click(function(){
 <div class="login-page">
   <div class="form">
   <h5> Hey <?php echo $_SESSION['uname'];?> would you like to setup a new connection </h5><br><br>
-  <form action="action.php" method="POST" class="login-form">
-<input type="text" name="uname" placeholder="db_username"><br>
- <input type="password" name ="passwd" placeholder="db_password"><br>
- <input type="password" name ="host" placeholder="hostname or ip address"><br>
+  <form action="insert_connection.php" method="POST" class="login-form">
+  <input type="text" name ="db_name" placeholder="Name of the database"><br>
+<input type="text" name="db_uname" placeholder="db_username"><br>
+ <input type="password" name ="db_passwd" placeholder="db_password"><br>
+ <input type="text" name ="db_host" placeholder="hostname or ip address"><br>
+ <input type="text" name ="port" placeholder="port"><br>
 <div class="row">
  <input type="submit" value="SUBMIT">
  
