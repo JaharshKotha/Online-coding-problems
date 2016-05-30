@@ -1,3 +1,7 @@
 Login :
 
 Accepts alphanumeric ,protected against sql injection , handles exceptions , writes logs 
+
+Dashboad:
+
+Displays some of the most freuently used tables
