@@ -1,23 +1,69 @@
 <?php
 session_start();
 ob_start();
+
+$colMaparray = array(
+    "smallint" => "integer",
+    "integer" => "integer",
+    "bigint" => "integer",
+    "decimal" => "integer",
+    "numeric" => "integer",
+    "real" => "integer",
+    "double" => "integer",
+    "serial" => "integer",
+    "bigserial" => "integer",
+    "character" => "string",
+    "varchar" => "string",
+    "char" => "string",
+    "text" => "string",
+    "timestamp" => "calender",
+    "date" => "calender",
+);
+
+$con2 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+$aName = $_SESSION['admin_uname'];
+$z = "select * from table_view_control where admin_name=$aName;";
+$zr = $r = pg_query($con2, $z);
+$dbA = array();
+while ($zo = pg_fetch_array($r)) {
+
+    $dbA[] = $zo[3];
+}
+
+$associativeArrayMainD = array();
+for ($k = 0; $k < sizeof($dbA); $k++) {
+    //  echo $dbA[$k];
+
+    $con = pg_connect("host=localhost port=5421 dbname=$dbA[$k] user=postgres password=plz");
+    $s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
+//$s = "SELECT column_name FROM information_schema.columns WHERE table_name = 'login';";
+    $r = pg_query($con, $s);
+
+    $associativeArrayMain = array();
+
+    while ($row = pg_fetch_row($r)) {
+        $s = "SELECT column_name ,data_type  FROM information_schema.columns WHERE table_name = '$row[0]'";
+        // echo $row[0];
+        $r1 = pg_query($con, $s);
+        $associativeArray = array();
+        while ($row2 = pg_fetch_row($r1)) {
+            $words = preg_split('/[^\w]/', trim($row2[1]));
+            if (!isset($colMaparray[$words[0]])) {
+                $associativeArray[$row2[0]] = "string";
+            } else {
+                $associativeArray[$row2[0]] = $colMaparray[trim($words[0])];
+            }
+            //    echo $row2[0];
+            //echo "\n";
+            //echo $row2[1];
+            //echo "\n";
+        }
+        $associativeArrayMain[$row[0]] = $associativeArray;
+    }
+    $associativeArrayMainD[$dbA[$k]] = $associativeArrayMain;
+}
 ?>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-<script>
-    $(document).ready(function () {
-
-        $("#tog_name").click(function () {
-            $("#tog_section").toggle();
-        });
-
-
-
-    });
-</script>
 <style>
-
-
     ._1d7NndZU1ZUV8ckJ55iYYR {
         color: #525658;
         display: flex;
@@ -67,7 +113,8 @@ ob_start();
         flex-direction: column;
         margin-right: 1em;
     }
-    ._1mX3zZmzXm3SmGfRY-dz_o._1SvpP38hhbHqja-Kx2O47U, ._1mX3zZmzXm3SmGfRY-dz_o._3QfZX_pEEghV4dbUcUqap4 {
+    ._1mX3zZmzXm3SmGfRY-dz_o._1SvpP38hhbHqja-Kx2O47U,
+    ._1mX3zZmzXm3SmGfRY-dz_o._3QfZX_pEEghV4dbUcUqap4 {
         display: flex;
     }
     ._1mX3zZmzXm3SmGfRY-dz_o._3QfZX_pEEghV4dbUcUqap4 {
@@ -77,7 +124,7 @@ ob_start();
     .l96_CLxo_PqCKgtKdL8oT {
         border-collapse: collapse;
         border-spacing: 0;
-        font-family: Helvetica Neue,Helvetica,sans-serif;
+        font-family: Helvetica Neue, Helvetica, sans-serif;
         font-size: 12px;
         line-height: 12px;
         text-align: left;
@@ -86,14 +133,17 @@ ob_start();
     .l96_CLxo_PqCKgtKdL8oT tr {
         border-bottom: 1px solid hsla(0, 0%, 84%, 0.3);
     }
-    .l96_CLxo_PqCKgtKdL8oT td, .l96_CLxo_PqCKgtKdL8oT th {
+    .l96_CLxo_PqCKgtKdL8oT td,
+    .l96_CLxo_PqCKgtKdL8oT th {
         border-bottom: 1px solid hsla(0, 0%, 84%, 0.3);
         padding: 1em;
     }
-    .oswsGtBEhm6HA5DPrrAWV td:first-child, .oswsGtBEhm6HA5DPrrAWV th:first-child {
+    .oswsGtBEhm6HA5DPrrAWV td:first-child,
+    .oswsGtBEhm6HA5DPrrAWV th:first-child {
         padding-left: 2em;
     }
-    ._2invWT6W-hRbHKxyGhFNp2, ._3-BJmSrN_AZ5oUTAtifzAE {
+    ._2invWT6W-hRbHKxyGhFNp2,
+    ._3-BJmSrN_AZ5oUTAtifzAE {
         bottom: 0;
         left: 0;
         position: absolute;
@@ -126,7 +176,8 @@ ob_start();
     ._1D-1oZqhPsdIM49TnsRtZ8 path {
         transition: opacity 0.3s linear 0s;
     }
-    ._3JybVcfZ40IzqdFZm5ate0, ._3JybVcfZ40IzqdFZm5ate0 ._3PFIQNqtdfy8ZUomeXHFC1 {
+    ._3JybVcfZ40IzqdFZm5ate0,
+    ._3JybVcfZ40IzqdFZm5ate0 ._3PFIQNqtdfy8ZUomeXHFC1 {
         display: flex;
         justify-content: center;
     }
@@ -179,7 +230,7 @@ ob_start();
     }
     ._29U08VsqFpQf7HG03EIE8W {
         color: #333;
-        font-family: Humor Sans,sans-serif;
+        font-family: Humor Sans, sans-serif;
         font-size: 16px;
         text-align: center;
     }
@@ -220,17 +271,20 @@ ob_start();
         padding-bottom: 0.5em;
         padding-top: 0.5em;
     }
-    ._1kx-tSUaN4O2TPv1wYjxWk:hover, ._1kx-tSUaN4O2TPv1wYjxWk:hover ._3W2fqtVL1PTaSmVA6jA7Oc {
+    ._1kx-tSUaN4O2TPv1wYjxWk:hover,
+    ._1kx-tSUaN4O2TPv1wYjxWk:hover ._3W2fqtVL1PTaSmVA6jA7Oc {
         color: #509ee3 !important;
     }
-    ._1kx-tSUaN4O2TPv1wYjxWk._1s8ylQUKEaUK0MBk414lVf._3Vn3LE6qy5BUeBt2B-x6-Z, ._1kx-tSUaN4O2TPv1wYjxWk._1s8ylQUKEaUK0MBk414lVf._3Vn3LE6qy5BUeBt2B-x6-Z ._3W2fqtVL1PTaSmVA6jA7Oc {
+    ._1kx-tSUaN4O2TPv1wYjxWk._1s8ylQUKEaUK0MBk414lVf._3Vn3LE6qy5BUeBt2B-x6-Z,
+    ._1kx-tSUaN4O2TPv1wYjxWk._1s8ylQUKEaUK0MBk414lVf._3Vn3LE6qy5BUeBt2B-x6-Z ._3W2fqtVL1PTaSmVA6jA7Oc {
         color: #9cc177;
     }
     ._1kx-tSUaN4O2TPv1wYjxWk .Icon {
         margin-right: 0.5em;
         visibility: hidden;
     }
-    ._1kx-tSUaN4O2TPv1wYjxWk._3Vn3LE6qy5BUeBt2B-x6-Z .Icon, ._1kx-tSUaN4O2TPv1wYjxWk:hover .Icon {
+    ._1kx-tSUaN4O2TPv1wYjxWk._3Vn3LE6qy5BUeBt2B-x6-Z .Icon,
+    ._1kx-tSUaN4O2TPv1wYjxWk:hover .Icon {
         visibility: visible;
     }
     ._1kx-tSUaN4O2TPv1wYjxWk ._3W2fqtVL1PTaSmVA6jA7Oc {
@@ -273,7 +327,8 @@ ob_start();
     .dc-chart .pie-slice.external {
         fill: #000;
     }
-    .dc-chart .pie-slice.highlight, .dc-chart .pie-slice *:hover {
+    .dc-chart .pie-slice.highlight,
+    .dc-chart .pie-slice *:hover {
         fill-opacity: 0.8;
     }
     .dc-chart .pie-path {
@@ -292,7 +347,8 @@ ob_start();
         fill-opacity: 0.5;
         stroke: none;
     }
-    .dc-chart .axis line, .dc-chart .axis path {
+    .dc-chart .axis line,
+    .dc-chart .axis path {
         fill: none;
         shape-rendering: crispedges;
         stroke: #000;
@@ -300,7 +356,10 @@ ob_start();
     .dc-chart .axis text {
         font: 10px sans-serif;
     }
-    .dc-chart .axis .grid-line, .dc-chart .axis .grid-line line, .dc-chart .grid-line, .dc-chart .grid-line line {
+    .dc-chart .axis .grid-line,
+    .dc-chart .axis .grid-line line,
+    .dc-chart .grid-line,
+    .dc-chart .grid-line line {
         fill: none;
         opacity: 0.5;
         shape-rendering: crispedges;
@@ -359,7 +418,8 @@ ob_start();
         margin-right: 15px;
         margin-top: 15px;
     }
-    .dc-data-count .filter-count, .dc-data-count .total-count {
+    .dc-data-count .filter-count,
+    .dc-data-count .total-count {
         color: #3182bd;
         font-weight: 700;
     }
@@ -411,7 +471,8 @@ ob_start();
     .dc-chart path.highlight {
         stroke-width: 3;
     }
-    .dc-chart .highlight, .dc-chart path.highlight {
+    .dc-chart .highlight,
+    .dc-chart path.highlight {
         fill-opacity: 1;
         stroke-opacity: 1;
     }
@@ -419,7 +480,8 @@ ob_start();
         fill-opacity: 0.2;
         stroke-opacity: 0.2;
     }
-    .dc-chart path.dc-symbol, g.dc-legend-item.fadeout {
+    .dc-chart path.dc-symbol,
+    g.dc-legend-item.fadeout {
         fill-opacity: 0.5;
         stroke-opacity: 0.5;
     }
@@ -431,7 +493,8 @@ ob_start();
         font: 10px sans-serif;
         pointer-events: none;
     }
-    .dc-chart .box circle, .dc-chart .box line {
+    .dc-chart .box circle,
+    .dc-chart .box line {
         fill: #fff;
         stroke: #000;
         stroke-width: 1.5px;
@@ -486,25 +549,33 @@ ob_start();
     .zF {
         z-index: 999;
     }
-    .public_Scrollbar_main.public_Scrollbar_mainActive, .public_Scrollbar_main:hover {
+    .public_Scrollbar_main.public_Scrollbar_mainActive,
+    .public_Scrollbar_main:hover {
         background-color: hsla(0, 0%, 100%, 0.8);
     }
-    .public_Scrollbar_mainOpaque, .public_Scrollbar_mainOpaque.public_Scrollbar_mainActive, .public_Scrollbar_mainOpaque:hover {
+    .public_Scrollbar_mainOpaque,
+    .public_Scrollbar_mainOpaque.public_Scrollbar_mainActive,
+    .public_Scrollbar_mainOpaque:hover {
         background-color: #fff;
     }
     .public_Scrollbar_face::after {
         background-color: #c2c2c2;
     }
-    .public_Scrollbar_faceActive::after, .public_Scrollbar_main:hover .public_Scrollbar_face::after, .public_Scrollbar_mainActive .public_Scrollbar_face::after {
+    .public_Scrollbar_faceActive::after,
+    .public_Scrollbar_main:hover .public_Scrollbar_face::after,
+    .public_Scrollbar_mainActive .public_Scrollbar_face::after {
         background-color: #7d7d7d;
     }
-    .public_fixedDataTable_hasBottomBorder, .public_fixedDataTable_header, .public_fixedDataTable_main {
+    .public_fixedDataTable_hasBottomBorder,
+    .public_fixedDataTable_header,
+    .public_fixedDataTable_main {
         border-color: #d3d3d3;
     }
     .public_fixedDataTable_header .public_fixedDataTableCell_main {
         font-weight: 700;
     }
-    .public_fixedDataTable_header, .public_fixedDataTable_header .public_fixedDataTableCell_main {
+    .public_fixedDataTable_header,
+    .public_fixedDataTable_header .public_fixedDataTableCell_main {
         background-color: #f6f7f8;
         background-image: linear-gradient(#fff, #efefef);
     }
@@ -540,7 +611,8 @@ ob_start();
     .public_fixedDataTableRow_main {
         background-color: #fff;
     }
-    .public_fixedDataTableRow_highlighted, .public_fixedDataTableRow_highlighted .public_fixedDataTableCell_main {
+    .public_fixedDataTableRow_highlighted,
+    .public_fixedDataTableRow_highlighted .public_fixedDataTableCell_main {
         background-color: #f6f7f8;
     }
     .public_fixedDataTableRow_fixedColumnsDivider {
@@ -564,7 +636,8 @@ ob_start();
         top: 0;
         width: 15px;
     }
-    .ScrollbarLayout_mainVertical.public_Scrollbar_mainActive, .ScrollbarLayout_mainVertical:hover {
+    .ScrollbarLayout_mainVertical.public_Scrollbar_mainActive,
+    .ScrollbarLayout_mainVertical:hover {
         width: 17px;
     }
     .ScrollbarLayout_mainHorizontal {
@@ -572,7 +645,8 @@ ob_start();
         height: 15px;
         left: 0;
     }
-    .ScrollbarLayout_mainHorizontal.public_Scrollbar_mainActive, .ScrollbarLayout_mainHorizontal:hover {
+    .ScrollbarLayout_mainHorizontal.public_Scrollbar_mainActive,
+    .ScrollbarLayout_mainHorizontal:hover {
         height: 17px;
     }
     .ScrollbarLayout_face {
@@ -686,7 +760,8 @@ ob_start();
         position: absolute;
         z-index: 10;
     }
-    .fixedDataTableColumnResizerLineLayout_hiddenElem, body[dir="rtl"] .fixedDataTableColumnResizerLineLayout_main {
+    .fixedDataTableColumnResizerLineLayout_hiddenElem,
+    body[dir="rtl"] .fixedDataTableColumnResizerLineLayout_main {
         display: none !important;
     }
     .fixedDataTableLayout_main {
@@ -696,7 +771,8 @@ ob_start();
         overflow: hidden;
         position: relative;
     }
-    .fixedDataTableLayout_hasBottomBorder, .fixedDataTableLayout_header {
+    .fixedDataTableLayout_hasBottomBorder,
+    .fixedDataTableLayout_header {
         border-bottom-style: solid;
         border-bottom-width: 1px;
     }
@@ -704,7 +780,8 @@ ob_start();
         border-top-style: solid;
         border-top-width: 1px;
     }
-    .fixedDataTableLayout_bottomShadow, .fixedDataTableLayout_topShadow {
+    .fixedDataTableLayout_bottomShadow,
+    .fixedDataTableLayout_topShadow {
         height: 4px;
         left: 0;
         position: absolute;
@@ -918,7 +995,8 @@ ob_start();
         cursor: not-allowed;
         opacity: 0.5;
     }
-    .Button--selected, .Button--selected:hover {
+    .Button--selected,
+    .Button--selected:hover {
         background-color: #f4f6f8;
         box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12) inset;
     }
@@ -944,7 +1022,8 @@ ob_start();
         transition: background 0.2s linear 0.2s, border 0.2s linear 0.2s;
         width: 3rem;
     }
-    .Button-toggle, .Button-toggleIndicator {
+    .Button-toggle,
+    .Button-toggleIndicator {
         border: 1px solid #ddd;
         display: flex;
     }
@@ -974,7 +1053,8 @@ ob_start();
     .Calendar-week {
         display: flex;
     }
-    .Calendar-day, .Calendar-day-name {
+    .Calendar-day,
+    .Calendar-day-name {
         flex: 1 1 0;
     }
     .Calendar-day {
@@ -1011,7 +1091,8 @@ ob_start();
     .Calendar-day-name {
         color: inherit !important;
     }
-    .Calendar-day--selected, .Calendar-day--selected-end {
+    .Calendar-day--selected,
+    .Calendar-day--selected-end {
         background-color: #a989c5;
         color: #fff !important;
         z-index: 1;
@@ -1019,7 +1100,9 @@ ob_start();
     .Calendar-day--in-range {
         background-color: #e3daeb;
     }
-    .Calendar-day--in-range::after, .Calendar-day--selected-end::after, .Calendar-day--selected::after {
+    .Calendar-day--in-range::after,
+    .Calendar-day--selected-end::after,
+    .Calendar-day--selected::after {
         border: 2px solid #7f6794;
         border-radius: 4px;
         bottom: -1px;
@@ -1118,7 +1201,8 @@ ob_start();
             font-size: 3.4em;
         }
     }
-    .CardSettings-group, .CardSettings-groupTitle {
+    .CardSettings-group,
+    .CardSettings-groupTitle {
         border-bottom: 1px solid #ddd;
     }
     .CardSettings-groupTitle {
@@ -1257,7 +1341,8 @@ ob_start();
     .Dashboard.Dashboard--night {
         background-color: #222527;
     }
-    .Dashboard.Dashboard--night .Header-button, .Dashboard.Dashboard--night .Header-button svg {
+    .Dashboard.Dashboard--night .Header-button,
+    .Dashboard.Dashboard--night .Header-button svg {
         color: hsla(0, 0%, 59%, 0.3);
     }
     .Dashboard.Dashboard--fullscreen .fullscreen-normal-text {
@@ -1275,10 +1360,12 @@ ob_start();
         background-color: #363a3d;
         border: 1px solid #2e3134;
     }
-    .Dashboard.Dashboard--night .enable-dots-onhover .dc-tooltip circle.dot:hover, .Dashboard.Dashboard--night .enable-dots .dc-tooltip circle.dot {
+    .Dashboard.Dashboard--night .enable-dots-onhover .dc-tooltip circle.dot:hover,
+    .Dashboard.Dashboard--night .enable-dots .dc-tooltip circle.dot {
         fill: currentcolor;
     }
-    .Dashboard.Dashboard--fullscreen, .Dashboard.Dashboard--fullscreen .DashCard .Card {
+    .Dashboard.Dashboard--fullscreen,
+    .Dashboard.Dashboard--fullscreen .DashCard .Card {
         transition: background-color 1s linear 0s, border 1s linear 0s;
     }
     .DashboardGrid {
@@ -1322,11 +1409,15 @@ ob_start();
     .Dash--editing .DashCard:hover .Card .Card-heading {
         z-index: 2;
     }
-    .DashCard .gm-bundled-control, .DashCard .gm-style-mtc, .DashCard .PinMapUpdateButton {
+    .DashCard .gm-bundled-control,
+    .DashCard .gm-style-mtc,
+    .DashCard .PinMapUpdateButton {
         opacity: 0.01;
         transition: opacity 0.3s linear 0s;
     }
-    .DashCard:hover .gm-bundled-control, .DashCard:hover .gm-style-mtc, .DashCard:hover .PinMapUpdateButton {
+    .DashCard:hover .gm-bundled-control,
+    .DashCard:hover .gm-style-mtc,
+    .DashCard:hover .PinMapUpdateButton {
         opacity: 1;
     }
     .Dash--editing .PinMap {
@@ -1345,10 +1436,12 @@ ob_start();
     .Dash--editing .DashCard.dragging .Card {
         box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
     }
-    .Dash--editing .DashCard.dragging, .Dash--editing .DashCard.resizing {
+    .Dash--editing .DashCard.dragging,
+    .Dash--editing .DashCard.resizing {
         z-index: 2;
     }
-    .Dash--editing .DashCard.dragging .Card, .Dash--editing .DashCard.resizing .Card {
+    .Dash--editing .DashCard.dragging .Card,
+    .Dash--editing .DashCard.resizing .Card {
         background-color: #e5f1fb !important;
         border: 1px solid #509ee3;
     }
@@ -1362,14 +1455,16 @@ ob_start();
         opacity: 1;
         pointer-events: all;
     }
-    .Dash--editing .DashCard.dragging .DashCard-actions, .Dash--editing .DashCard.resizing .DashCard-actions {
+    .Dash--editing .DashCard.dragging .DashCard-actions,
+    .Dash--editing .DashCard.resizing .DashCard-actions {
         opacity: 0;
         transition: opacity 0.3s linear 0s;
     }
     .Dash--editing .DashCard {
         transition: transform 0.3s ease 0s, -webkit-transform 0.3s ease 0s;
     }
-    .Dash--editing .DashCard.dragging, .Dash--editing .DashCard.resizing {
+    .Dash--editing .DashCard.dragging,
+    .Dash--editing .DashCard.resizing {
         transition: transform 0s ease 0s, -webkit-transform 0s ease 0s;
     }
     .Dash--editing .DashCard {
@@ -1402,7 +1497,8 @@ ob_start();
     .Dash--editing .DashCard:hover .react-resizable-handle::after {
         opacity: 1;
     }
-    .Dash--editing .DashCard.dragging .react-resizable-handle::after, .Dash--editing .DashCard.resizing .react-resizable-handle::after {
+    .Dash--editing .DashCard.dragging .react-resizable-handle::after,
+    .Dash--editing .DashCard.resizing .react-resizable-handle::after {
         opacity: 0.01;
     }
     .Dash--editing .react-grid-placeholder {
@@ -1429,19 +1525,25 @@ ob_start();
     .dc-chart .axis {
         z-index: -1;
     }
-    .dc-chart .axis .domain, .dc-chart .axis .tick line {
+    .dc-chart .axis .domain,
+    .dc-chart .axis .tick line {
         stroke: #ededed;
     }
     .dc-chart .axis .tick text {
         fill: #c5c6c8;
     }
-    .dc-chart .axis.y .domain, .dc-chart .axis.y .tick line, .dc-chart .axis.yr .domain, .dc-chart .axis.yr .tick line {
+    .dc-chart .axis.y .domain,
+    .dc-chart .axis.y .tick line,
+    .dc-chart .axis.yr .domain,
+    .dc-chart .axis.yr .tick line {
         display: none;
     }
-    .dc-chart .x-axis-label, .dc-chart .y-axis-label {
+    .dc-chart .x-axis-label,
+    .dc-chart .y-axis-label {
         fill: #a2a2a2;
     }
-    .dc-chart .grid-line.horizontal line:first-child, .dc-chart .tick line {
+    .dc-chart .grid-line.horizontal line:first-child,
+    .dc-chart .tick line {
         display: none;
     }
     .dc-chart rect.bar:hover {
@@ -1454,26 +1556,72 @@ ob_start();
         stroke-opacity: 1 !important;
         stroke-width: 2;
     }
-    .enable-dots .dc-tooltip circle.dot.hover, .enable-dots .dc-tooltip circle.dot:hover {
+    .enable-dots .dc-tooltip circle.dot.hover,
+    .enable-dots .dc-tooltip circle.dot:hover {
         fill: currentcolor;
     }
-    .enable-dots-onhover .dc-tooltip circle.dot.hover, .enable-dots-onhover .dc-tooltip circle.dot:hover {
+    .enable-dots-onhover .dc-tooltip circle.dot.hover,
+    .enable-dots-onhover .dc-tooltip circle.dot:hover {
         fill: #fff;
         fill-opacity: 1 !important;
         stroke: currentcolor;
         stroke-opacity: 1 !important;
         stroke-width: 2;
     }
-    .dc-chart .area, .dc-chart .bar, .dc-chart .dot, .dc-chart .line {
+    .dc-chart .area,
+    .dc-chart .bar,
+    .dc-chart .dot,
+    .dc-chart .line {
         transition: opacity 0.1s linear 0s;
     }
-    .dc-chart .axis.y, .dc-chart .axis.yr, .dc-chart .y-axis-label, .dc-chart .yr-axis-label {
+    .dc-chart .axis.y,
+    .dc-chart .axis.yr,
+    .dc-chart .y-axis-label,
+    .dc-chart .yr-axis-label {
         transition: opacity 0.25s linear 0s;
     }
-    .mute-0 .sub._0 .bar, .mute-0 .sub._0 .dot, .mute-0 .sub._0 .line, .mute-0 svg > g > .chart-body .dc-tooltip._0 .dot, .mute-0 svg > g > .chart-body .stack._0 .area, .mute-0 svg > g > .chart-body .stack._0 .line, .mute-1 .sub._1 .bar, .mute-1 .sub._1 .dot, .mute-1 .sub._1 .line, .mute-1 svg > g > .chart-body .dc-tooltip._1 .dot, .mute-1 svg > g > .chart-body .stack._1 .area, .mute-1 svg > g > .chart-body .stack._1 .line, .mute-2 .sub._2 .bar, .mute-2 .sub._2 .dot, .mute-2 .sub._2 .line, .mute-2 svg > g > .chart-body .dc-tooltip._2 .dot, .mute-2 svg > g > .chart-body .stack._2 .area, .mute-2 svg > g > .chart-body .stack._2 .line, .mute-3 .sub._3 .bar, .mute-3 .sub._3 .dot, .mute-3 .sub._3 .line, .mute-3 svg > g > .chart-body .dc-tooltip._3 .dot, .mute-3 svg > g > .chart-body .stack._3 .area, .mute-3 svg > g > .chart-body .stack._3 .line, .mute-4 .sub._4 .bar, .mute-4 .sub._4 .dot, .mute-4 .sub._4 .line, .mute-4 svg > g > .chart-body .dc-tooltip._4 .dot, .mute-4 svg > g > .chart-body .stack._4 .area, .mute-4 svg > g > .chart-body .stack._4 .line, .mute-5 .sub._5 .bar, .mute-5 .sub._5 .dot, .mute-5 .sub._5 .line, .mute-5 svg > g > .chart-body .dc-tooltip._5 .dot, .mute-5 svg > g > .chart-body .stack._5 .area, .mute-5 svg > g > .chart-body .stack._5 .line {
+    .mute-0 .sub._0 .bar,
+    .mute-0 .sub._0 .dot,
+    .mute-0 .sub._0 .line,
+    .mute-0 svg > g > .chart-body .dc-tooltip._0 .dot,
+    .mute-0 svg > g > .chart-body .stack._0 .area,
+    .mute-0 svg > g > .chart-body .stack._0 .line,
+    .mute-1 .sub._1 .bar,
+    .mute-1 .sub._1 .dot,
+    .mute-1 .sub._1 .line,
+    .mute-1 svg > g > .chart-body .dc-tooltip._1 .dot,
+    .mute-1 svg > g > .chart-body .stack._1 .area,
+    .mute-1 svg > g > .chart-body .stack._1 .line,
+    .mute-2 .sub._2 .bar,
+    .mute-2 .sub._2 .dot,
+    .mute-2 .sub._2 .line,
+    .mute-2 svg > g > .chart-body .dc-tooltip._2 .dot,
+    .mute-2 svg > g > .chart-body .stack._2 .area,
+    .mute-2 svg > g > .chart-body .stack._2 .line,
+    .mute-3 .sub._3 .bar,
+    .mute-3 .sub._3 .dot,
+    .mute-3 .sub._3 .line,
+    .mute-3 svg > g > .chart-body .dc-tooltip._3 .dot,
+    .mute-3 svg > g > .chart-body .stack._3 .area,
+    .mute-3 svg > g > .chart-body .stack._3 .line,
+    .mute-4 .sub._4 .bar,
+    .mute-4 .sub._4 .dot,
+    .mute-4 .sub._4 .line,
+    .mute-4 svg > g > .chart-body .dc-tooltip._4 .dot,
+    .mute-4 svg > g > .chart-body .stack._4 .area,
+    .mute-4 svg > g > .chart-body .stack._4 .line,
+    .mute-5 .sub._5 .bar,
+    .mute-5 .sub._5 .dot,
+    .mute-5 .sub._5 .line,
+    .mute-5 svg > g > .chart-body .dc-tooltip._5 .dot,
+    .mute-5 svg > g > .chart-body .stack._5 .area,
+    .mute-5 svg > g > .chart-body .stack._5 .line {
         opacity: 0.25;
     }
-    .mute-yl .dc-chart .axis.y, .mute-yl .dc-chart .y-axis-label.y-label, .mute-yr .dc-chart .axis.yr, .mute-yr .dc-chart .y-axis-label.yr-label {
+    .mute-yl .dc-chart .axis.y,
+    .mute-yl .dc-chart .y-axis-label.y-label,
+    .mute-yr .dc-chart .axis.yr,
+    .mute-yr .dc-chart .y-axis-label.yr-label {
         opacity: 0;
     }
     .voronoi {
@@ -1483,7 +1631,8 @@ ob_start();
         .Dashboard.Dashboard--fullscreen {
             font-size: 1.2em;
         }
-        .Dashboard.Dashboard--fullscreen .fullscreen-text-small .LegendItem, .Dashboard.Dashboard--fullscreen .Header-title-name {
+        .Dashboard.Dashboard--fullscreen .fullscreen-text-small .LegendItem,
+        .Dashboard.Dashboard--fullscreen .Header-title-name {
             font-size: 1em;
         }
     }
@@ -1520,7 +1669,8 @@ ob_start();
         right: 0;
         top: -20px;
     }
-    .Dropdown--showing.Dropdown-content, .Dropdown.open .Dropdown-content {
+    .Dropdown--showing.Dropdown-content,
+    .Dropdown.open .Dropdown-content {
         margin-top: 0;
         opacity: 1;
         pointer-events: all;
@@ -1624,7 +1774,7 @@ ob_start();
     }
     .Form-message {
         opacity: 0;
-        transition: none 0s ease 0s ;
+        transition: none 0s ease 0s;
     }
     .Form-message.Form-message--visible {
         opacity: 1;
@@ -1688,7 +1838,8 @@ ob_start();
     .Form-group {
         padding: 1em;
     }
-    .Form-group, .Form-groupDisabled {
+    .Form-group,
+    .Form-groupDisabled {
         transition: opacity 0.3s linear 0s;
     }
     .Form-groupDisabled {
@@ -1705,7 +1856,8 @@ ob_start();
         border-bottom: 1px solid #e8e8e8;
         position: relative;
     }
-    :-moz-placeholder, *::-moz-placeholder {
+    :-moz-placeholder,
+    *::-moz-placeholder {
         color: silver;
         opacity: 1;
     }
@@ -1740,7 +1892,6 @@ ob_start();
     }
     .Header-title {
         width: 455px;
-        bgcolor: green;
     }
     .Header-title-name {
         color: #797979;
@@ -1771,8 +1922,7 @@ ob_start();
         background-color: #6cafed;
     }
     .EditHeader-title {
-        color: green;
-        bgcolor:green;
+        color: #fff;
     }
     .EditHeader-subtitle {
         color: hsla(0, 0%, 100%, 0.5);
@@ -1786,7 +1936,8 @@ ob_start();
         margin-left: 0.75em;
         text-transform: uppercase;
     }
-    .EditHeader .Button, .EditHeader .Button--primary {
+    .EditHeader .Button,
+    .EditHeader .Button--primary {
         background-color: #fff;
     }
     .EditHeader .Button:hover {
@@ -1832,7 +1983,8 @@ ob_start();
     .MB-DataTable-header .Icon {
         opacity: 0;
     }
-    .MB-DataTable-header--sorted .Icon, .MB-DataTable-header:hover .Icon {
+    .MB-DataTable-header--sorted .Icon,
+    .MB-DataTable-header:hover .Icon {
         opacity: 1;
         transition: opacity 0.3s linear 0s;
     }
@@ -1855,10 +2007,12 @@ ob_start();
         color: #509ee3;
         cursor: pointer;
     }
-    .MB-DataTable .public_fixedDataTableRow_highlighted, .MB-DataTable .public_fixedDataTableRow_highlighted .public_fixedDataTableCell_main {
+    .MB-DataTable .public_fixedDataTableRow_highlighted,
+    .MB-DataTable .public_fixedDataTableRow_highlighted .public_fixedDataTableCell_main {
         background-color: #fff;
     }
-    .MB-DataTable .public_fixedDataTable_header, .MB-DataTable .public_fixedDataTable_header .public_fixedDataTableCell_main {
+    .MB-DataTable .public_fixedDataTable_header,
+    .MB-DataTable .public_fixedDataTable_header .public_fixedDataTableCell_main {
         background-color: #fff;
         background-image: none;
     }
@@ -1873,7 +2027,11 @@ ob_start();
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .cellData, .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_cellContent, .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_wrap1, .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_wrap2, .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_wrap3 {
+    .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .cellData,
+    .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_cellContent,
+    .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_wrap1,
+    .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_wrap2,
+    .MB-DataTable.MB-DataTable--ready .public_fixedDataTable_bodyRow .public_fixedDataTableCell_wrap3 {
         display: block;
     }
     .Modal {
@@ -1902,11 +2060,14 @@ ob_start();
         right: 0;
         top: 0;
     }
-    .Modal-backdrop.Modal-appear, .Modal-backdrop.Modal-enter {
+    .Modal-backdrop.Modal-appear,
+    .Modal-backdrop.Modal-enter {
         background-color: hsla(0, 0%, 100%, 0.01);
         transition: background-color 0.2s ease-in-out 0s;
     }
-    .Modal-backdrop.Modal-appear-active, .Modal-backdrop.Modal-enter-active, .Modal-backdrop.Modal-leave {
+    .Modal-backdrop.Modal-appear-active,
+    .Modal-backdrop.Modal-enter-active,
+    .Modal-backdrop.Modal-leave {
         background-color: hsla(0, 0%, 100%, 0.6);
     }
     .Modal-backdrop.Modal-leave {
@@ -1915,12 +2076,15 @@ ob_start();
     .Modal-backdrop.Modal-leave-active {
         background-color: hsla(0, 0%, 100%, 0.01);
     }
-    .Modal-backdrop.Modal-appear .Modal, .Modal-backdrop.Modal-enter .Modal {
+    .Modal-backdrop.Modal-appear .Modal,
+    .Modal-backdrop.Modal-enter .Modal {
         opacity: 0.01;
         transform: translate(-50%, -55%);
         transition: opacity 0.2s linear 0s, transform 0.2s ease-in-out 0s, -webkit-transform 0.2s ease-in-out 0s;
     }
-    .Modal-backdrop.Modal-appear-active .Modal, .Modal-backdrop.Modal-enter-active .Modal, .Modal-backdrop.Modal-leave .Modal {
+    .Modal-backdrop.Modal-appear-active .Modal,
+    .Modal-backdrop.Modal-enter-active .Modal,
+    .Modal-backdrop.Modal-leave .Modal {
         opacity: 1;
         transform: translate(-50%, -50%);
     }
@@ -1957,7 +2121,8 @@ ob_start();
         position: relative;
         transition: left 0.5s ease-in-out 0s, top 0.5s ease-in-out 0s;
     }
-    .PageFlag::after, .PageFlag::before {
+    .PageFlag::after,
+    .PageFlag::before {
         content: " ";
         height: 0;
         position: absolute;
@@ -1994,7 +2159,8 @@ ob_start();
         transform: translateX(15px);
         transition: opacity 0.2s linear 0s, transform 0.2s linear 0s, -webkit-transform 0.2s linear 0s;
     }
-    .PageFlag-enter-active, .PageFlag-leave {
+    .PageFlag-enter-active,
+    .PageFlag-leave {
         opacity: 1;
         transform: translateX(0px);
     }
@@ -2070,7 +2236,8 @@ ob_start();
         font-weight: 700;
         pointer-events: none;
     }
-    .PopoverBody--withArrow::after, .PopoverBody--withArrow::before {
+    .PopoverBody--withArrow::after,
+    .PopoverBody--withArrow::before {
         border: 10px solid transparent;
         content: "";
         display: block;
@@ -2106,7 +2273,8 @@ ob_start();
     .PopoverHeader-item--withArrow {
         margin-right: 8px;
     }
-    .PopoverHeader-item--withArrow::after, .PopoverHeader-item--withArrow::before {
+    .PopoverHeader-item--withArrow::after,
+    .PopoverHeader-item--withArrow::before {
         border: 8px solid transparent;
         content: "";
         display: block;
@@ -2150,17 +2318,21 @@ ob_start();
     .tether-element-attached-bottom .PopoverBody--tooltip::after {
         border-top-color: #4c4747;
     }
-    .tether-target-attached-right .PopoverBody--withArrow::after, .tether-target-attached-right .PopoverBody--withArrow::before {
+    .tether-target-attached-right .PopoverBody--withArrow::after,
+    .tether-target-attached-right .PopoverBody--withArrow::before {
         right: 12px;
     }
-    .tether-element-attached-center .PopoverBody--withArrow::after, .tether-element-attached-center .PopoverBody--withArrow::before {
+    .tether-element-attached-center .PopoverBody--withArrow::after,
+    .tether-element-attached-center .PopoverBody--withArrow::before {
         left: -10px;
         margin-left: 50%;
     }
-    .tether-element-attached-right .PopoverBody--withArrow::after, .tether-element-attached-right .PopoverBody--withArrow::before {
+    .tether-element-attached-right .PopoverBody--withArrow::after,
+    .tether-element-attached-right .PopoverBody--withArrow::before {
         right: 12px;
     }
-    .tether-element-attached-left .PopoverBody--withArrow::after, .tether-element-attached-left .PopoverBody--withArrow::before {
+    .tether-element-attached-left .PopoverBody--withArrow::after,
+    .tether-element-attached-left .PopoverBody--withArrow::before {
         left: 12px;
     }
     #popover-event-target {
@@ -2174,7 +2346,8 @@ ob_start();
         display: inline-block;
         position: relative;
     }
-    .Select::after, .Select::before {
+    .Select::after,
+    .Select::before {
         content: "";
         height: 0;
         pointer-events: none;
@@ -2187,7 +2360,8 @@ ob_start();
         border-bottom: 0.3rem solid #cacaca;
         margin-top: -0.25rem;
     }
-    .Select::after, .Select::before {
+    .Select::after,
+    .Select::before {
         border-left: 0.3rem solid transparent;
         border-right: 0.3rem solid transparent;
     }
@@ -2297,28 +2471,31 @@ ob_start();
         overflow-x: scroll;
         width: 100%;
     }
-    .Table, th {
+    .Table,
+    th {
         text-align: left;
     }
     .Table {
         border-collapse: collapse;
         border-spacing: 0;
-        font-family: Helvetica Neue,Helvetica,sans-serif;
+        font-family: Helvetica Neue, Helvetica, sans-serif;
         font-size: 0.76rem;
         line-height: 0.76rem;
         width: 100%;
     }
     .Table--bordered {
-        border: 1px solid hsla(0, 0%, 84%, 0.3);
+        border: 1px solid black;
     }
     .Table tr {
-        border-bottom: 1px solid hsla(0, 0%, 84%, 0.3);
+        border-bottom: 1px solid black;
     }
     .Table tr:nth-child(2n) {
         background-color: rgba(0, 0, 0, 0.02);
     }
-    .Table td, .Table th {
-        border: 1px solid hsla(0, 0%, 84%, 0.3);
+    .Table td,
+    .Table th {
+        border-left: 2px solid black;
+        border-right: 2px solid black;
         padding: 1em;
     }
     .EntityImage {
@@ -2399,19 +2576,23 @@ ob_start();
     .AdminNav .NavItem {
         color: hsla(0, 0%, 100%, 0.63);
     }
-    .AdminNav .NavItem.is--selected, .AdminNav .NavItem:hover {
+    .AdminNav .NavItem.is--selected,
+    .AdminNav .NavItem:hover {
         color: #fff;
     }
-    .AdminNav .NavItem.is--selected::after, .AdminNav .NavItem:hover::after {
+    .AdminNav .NavItem.is--selected::after,
+    .AdminNav .NavItem:hover::after {
         display: none;
     }
-    .AdminNav .NavDropdown .NavDropdown-content-layer, .AdminNav .NavDropdown.open .NavDropdown-button {
-
+    .AdminNav .NavDropdown .NavDropdown-content-layer,
+    .AdminNav .NavDropdown.open .NavDropdown-button {
+        background-color: #8993a1;
     }
     .AdminNav .Dropdown-item:hover {
         background-color: #6f7a8b;
     }
-    .AdminHoverItem:hover, .HoverItem:hover {
+    .AdminHoverItem:hover,
+    .HoverItem:hover {
         background-color: #f3f8fd;
         transition: background 0.2s linear 0s;
     }
@@ -2464,7 +2645,8 @@ ob_start();
     .ContentTable .Table-actions {
         opacity: 0;
     }
-    .ContentTable td, .ContentTable th {
+    .ContentTable td,
+    .ContentTable th {
         padding: 1em;
     }
     .ContentTable tbody tr:hover {
@@ -2474,7 +2656,8 @@ ob_start();
         opacity: 1;
         transition: opacity 0.2s linear 0s;
     }
-    .DatabaseList, .TableFieldList {
+    .DatabaseList,
+    .TableFieldList {
         height: 100%;
         left: 0;
         overflow-y: scroll;
@@ -2507,7 +2690,8 @@ ob_start();
         font-size: 0.8em;
         font-style: normal;
     }
-    .DatabaseTablesAdmin .editable-click:hover, .DatabaseTablesAdmin .editable-empty:hover {
+    .DatabaseTablesAdmin .editable-click:hover,
+    .DatabaseTablesAdmin .editable-empty:hover {
         color: inherit !important;
         font-style: normal;
     }
@@ -2555,7 +2739,8 @@ ob_start();
     .AdminList-item.selected {
         color: #509ee3;
     }
-    .AdminList-item.selected, .AdminList-item:hover {
+    .AdminList-item.selected,
+    .AdminList-item:hover {
         background-color: #fff;
         border-color: #f0f0f0;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -2595,7 +2780,8 @@ ob_start();
         min-width: 90px;
         padding: 0.6em;
     }
-    .AdminSelect, .AdminSelectBorderless {
+    .AdminSelect,
+    .AdminSelectBorderless {
         display: inline-block;
         font-size: 14px;
         font-weight: 700;
@@ -2610,7 +2796,8 @@ ob_start();
     .TableEditor-field-name {
         font-size: 16px;
     }
-    .TableEditor-field-description, .TableEditor-table-description {
+    .TableEditor-field-description,
+    .TableEditor-table-description {
         font-size: 14px;
     }
     .TableEditor-field-visibility .ColumnarSelector-row:hover {
@@ -2621,7 +2808,8 @@ ob_start();
         background-color: #509ee3 !important;
         color: #fff !important;
     }
-    .TableEditor-field-special-type .ColumnarSelector-row:hover, .TableEditor-field-target .ColumnarSelector-row:hover {
+    .TableEditor-field-special-type .ColumnarSelector-row:hover,
+    .TableEditor-field-target .ColumnarSelector-row:hover {
         background-color: #509ee3 !important;
         color: #fff !important;
     }
@@ -2645,7 +2833,8 @@ ob_start();
         left: 1px;
         transition: all 0.3s ease 0s;
     }
-    .Toggle.selected::after, .Toggle::after {
+    .Toggle.selected::after,
+    .Toggle::after {
         border-radius: 99px;
         content: "";
         height: 20px;
@@ -2720,7 +2909,8 @@ ob_start();
     .arrow-right {
         position: relative;
     }
-    .arrow-right::after, .arrow-right::before {
+    .arrow-right::after,
+    .arrow-right::before {
         border: 10px solid transparent;
         content: "";
         display: block;
@@ -2734,26 +2924,31 @@ ob_start();
         border-left-color: #fff;
         right: -19px;
     }
-    .arrow-right::after, .arrow-right::before {
+    .arrow-right::after,
+    .arrow-right::before {
         margin-top: -10px;
         top: 50%;
     }
-    body, html {
+    body,
+    html {
         height: 100%;
     }
     body {
         color: #727479;
         display: flex;
         flex-direction: column;
-        font-family: Lato,Helvetica Neue,Helvetica,sans-serif;
+        font-family: Lato, Helvetica Neue, Helvetica, sans-serif;
         font-size: 0.875em;
         margin: 0;
         text-rendering: optimizelegibility;
     }
-    ol, ul {
+    ol,
+    ul {
         list-style-type: none;
     }
-    button, ol, ul {
+    button,
+    ol,
+    ul {
         margin: 0;
         padding: 0;
     }
@@ -2766,8 +2961,9 @@ ob_start();
         color: inherit;
         cursor: pointer;
     }
-    input, textarea {
-        font-family: Lato,Helvetica Neue,Helvetica,sans-serif;
+    input,
+    textarea {
+        font-family: Lato, Helvetica Neue, Helvetica, sans-serif;
     }
     .disabled {
         opacity: 0.4;
@@ -2842,32 +3038,50 @@ ob_start();
     .border-dashed {
         border-style: dashed;
     }
-    article, body, div, fieldset, footer, form, header, input, li, main, nav, section, span, table, textarea, ul {
+    article,
+    body,
+    div,
+    fieldset,
+    footer,
+    form,
+    header,
+    input,
+    li,
+    main,
+    nav,
+    section,
+    span,
+    table,
+    textarea,
+    ul {
         box-sizing: border-box;
     }
-    .clearfix::after, .clearfix::before {
+    .clearfix::after,
+    .clearfix::before {
         content: " ";
         display: table;
     }
     .clearfix::after {
         clear: both;
     }
-    .clearfix {
-    }
-    .text-default {
+    .clearfix {} .text-default {
         color: #727479;
     }
-    .text-brand, .text-brand-hover:hover {
+    .text-brand,
+    .text-brand-hover:hover {
         color: #509ee3;
     }
-    .text-brand-darken, .text-brand-darken-hover:hover {
+    .text-brand-darken,
+    .text-brand-darken-hover:hover {
         color: #407eb6;
     }
-    .text-brand-light, .text-brand-light-hover:hover {
+    .text-brand-light,
+    .text-brand-light-hover:hover {
         color: #cde3f8;
     }
-    .bg-brand, .bg-brand-hover:hover {
-        background-color: #509ee3;
+    .bg-brand,
+    .bg-brand-hover:hover {
+        background-color: #74AFAD;
     }
     .text-success {
         color: #9cc177;
@@ -2875,10 +3089,12 @@ ob_start();
     .bg-success {
         background-color: #9cc177;
     }
-    .text-error, .text-error-hover:hover {
+    .text-error,
+    .text-error-hover:hover {
         color: #ef8c8c;
     }
-    .bg-error, .bg-error-hover:hover {
+    .bg-error,
+    .bg-error-hover:hover {
         background-color: #ef8c8c;
     }
     .bg-error-input {
@@ -2896,16 +3112,20 @@ ob_start();
     .bg-warning {
         background-color: #e35050;
     }
-    .text-gold, .text-gold-hover:hover {
+    .text-gold,
+    .text-gold-hover:hover {
         color: #f9d45c;
     }
-    .text-purple, .text-purple-hover:hover {
+    .text-purple,
+    .text-purple-hover:hover {
         color: #a989c5;
     }
-    .text-purple-light, .text-purple-light-hover:hover {
+    .text-purple-light,
+    .text-purple-light-hover:hover {
         color: #c5abdb;
     }
-    .text-green, .text-green-hover:hover {
+    .text-green,
+    .text-green-hover:hover {
         color: #9cc177;
     }
     .text-orange {
@@ -2932,16 +3152,20 @@ ob_start();
     .bg-alt {
         background-color: #f5f7f9;
     }
-    .text-grey-1, .text-grey-1-hover:hover {
+    .text-grey-1,
+    .text-grey-1-hover:hover {
         color: #dfdfdf;
     }
-    .text-grey-2, .text-grey-2-hover:hover {
+    .text-grey-2,
+    .text-grey-2-hover:hover {
         color: #c6c6c6;
     }
-    .text-grey-3, .text-grey-3-hover:hover {
+    .text-grey-3,
+    .text-grey-3-hover:hover {
         color: #aeaeae;
     }
-    .text-grey-4, .text-grey-4-hover:hover {
+    .text-grey-4,
+    .text-grey-4-hover:hover {
         color: #959595;
     }
     .bg-grey-0 {
@@ -2962,7 +3186,8 @@ ob_start();
     .text-dark {
         color: #4c545b;
     }
-    .text-white, .text-white-hover:hover {
+    .text-white,
+    .text-white-hover:hover {
         color: #fff;
     }
     .bg-white {
@@ -3101,7 +3326,8 @@ ob_start();
         margin: 0;
         padding: 0;
     }
-    .Grid--normal > .Grid-cell, .Grid-cell {
+    .Grid--normal > .Grid-cell,
+    .Grid-cell {
         flex: 1 1 0;
     }
     .Grid--flexCells > .Grid-cell {
@@ -3304,7 +3530,18 @@ ob_start();
             flex: 0 0 33.3333%;
         }
     }
-    .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    .h1,
+    .h2,
+    .h3,
+    .h4,
+    .h5,
+    .h6,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         margin-bottom: 0;
         margin-top: 0;
     }
@@ -3329,9 +3566,10 @@ ob_start();
     .hide {
         display: none !important;
     }
-    .show {
-    }
-    .lg-show, .md-show, .sm-show, .xl-show {
+    .show {} .lg-show,
+    .md-show,
+    .sm-show,
+    .xl-show {
         display: none;
     }
     @media screen and (min-width: 40em) {
@@ -3383,12 +3621,14 @@ ob_start();
     .input--small {
         padding: 0.3rem 0.4rem;
     }
-    .input--focus, .input:focus {
+    .input--focus,
+    .input:focus {
         border: 1px solid #4e82c0;
         outline: medium none;
         transition: border 0.3s linear 0s;
     }
-    .input--borderless, .input--borderless:focus {
+    .input--borderless,
+    .input--borderless:focus {
         border: medium none !important;
         box-shadow: none;
         outline: 0 none;
@@ -3481,7 +3721,8 @@ ob_start();
         right: 0;
         top: 0;
     }
-    .link, .no-decoration {
+    .link,
+    .no-decoration {
         text-decoration: none;
     }
     .link {
@@ -3556,7 +3797,8 @@ ob_start();
     .py1 {
         padding-bottom: 0.5rem;
     }
-    .pt1, .py1 {
+    .pt1,
+    .py1 {
         padding-top: 0.5rem;
     }
     .pb1 {
@@ -3578,7 +3820,8 @@ ob_start();
     .py2 {
         padding-bottom: 1rem;
     }
-    .pt2, .py2 {
+    .pt2,
+    .py2 {
         padding-top: 1rem;
     }
     .pb2 {
@@ -3600,7 +3843,8 @@ ob_start();
     .py3 {
         padding-bottom: 1.5rem;
     }
-    .pt3, .py3 {
+    .pt3,
+    .py3 {
         padding-top: 1.5rem;
     }
     .pb3 {
@@ -3622,7 +3866,8 @@ ob_start();
     .py4 {
         padding-bottom: 2rem;
     }
-    .pt4, .py4 {
+    .pt4,
+    .py4 {
         padding-top: 2rem;
     }
     .pb4 {
@@ -3659,7 +3904,8 @@ ob_start();
     .my1 {
         margin-bottom: 0.5rem;
     }
-    .mt1, .my1 {
+    .mt1,
+    .my1 {
         margin-top: 0.5rem;
     }
     .mb1 {
@@ -3681,7 +3927,8 @@ ob_start();
     .my2 {
         margin-bottom: 1rem;
     }
-    .mt2, .my2 {
+    .mt2,
+    .my2 {
         margin-top: 1rem;
     }
     .mb2 {
@@ -3703,7 +3950,8 @@ ob_start();
     .my3 {
         margin-bottom: 1.5rem;
     }
-    .mt3, .my3 {
+    .mt3,
+    .my3 {
         margin-top: 1.5rem;
     }
     .mb3 {
@@ -3725,7 +3973,8 @@ ob_start();
     .my4 {
         margin-bottom: 2rem;
     }
-    .mt4, .my4 {
+    .mt4,
+    .my4 {
         margin-top: 2rem;
     }
     .mb4 {
@@ -3763,7 +4012,8 @@ ob_start();
         .sm-py1 {
             padding-bottom: 0.5rem;
         }
-        .sm-pt1, .sm-py1 {
+        .sm-pt1,
+        .sm-py1 {
             padding-top: 0.5rem;
         }
         .sm-pb1 {
@@ -3785,7 +4035,8 @@ ob_start();
         .sm-py2 {
             padding-bottom: 1rem;
         }
-        .sm-pt2, .sm-py2 {
+        .sm-pt2,
+        .sm-py2 {
             padding-top: 1rem;
         }
         .sm-pb2 {
@@ -3807,7 +4058,8 @@ ob_start();
         .sm-py3 {
             padding-bottom: 1.5rem;
         }
-        .sm-pt3, .sm-py3 {
+        .sm-pt3,
+        .sm-py3 {
             padding-top: 1.5rem;
         }
         .sm-pb3 {
@@ -3829,7 +4081,8 @@ ob_start();
         .sm-py4 {
             padding-bottom: 2rem;
         }
-        .sm-pt4, .sm-py4 {
+        .sm-pt4,
+        .sm-py4 {
             padding-top: 2rem;
         }
         .sm-pb4 {
@@ -3866,7 +4119,8 @@ ob_start();
         .sm-my1 {
             margin-bottom: 0.5rem;
         }
-        .sm-mt1, .sm-my1 {
+        .sm-mt1,
+        .sm-my1 {
             margin-top: 0.5rem;
         }
         .sm-mb1 {
@@ -3888,7 +4142,8 @@ ob_start();
         .sm-my2 {
             margin-bottom: 1rem;
         }
-        .sm-mt2, .sm-my2 {
+        .sm-mt2,
+        .sm-my2 {
             margin-top: 1rem;
         }
         .sm-mb2 {
@@ -3910,7 +4165,8 @@ ob_start();
         .sm-my3 {
             margin-bottom: 1.5rem;
         }
-        .sm-mt3, .sm-my3 {
+        .sm-mt3,
+        .sm-my3 {
             margin-top: 1.5rem;
         }
         .sm-mb3 {
@@ -3932,7 +4188,8 @@ ob_start();
         .sm-my4 {
             margin-bottom: 2rem;
         }
-        .sm-mt4, .sm-my4 {
+        .sm-mt4,
+        .sm-my4 {
             margin-top: 2rem;
         }
         .sm-mb4 {
@@ -3971,7 +4228,8 @@ ob_start();
         .md-py1 {
             padding-bottom: 0.5rem;
         }
-        .md-pt1, .md-py1 {
+        .md-pt1,
+        .md-py1 {
             padding-top: 0.5rem;
         }
         .md-pb1 {
@@ -3993,7 +4251,8 @@ ob_start();
         .md-py2 {
             padding-bottom: 1rem;
         }
-        .md-pt2, .md-py2 {
+        .md-pt2,
+        .md-py2 {
             padding-top: 1rem;
         }
         .md-pb2 {
@@ -4015,7 +4274,8 @@ ob_start();
         .md-py3 {
             padding-bottom: 1.5rem;
         }
-        .md-pt3, .md-py3 {
+        .md-pt3,
+        .md-py3 {
             padding-top: 1.5rem;
         }
         .md-pb3 {
@@ -4037,7 +4297,8 @@ ob_start();
         .md-py4 {
             padding-bottom: 2rem;
         }
-        .md-pt4, .md-py4 {
+        .md-pt4,
+        .md-py4 {
             padding-top: 2rem;
         }
         .md-pb4 {
@@ -4074,7 +4335,8 @@ ob_start();
         .md-my1 {
             margin-bottom: 0.5rem;
         }
-        .md-mt1, .md-my1 {
+        .md-mt1,
+        .md-my1 {
             margin-top: 0.5rem;
         }
         .md-mb1 {
@@ -4096,7 +4358,8 @@ ob_start();
         .md-my2 {
             margin-bottom: 1rem;
         }
-        .md-mt2, .md-my2 {
+        .md-mt2,
+        .md-my2 {
             margin-top: 1rem;
         }
         .md-mb2 {
@@ -4118,7 +4381,8 @@ ob_start();
         .md-my3 {
             margin-bottom: 1.5rem;
         }
-        .md-mt3, .md-my3 {
+        .md-mt3,
+        .md-my3 {
             margin-top: 1.5rem;
         }
         .md-mb3 {
@@ -4140,7 +4404,8 @@ ob_start();
         .md-my4 {
             margin-bottom: 2rem;
         }
-        .md-mt4, .md-my4 {
+        .md-mt4,
+        .md-my4 {
             margin-top: 2rem;
         }
         .md-mb4 {
@@ -4179,7 +4444,8 @@ ob_start();
         .lg-py1 {
             padding-bottom: 0.5rem;
         }
-        .lg-pt1, .lg-py1 {
+        .lg-pt1,
+        .lg-py1 {
             padding-top: 0.5rem;
         }
         .lg-pb1 {
@@ -4201,7 +4467,8 @@ ob_start();
         .lg-py2 {
             padding-bottom: 1rem;
         }
-        .lg-pt2, .lg-py2 {
+        .lg-pt2,
+        .lg-py2 {
             padding-top: 1rem;
         }
         .lg-pb2 {
@@ -4223,7 +4490,8 @@ ob_start();
         .lg-py3 {
             padding-bottom: 1.5rem;
         }
-        .lg-pt3, .lg-py3 {
+        .lg-pt3,
+        .lg-py3 {
             padding-top: 1.5rem;
         }
         .lg-pb3 {
@@ -4245,7 +4513,8 @@ ob_start();
         .lg-py4 {
             padding-bottom: 2rem;
         }
-        .lg-pt4, .lg-py4 {
+        .lg-pt4,
+        .lg-py4 {
             padding-top: 2rem;
         }
         .lg-pb4 {
@@ -4282,7 +4551,8 @@ ob_start();
         .lg-my1 {
             margin-bottom: 0.5rem;
         }
-        .lg-mt1, .lg-my1 {
+        .lg-mt1,
+        .lg-my1 {
             margin-top: 0.5rem;
         }
         .lg-mb1 {
@@ -4304,7 +4574,8 @@ ob_start();
         .lg-my2 {
             margin-bottom: 1rem;
         }
-        .lg-mt2, .lg-my2 {
+        .lg-mt2,
+        .lg-my2 {
             margin-top: 1rem;
         }
         .lg-mb2 {
@@ -4326,7 +4597,8 @@ ob_start();
         .lg-my3 {
             margin-bottom: 1.5rem;
         }
-        .lg-mt3, .lg-my3 {
+        .lg-mt3,
+        .lg-my3 {
             margin-top: 1.5rem;
         }
         .lg-mb3 {
@@ -4348,7 +4620,8 @@ ob_start();
         .lg-my4 {
             margin-bottom: 2rem;
         }
-        .lg-mt4, .lg-my4 {
+        .lg-mt4,
+        .lg-my4 {
             margin-top: 2rem;
         }
         .lg-mb4 {
@@ -4387,7 +4660,8 @@ ob_start();
         .xl-py1 {
             padding-bottom: 0.5rem;
         }
-        .xl-pt1, .xl-py1 {
+        .xl-pt1,
+        .xl-py1 {
             padding-top: 0.5rem;
         }
         .xl-pb1 {
@@ -4409,7 +4683,8 @@ ob_start();
         .xl-py2 {
             padding-bottom: 1rem;
         }
-        .xl-pt2, .xl-py2 {
+        .xl-pt2,
+        .xl-py2 {
             padding-top: 1rem;
         }
         .xl-pb2 {
@@ -4431,7 +4706,8 @@ ob_start();
         .xl-py3 {
             padding-bottom: 1.5rem;
         }
-        .xl-pt3, .xl-py3 {
+        .xl-pt3,
+        .xl-py3 {
             padding-top: 1.5rem;
         }
         .xl-pb3 {
@@ -4453,7 +4729,8 @@ ob_start();
         .xl-py4 {
             padding-bottom: 2rem;
         }
-        .xl-pt4, .xl-py4 {
+        .xl-pt4,
+        .xl-py4 {
             padding-top: 2rem;
         }
         .xl-pb4 {
@@ -4490,7 +4767,8 @@ ob_start();
         .xl-my1 {
             margin-bottom: 0.5rem;
         }
-        .xl-mt1, .xl-my1 {
+        .xl-mt1,
+        .xl-my1 {
             margin-top: 0.5rem;
         }
         .xl-mb1 {
@@ -4512,7 +4790,8 @@ ob_start();
         .xl-my2 {
             margin-bottom: 1rem;
         }
-        .xl-mt2, .xl-my2 {
+        .xl-mt2,
+        .xl-my2 {
             margin-top: 1rem;
         }
         .xl-mb2 {
@@ -4534,7 +4813,8 @@ ob_start();
         .xl-my3 {
             margin-bottom: 1.5rem;
         }
-        .xl-mt3, .xl-my3 {
+        .xl-mt3,
+        .xl-my3 {
             margin-top: 1.5rem;
         }
         .xl-mb3 {
@@ -4556,7 +4836,8 @@ ob_start();
         .xl-my4 {
             margin-bottom: 2rem;
         }
-        .xl-mt4, .xl-my4 {
+        .xl-mt4,
+        .xl-my4 {
             margin-top: 2rem;
         }
         .xl-mb4 {
@@ -4650,9 +4931,7 @@ ob_start();
     .text-normal {
         font-weight: 400;
     }
-    .text-strong {
-    }
-    .text-bold {
+    .text-strong {} .text-bold {
         font-weight: 700;
     }
     .text-italic {
@@ -4666,7 +4945,8 @@ ob_start();
     .text-current {
         color: currentcolor;
     }
-    .text-underline, .text-underline-hover:hover {
+    .text-underline,
+    .text-underline-hover:hover {
         text-decoration: underline;
     }
     .text-ellipsis {
@@ -4684,7 +4964,10 @@ ob_start();
     .transition-all {
         transition: all 0.2s linear 0s;
     }
-    .editable-click, .editable-empty, a.editable-click, a.editable-empty {
+    .editable-click,
+    .editable-empty,
+    a.editable-click,
+    a.editable-empty {
         color: #666;
     }
     .editable-input {
@@ -4703,12 +4986,11 @@ ob_start();
         background-image: url("/app/components/icons/assets/header_rect.svg");
         background-repeat: repeat;
     }
-    .CheckBg-offset {
-    }
-    .NavItem {
+    .CheckBg-offset {} .NavItem {
         border-radius: 8px;
     }
-    .NavItem.NavItem--selected, .NavItem:hover {
+    .NavItem.NavItem--selected,
+    .NavItem:hover {
         background-color: hsla(0, 0%, 100%, 0.08);
     }
     .NavNewQuestion {
@@ -4765,7 +5047,8 @@ ob_start();
     .NavDropdown .NavDropdown-content.NavDropdown-content--dashboards {
         top: 33px;
     }
-    .NavDropdown .NavDropdown-button::before, .NavDropdown .NavDropdown-content::before {
+    .NavDropdown .NavDropdown-button::before,
+    .NavDropdown .NavDropdown-content::before {
         background-clip: padding-box;
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.12);
         content: "";
@@ -4792,8 +5075,9 @@ ob_start();
         position: relative;
         z-index: 2;
     }
-    .NavDropdown .NavDropdown-content-layer, .NavDropdown.open .NavDropdown-button {
-        background-color: green;
+    .NavDropdown .NavDropdown-content-layer,
+    .NavDropdown.open .NavDropdown-button {
+        background-color: #6fb0eb;
     }
     .NavDropdown .NavDropdown-content-layer {
         border-radius: 4px;
@@ -4914,7 +5198,8 @@ ob_start();
         0% {
             margin-left: 40%;
         }
-        0%, 45% {
+        0%,
+        45% {
             transform: rotateY(0deg);
         }
         45% {
@@ -4923,10 +5208,12 @@ ob_start();
         50% {
             margin-left: 60%;
         }
-        50%, 95% {
+        50%,
+        95% {
             transform: rotateY(180deg);
         }
-        95%, 100% {
+        95%,
+        100% {
             margin-left: 40%;
         }
         100% {
@@ -4956,7 +5243,9 @@ ob_start();
         position: relative;
         z-index: 50;
     }
-    .NotFoundScene .brand-bridge, .NotFoundScene .brand-illustration, .NotFoundScene .brand-mountain-1 {
+    .NotFoundScene .brand-bridge,
+    .NotFoundScene .brand-illustration,
+    .NotFoundScene .brand-mountain-1 {
         display: none;
     }
     .NotFoundScene .brand-boat-container {
@@ -4971,7 +5260,8 @@ ob_start();
         flex-direction: column;
         padding: 4em;
     }
-    .SuccessGroup, .SuccessMark {
+    .SuccessGroup,
+    .SuccessMark {
         color: #9cc177;
         display: flex;
     }
@@ -4986,11 +5276,13 @@ ob_start();
         margin-top: 1em;
         text-align: center;
     }
-    .ForgotForm, .SuccessGroup {
+    .ForgotForm,
+    .SuccessGroup {
         position: relative;
         z-index: 10;
     }
-    .PulseEdit-footer, .PulseEdit-header {
+    .PulseEdit-footer,
+    .PulseEdit-header {
         margin: 0 auto;
         padding-left: 180px;
         padding-right: 180px;
@@ -5004,19 +5296,25 @@ ob_start();
         color: #79827f;
         font-weight: 700;
     }
-    .PulseButton, .PulseEdit .AdminSelect, .PulseEdit .border-bottom, .PulseEdit .border-row-divider, .PulseEdit .bordered, .PulseEdit .input {
+    .PulseButton,
+    .PulseEdit .AdminSelect,
+    .PulseEdit .border-bottom,
+    .PulseEdit .border-row-divider,
+    .PulseEdit .bordered,
+    .PulseEdit .input {
         border-color: #dee4e2;
         border-width: 2px;
     }
     .PulseEdit .AdminSelect {
         padding: 1em;
     }
-    .PulseEdit .input--focus, .PulseEdit .input:focus {
+    .PulseEdit .input--focus,
+    .PulseEdit .input:focus {
         border-color: #61a7e5 !important;
         border-width: 2px;
     }
     .PulseListItem button {
-        font-family: Lato,Helvetica,sans-serif;
+        font-family: Lato, Helvetica, sans-serif;
     }
     .bg-grey-0 {
         background-color: #fcfcfd;
@@ -5075,11 +5373,13 @@ ob_start();
     .QueryHeader-section:last-child {
         border-right: medium none;
     }
-    .Icon-addToDash, .Icon-download {
+    .Icon-addToDash,
+    .Icon-download {
         fill: #919191;
         transition: fill 0.3s linear 0s;
     }
-    .Icon-addToDash:hover, .Icon-download:hover {
+    .Icon-addToDash:hover,
+    .Icon-download:hover {
         fill: #509ee3;
         transition: fill 0.3s linear 0s;
     }
@@ -5111,7 +5411,8 @@ ob_start();
         overflow-y: hidden;
         white-space: nowrap;
     }
-    .Query-filter, .Query-filterList {
+    .Query-filter,
+    .Query-filterList {
         display: flex;
     }
     .Query-filter {
@@ -5195,7 +5496,8 @@ ob_start();
     .SelectionItem:hover .Icon {
         color: #fff !important;
     }
-    .SelectionItem:hover .SelectionModule-description, .SelectionItem:hover .SelectionModule-display {
+    .SelectionItem:hover .SelectionModule-description,
+    .SelectionItem:hover .SelectionModule-display {
         color: #fff;
     }
     .SelectionItem.SelectionItem--selected .Icon-check {
@@ -5209,10 +5511,13 @@ ob_start();
         color: #959595;
         font-size: 0.8rem;
     }
-    .Visualization, .Visualization.Visualization--loading {
+    .Visualization,
+    .Visualization.Visualization--loading {
         transition: background 0.3s linear 0s;
+        margin-top: 20px;
     }
-    .Visualization--scalar, .Visualization.Visualization--error {
+    .Visualization--scalar,
+    .Visualization.Visualization--error {
         justify-content: center;
     }
     .Visualization--scalar {
@@ -5373,7 +5678,9 @@ ob_start();
     .GuiBuilder-data {
         z-index: 1;
     }
-    .Filter-section-field, .Filter-section-field .QueryOption, .Filter-section-operator {
+    .Filter-section-field,
+    .Filter-section-field .QueryOption,
+    .Filter-section-operator {
         color: #a989c5;
     }
     .Filter-section-operator .QueryOption {
@@ -5392,16 +5699,23 @@ ob_start();
         padding-bottom: 0.25em;
         padding-right: 0.5em;
     }
-    .Filter-section-sort-direction.selected .QueryOption, .Filter-section-sort-field.selected .QueryOption {
+    .Filter-section-sort-direction.selected .QueryOption,
+    .Filter-section-sort-field.selected .QueryOption {
         color: inherit;
     }
-    .FilterPopover .ColumnarSelector-row--selected, .FilterPopover .PopoverHeader-item.selected {
+    .FilterPopover .ColumnarSelector-row--selected,
+    .FilterPopover .PopoverHeader-item.selected {
         color: #a989c5 !important;
     }
     .FilterPopover .ColumnarSelector-row:hover {
         background-color: #a989c5 !important;
     }
-    .View-section-aggregation, .View-section-aggregation-target, .View-section-aggregation-target.selected .QueryOption, .View-section-aggregation.selected .QueryOption, .View-section-breakout, .View-section-breakout.selected .QueryOption {
+    .View-section-aggregation,
+    .View-section-aggregation-target,
+    .View-section-aggregation-target.selected .QueryOption,
+    .View-section-aggregation.selected .QueryOption,
+    .View-section-breakout,
+    .View-section-breakout.selected .QueryOption {
         color: #9cc177;
     }
     .GuiBuilder-sort-limit {
@@ -5532,7 +5846,8 @@ ob_start();
     .List {
         padding: 0.5rem;
     }
-    .List-item .List-item-arrow .Icon, .List-section-header .Icon {
+    .List-item .List-item-arrow .Icon,
+    .List-section-header .Icon {
         color: #727479;
     }
     .List-item .Icon {
@@ -5542,7 +5857,11 @@ ob_start();
         border: 2px solid transparent;
         color: #727479;
     }
-    .List-section--open .List-section-header, .List-section--open .List-section-header .List-section-icon .Icon, .List-section .List-section-header:hover, .List-section .List-section-header:hover .Icon, .List-section .List-section-header:hover .List-section-title {
+    .List-section--open .List-section-header,
+    .List-section--open .List-section-header .List-section-icon .Icon,
+    .List-section .List-section-header:hover,
+    .List-section .List-section-header:hover .Icon,
+    .List-section .List-section-header:hover .List-section-title {
         color: currentcolor;
     }
     .List-section--open .List-section-header .List-section-title {
@@ -5559,24 +5878,30 @@ ob_start();
         margin-bottom: 2px;
         margin-top: 2px;
     }
-    .List-item--segment .Icon, .List-item--segment .List-item-title {
+    .List-item--segment .Icon,
+    .List-item--segment .List-item-title {
         color: #a989c5;
     }
-    .List-item--selected, .List-item:hover {
+    .List-item--selected,
+    .List-item:hover {
         background-color: currentcolor;
         border-color: rgba(0, 0, 0, 0.2);
     }
     .List-item-title {
         color: #727479;
     }
-    .List-item--selected .Icon, .List-item--selected .List-item-title, .List-item:hover .Icon, .List-item:hover .List-item-title {
+    .List-item--selected .Icon,
+    .List-item--selected .List-item-title,
+    .List-item:hover .Icon,
+    .List-item:hover .List-item-title {
         color: #fff;
     }
     .FieldList-grouping-trigger {
         display: flex;
         visibility: hidden;
     }
-    .List-item--selected .FieldList-grouping-trigger, .List-item:hover .FieldList-grouping-trigger {
+    .List-item--selected .FieldList-grouping-trigger,
+    .List-item:hover .FieldList-grouping-trigger {
         border-left: 2px solid rgba(0, 0, 0, 0.1);
         color: hsla(0, 0%, 100%, 0.5);
         visibility: visible;
@@ -5688,165 +6013,1397 @@ ob_start();
     ._3TLsalUZYdJqkR3JEsP5Cb {
         cursor: pointer;
     }
+    /* tables still need 'cellspacing="0"' in the markup */
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    /* add some styling to the table, padding etc*/
+    table thead th{
+        padding:3px 10px;
+        border-bottom:1px solid #000000;
+        background:#74AFAD;
+        background-size: 50%;
+    }
+    table tbody td{
+        padding:3px 10px;
+        white-space: no
+    }
+    table tbody tr:nth-of-type(2n+1) td{
+        background:#CCCCCC;
+    }
+
+    tfoot td{
+        background: #ccc;
+    }
+    #three tbody tr:nth-of-type(2n+1) td{
+        background:#82CE76;
+    }
+    .drag{
+        background:#CCCCCC !important;
+        color:#cCCCCC;
+    }
+
+    .dragtable-drag-handle{
+        height:.5em;
+        width: 5px;
+        float: right;
+        background:green;
+    }
 
 
+    .test3{
+        /*border-right: 5px solid red !important;*/
+    }
 </style>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>    
+
+<script type="text/javascript" src="src/js/jquery.dragtable.js"></script>
+<link rel="stylesheet" href="src/css/dragtable-default.css" type="text/css" />
+<script>
+    //alert("1asdas");
+    var i = 0;
+
+    $(document).ready(function () {
+
+        var queryMain = "";
+        $('table').each(function () {
+
+            $(this).dragtable({
+                placeholder: 'dragtable-col-placeholder test3',
+                items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
+                scroll: true
+            });
+        });
+        function hideAll() {
+            $(".outerNav").hide();
+            $(".outerNav_").hide();
 
 
-<div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-    <header data-reactid=".d.0.0" class="DashboardHeader relative z2" >
-        <div mb-react-component="Navbar" ng-controller="Nav" class="Nav ng-scope">
-            <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3" style=" background-color:green;">
-                <ul class="pl4 pr1 flex align-center">
-                    <li>
-                        <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                            <?php
-                            include_once 'config.php';
-                            $a = trim("Admin");
-                            $p = trim("Privileged");
-                            $b = trim($_SESSION['utype']);
-                            if ($a == $b) {
-                                echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,' . $_SESSION['uname'] . '(Admin)' . '</h2>';
-                            } else if ($p == $b) {
-                                echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,' . $_SESSION['uname'] . '(Privileged)' . '</h2>';
-                            } else {
-                                echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,' . $_SESSION['uname'] . '</h2>';
-                            }
-                            ?>
+            $(".innerNav").hide();
+            $("#509797").hide();
+            $("#beforeColoumnContainer").hide();
+            $(".rawSecondLevel").hide();
+            $("afterSortClick").hide();
+            $(".groupingTags").hide();
+            $("#sortSpan").hide();
+            $("#sortColoumnList").hide();
+            $("#groupByContainer").hide();
 
-                            <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3" style="color:white;">Your Home page</h4>
+            $("#rawDataList").hide();
+            $(".afterFilter").hide();
+            $(".beforeColoumn").hide();
+            $("#afterColoumn").hide();
+        }
 
+        // var json='{  	"database2": {  		"window": {  			"title": "int",  			"name": "date",  			"width": "date",  			"height": "var"  		},  		"image": {  			"src": "int",  			"name": "var",  			"hOffset": "var",  			"vOffset": "date",  			"alignment": "int"  		},  		"text": {  			"data": "date",  			"size": "int",  			"style": "int",  			"name": "string",  			"hOffset": "string",  			"vOffset": "int",  			"alignment": "string",  			"onMouseUp": "date"  		}  	},  	"database1": {  		"window1": {  			"title": "int",  			"name": "date",  			"width": "date",  			"height": "var"  		},  		"image1": {  			"src": "int",  			"name": "var",  			"hOffset": "var",  			"vOffset": "date",  			"alignment": "int"  		},  		"text1": {  			"data": "date",  			"size": "int",  			"style": "int",  			"name": "string",  			"hOffset": "string",  			"vOffset": "int",  			"alignment": "string",  			"onMouseUp": "date"  		}  	}  }';
+
+        // var json = '{"postgres":{"company":{"id":"integer","name":"text"},"Staff":{"EmpId":"char","Name":"ARRAY","Address":"ARRAY","UID":"integer"},"POSTTYPE":{"ID":"text","POSTTYPE":"text","TITLE":"text"}}}';
+        var result = <?php echo str_replace('""', '"', stripslashes(json_encode($associativeArrayMainD))); ?>;
+        //alert(json.to);
+        //var result = $.parseJSON(json);
+        hideAll();
+        $.each(result, function (k, v) {
+
+            $("#databaseListDummy .List-section-title").text(k);
+            var dummyDB = $("#databaseListDummy").clone();
+            dummyDB.removeAttr("id");
+            dummyDB.prop("class", "outerNav1");
+            dummyDB.css('display', 'block');
+            $("#databaseListDummyContainer").append(dummyDB[0]['outerHTML']);
+
+            $("#databaseListDummy2 .List-section-title").text(k);
+            dummyDB = $("#databaseListDummy2").clone();
+            dummyDB.removeAttr("id");
+            dummyDB.prop("class", "outerNav2");
+            dummyDB.css('display', 'block');
+            $("#databaseListDummyContainer2").append(dummyDB[0]['outerHTML']);
+
+            var dummyInnerNav = $(".innerNav").clone();
+            dummyInnerNav.removeClass("innerNav");
+            dummyInnerNav.addClass("innerNav" + k);
+            $("#inoutNavContainer").append(dummyInnerNav[0]['outerHTML']);
+            $(".innerNav" + k + " .outerNavPointer").text(k);
+
+            var rowResult = $.parseJSON(JSON.stringify(v));
+            $.each(rowResult, function (k1, v1) {
+                $(".innerNav li h4").text(k1);
+                var li = $(".innerNav li").clone();
+                li.children().attr("data-val", k);
+                li.css('display', 'block');
+                li.css('display', 'block');
+
+                $(".innerNav" + k + " ul").append(li[0]['outerHTML']);
+                var colResult = $.parseJSON(JSON.stringify(v1));
+                var dummyColNav = $(".beforeColoumn").clone();
+                dummyColNav.removeClass("beforeColoumn");
+                dummyColNav.addClass("beforeColoumn" + k1);
+                $("#beforeColoumnContainer").append(dummyColNav[0]['outerHTML']);
+                $(".beforeColoumn" + k1 + " .text-default").text(k1);
+                var dummyColNav = $(".sortColoumn").clone();
+                dummyColNav.removeClass("sortColoumn");
+                dummyColNav.addClass("sortColoumn" + k1);
+                $("#sortColoumnContainer").append(dummyColNav[0]['outerHTML']);
+                $(".sortColoumn" + k1 + " .text-default").text(k1);
+                var dummyColNav = $(".groupLists").clone();
+                dummyColNav.removeClass("groupLists");
+                dummyColNav.addClass("groupLists" + k1);
+                $("#groupByContainer").append(dummyColNav[0]['outerHTML']);
+                $(".groupLists" + k1 + " .text-default").text(k1);
+                $.each(colResult, function (k2, v2) {
+                    var dummyColNavAft = $("#afterColoumn").clone();
+                    dummyColNavAft.removeAttr("id");
+                    dummyColNavAft.addClass("afterColoumn" + k1 + "_" + k2);
+                    $("#beforeColoumnContainer").append(dummyColNavAft[0]['outerHTML']);
+                    $(".afterColoumn" + k1 + "_" + k2 + " .inline-block").text(k1);
+                    $(".afterColoumn" + k1 + "_" + k2 + " .coloumnBack").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                    $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                    $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-tableName", k1);
+
+                    $(".afterColoumn" + k1 + "_" + k2 + " .text-default").text(k2);
+                    $(".sortColoumn li h4").text(k2);
+                    $(".beforeColoumn li h4").text(k2);
+                    $(".groupLists li h4").text(k2);
+                    var cloneIcon;
+                    if (v2 === "string")
+                        cloneIcon = $("#iconContainer .Icon-string").clone(true);
+                    else if (v2 === "integer")
+                        cloneIcon = $("#iconContainer .Icon-int").clone(true);
+                    else
+                        cloneIcon = $("#iconContainer .Icon-calendar").clone(true);
+                    $(".sortColoumn li svg").remove();
+                    var someHtml = $(".sortColoumn li a").html();
+                    $(".sortColoumn li a").empty();
+                    $(".sortColoumn li a").append(cloneIcon[0]['outerHTML'] + someHtml);
+                    $(".beforeColoumn li svg").remove();
+                    $(".beforeColoumn li a").empty();
+                    $(".beforeColoumn li a").append(cloneIcon[0]['outerHTML'] + someHtml);
+                    $(".groupLists li svg").remove();
+                    $(".groupLists li a").empty();
+                    $(".groupLists li a").append(cloneIcon[0]['outerHTML'] + someHtml);
+                    var li1 = $(".sortColoumn li").clone(true);
+                    var li2 = $(".beforeColoumn li").clone(true);
+                    var li3 = $(".groupLists li").clone(true);
+                    // console.log(li2.html());
+                    li1.children().attr("data-val", k1);
+                    //console.log(k2);
+                    li1.css('display', 'block');
+                    $(".sortColoumn" + k1 + " ul").append(li1);
+                    li2.children().attr("data-val", k1);
+                    //console.log(k2);
+                    li2.css('display', 'block');
+                    $(".beforeColoumn" + k1 + " ul").append(li2);
+                    li3.children().attr("data-val", k1);
+                    //console.log(k2);
+                    li3.css('display', 'block');
+                    $(".groupLists" + k1 + " ul").append(li3);
+                });
+            });
+        });
+        $("#selectTable").click(function () {
+            $(".outerNav").toggle();
+        });
+        $("#selectTable2").click(function () {
+            $(".outerNav_").css({
+                'position': 'absolute',
+                'left': $(this).offset().left,
+                'top': $("#react_qb_editor").height()
+            }).show();
+        });
+
+        $(".outerNav1").click(function () {
+            $(".innerNav" + $(this).text().trim()).show();
+            $(".outerNav").hide();
+
+
+        });
+        $(".outerNav2").click(function () {
+            $("#tableNameText2").text($(this).text().trim());
+            $.each(result, function (k, v) {
+
+                if ($("#tableNameText2").text().trim() === k.trim())
+                {
+                    var rowResult = $.parseJSON(JSON.stringify(v));
+                    $.each(rowResult, function (k1, v1) {
+                        $("#joinTableNameContainer .selectJoinTable").append("<option value='" + k1.trim() + "'>" + k1.trim() + "</option>");
+
+
+                    });
+
+                }
+            });
+            $("#joinTableNameContainer").show();
+
+            $(".outerNav_").hide();
+        });
+
+        $('#joinTableNameContainer .selectJoinTable').change(function () {
+            var first = 0;
+            var second = 0;
+
+            $.each(result, function (k, v) {
+                if ($("#tableNameText2").text().trim() === k.trim())
+                {
+                    var rowResult = $.parseJSON(JSON.stringify(v));
+                    $.each(rowResult, function (k1, v1) {
+
+                        if ($("#selectSecondTable").val().trim() === k1.trim())
+                        {
+                            $("#joinSecondColoumnNameContainer").find("option").text("Select Coloumn Name for Table:" + $("#selectSecondTable").val());
+
+                            var rowResult2 = $.parseJSON(JSON.stringify(v1));
+
+                            $.each(rowResult2, function (k2, v2) {
+
+
+                                $("#joinSecondColoumnNameContainer .selectJoinTable").append("<option value='" + k2.trim() + "'>" + k2.trim() + "</option>");
+                                first = 1;
+                            });
+
+                        } else if ($("#tableNameText").text().trim() === k1.trim())
+                        {
+                            $("#joinFirstColoumnNameContainer").find("option").text("Select Coloumn Name for Table:" + $("#tableNameText").text().trim());
+
+                            var rowResult2 = $.parseJSON(JSON.stringify(v1));
+
+                            $.each(rowResult2, function (k2, v2) {
+
+
+                                $("#joinFirstColoumnNameContainer .selectJoinTable").append("<option value='" + k2.trim() + "'>" + k2.trim() + "</option>");
+                                second = 1;
+                            });
+
+                        }
+
+                    });
+                }
+            });
+            $("#SecondContainer").show();
+
+        });
+        $(".backOuter").click(function () {
+            // alert("asd");
+            $(".innerNav" + $(this).text().trim()).hide();
+            $(".outerNav").show();
+        });
+        $(".tableName").click(function () {
+            $("#filterWala").removeClass("disabled");
+            $(".innerNav" + $(this).attr("data-val")).hide();
+            $("#tableNameText").text($(this).text());
+            $("#tableNameText").attr("data-attr", $(this).attr("data-val").trim());
+        });
+        $("#selectFilters").click(function () {
+            //  alert(".beforeColoumn"+ $("#tableNameText").text().trim())
+            $("#beforeColoumnContainer").toggle();
+            $(".beforeColoumn" + $("#tableNameText").text().trim()).toggle();
+//            if ($("#selectSecondTable").val().trim().length > 0)
+//            {
+//                console.log(".beforeColoumn" + $("#selectSecondTable").val().trim());
+//                $(".beforeColoumn" + $("#selectSecondTable").val().trim()).toggle();
+//
+//
+//            }
+
+
+        });
+        $("#beforeColoumnContainer .List-item").click(function () {
+            $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).show();
+            $(".beforeColoumn" + $("#tableNameText").text().trim()).hide();
+            $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainer").each(function () {
+                $(this).hide();
+            });
+            if ($(this).find("svg").attr("class").indexOf("Icon-int") >= 0)
+            {
+
+                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerInt").show();
+            } else if ($(this).find("svg").attr("class").indexOf("Icon-calendar") >= 0)
+                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerCal").show();
+            else
+            {
+                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerString").show();
+            }
+        });
+        $(".addFilterButton").click(function () {
+            i++;
+            var dummyColFilAft = $(".afterFilter").clone(true);
+            dummyColFilAft.removeClass("afterFilter");
+            var tableName = $(this).attr("data-colName").replace(/ /g, '');
+            dummyColFilAft.addClass("afterFilter_" + tableName + "_" + i);
+            dummyColFilAft.css('display', 'block');
+            $("#filterWala").append(dummyColFilAft);
+            var dumTbl = $(this).attr("data-tableName").replace(/ /g, '')
+            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").text($("." + tableName + " .text-default").text());
+            //console.log("\""+dumTbl+"\".\""+$("." + tableName + " .text-default").text()+"\"");
+            // alert("\""+tableName+"\".\""+$("." + tableName + " .text-default").text()+"\"");
+            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").attr("data-attr", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"");
+            $(".afterFilter_" + tableName + "_" + i + " .midQuery").text($("." + tableName + " .buttonContainer .Button--purple").text());
+            $(".afterFilter_" + tableName + "_" + i + " .midQuery").attr("data-reactid", $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid"));
+            $(".afterFilter_" + tableName + "_" + i + " .valQuery").text($("." + tableName + " .FilterInputText").val());
+            $(".afterFilter_" + tableName + "_" + i + " .Query-filter-close").attr("data-attr", "afterFilter_" + tableName + "_" + i)
+            var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val());
+            $(".afterFilter_" + tableName + "_" + i + " .valQuery").attr("data-attr", qVal);
+            // alert(tableName);
+            $(".afterFilter_" + tableName + "_" + i).show();
+            $("#beforeFilter").hide();
+            $("." + tableName).hide();
+            $("#beforeColoumnContainer").hide();
+        });
+        $(".Query-filter-close").click(function () {
+            //alert("."+$(this).attr("data-attr"));
+            var tableName = $(this).attr("data-attr").replace(/ /g, '');
+            $("." + tableName).remove();
+        });
+        $(".coloumnBack").click(function () {
+            //  alert($("#tableNameText").text().trim());
+
+            $("." + $(this).attr("data-colName")).hide();
+            $(".beforeColoumn" + $("#tableNameText").text().trim()).show();
+        });
+        $("#rawDataGroup").click(function () {
+            $("#rawDataList").toggle();
+        });
+        $("#groupByButton").click(function () {
+            // alert("asd");
+            $(".groupLists" + $("#tableNameText").text().trim()).show();
+            $("#groupByContainer").toggle();
+        });
+        $("#rawDataList li").click(function () {
+
+            if (($(this).attr("data-attr").trim() === "*") || ($(this).attr("data-attr").toLowerCase() === "count(*) as count")) {
+                $("#rawDataTextField").text($(this).attr("data-attr"));
+            } else if ($(this).attr("data-attr").trim().toLowerCase() === "count(distinct ##addtext##)") {
+                $("#rawDataTextField").text($(this).text().trim());
+                $(".rawSecondLevel").show();
+                var clonedColoumnList = $(".groupLists" + $("#tableNameText").text().trim()).clone(true);
+                $(".rawSecondLevel .inline-block").text($(this).text().trim());
+
+                clonedColoumnList.removeClass("groupLists" + $("#tableNameText").text().trim());
+                clonedColoumnList.find("li").attr("data-attr", "rawDataOne");
+                clonedColoumnList.find("li").attr("data-tblName", $("#tableNameText").text().trim());
+                clonedColoumnList.find("li").attr("data-val", $(this).attr("data-attr"));
+                clonedColoumnList.addClass("rawDataListDummy");
+                $("#ColoumnListContents").empty();
+                $("#ColoumnListContents").append(clonedColoumnList);
+                $(".rawDataListDummy").show();
+            } else
+            {
+                $("#rawDataTextField").text($(this).text().trim());
+                $(".rawSecondLevel").show();
+                $(".rawSecondLevel .inline-block").text($(this).text().trim());
+
+                var clonedColoumnList = $(".groupLists" + $("#tableNameText").text().trim()).clone(true);
+                clonedColoumnList.removeClass("groupLists" + $("#tableNameText").text().trim());
+                clonedColoumnList.find("li").attr("data-attr", "rawDataOne");
+                clonedColoumnList.find("li").attr("data-tblName", $("#tableNameText").text().trim());
+                clonedColoumnList.find("li").attr("data-val", $(this).attr("data-attr"));
+                clonedColoumnList.find("li .Icon-string").each(function () {
+                    $(this).parent().parent().hide();
+                });
+                clonedColoumnList.find("li .Icon-calendar").each(function () {
+                    $(this).parent().parent().hide();
+                });
+                ;
+
+                clonedColoumnList.addClass("rawDataListDummy");
+                $("#ColoumnListContents").empty();
+                $("#ColoumnListContents").append(clonedColoumnList);
+                $(".rawDataListDummy").show();
+            }
+            $("#rawDataList").hide();
+        });
+        $(".rawSecondLevel .text-grey-3").click(function () {
+            $(".rawSecondLevel").toggle();
+            $(".rawDataList").toggle();
+        });
+        $("#groupByContainer li").click(function () {
+            if ($(this).attr("data-attr") === "rawDataOne")
+            {
+                var mainChar = "\"" + $(this).attr("data-tblName") + "\".\"" + $(this).text().trim() + "\"";
+                var someData = $("#rawDataTextField").text();
+                var upperCase = new RegExp('[A-Z]');
+                var text = "";
+                if (mainChar.match(upperCase))
+                    text = $(this).attr("data-val").replace('##addText##', "\"" + mainChar + "\"");
+                else
+                    text = $(this).attr("data-val").replace('##addText##', mainChar);
+
+                $("#rawDataTextField").text(text);
+                $(".rawSecondLevel").hide();
+            } else {
+                $(".groupingTags .QueryOption span").text($(this).text().trim());
+                $(".groupingTags .QueryOption").attr("data-attr", "\"" + $("#tableNameText").text().trim() + "\".\"" + $(this).text().trim() + "\"");
+                $(".groupingTags .groupingTagAnchor").attr("data-attr", "groupingTags_" + $(this).text().trim());
+                var grpClone = $(".groupingTags").clone(true);
+                grpClone.removeClass("groupingTags");
+                grpClone.addClass("groupingTags_" + $(this).text().trim());
+                grpClone.addClass("groupingTagsLive");
+                $(".groupingTags_" + $(this).text().trim()).remove();
+                $(".groupingTags").parent().append(grpClone);
+                $(".groupingTags_" + $(this).text().trim()).show();
+                //$("#groupByButton").hide();
+                $("#groupByContainer").hide();
+            }
+
+        });
+        //  $(".").show();
+        $(".groupingTagAnchor").click(function () {
+            $("." + $(this).attr("data-attr")).hide();
+            $("#groupByButton").show();
+        });
+        $("#sortButton").click(function () {
+            $("#sortSpan").toggle();
+        });
+        $("#sortFieldPicker").click(function () {
+
+            // alert("da");
+            $(".sortColoumn" + $("#tableNameText").text().trim()).show();
+            $("#sortColoumnContainer").toggle();
+        });
+        $("#sortColoumnContainer .List-item").click(function () {
+            var someData = $(this).text();
+            // alert(someData);
+
+            $("#sortTag").text(someData);
+            $("#sortTag").attr("data-attr", "\"" + $("#tableNameText").text().trim() + "\".\"" + someData.trim() + "\"")
+            $("#beforeSortClick").hide();
+            $("#afterSortClick").show();
+            $("#sortColoumnContainer").hide();
+            //$(".sortColoumn"+ $("#tableNameText").text().trim()).hide();
+
+
+        });
+        $("#removeSortTag").click(function () {
+            $("#afterSortClick").hide();
+            $("beforeSortClick").show();
+            $("#sortTag").text("");
+
+        });
+        $("#sortOrder").click(function () {
+            if ($("#sortOrder").text().trim() === "ascending") {
+                $("#sortOrder").text("descending");
+                $("#sortOrder").attr("data-attr", "DESC");
+            } else {
+                $("#sortOrder").attr("data-attr", "ASC");
+                $("#sortOrder").text("ascending");
+            }
+
+        });
+        $("#limit>ul>li").click(function () {
+            $("#limit>ul>li.Button--active").removeClass("Button--active");
+            $(this).addClass("Button--active");
+        });
+        $(".FilterPopover button").click(function () {
+            $(".FilterPopover button.Button--purple").removeClass("Button--purple");
+            $(this).addClass("Button--purple");
+        });
+
+        $("#saveQuery").click(function () {
+            $(".Modal").css("z-index", 9);
+            $(".Modal").show();
+        });
+        $("#closeSaveDiv").click(function () {
+            $(".Modal").css("z-index", 0);
+            $(".Modal").hide();
+        });
+
+        $("#formMain").submit(function () {
+            /*
+             var str = $(this).serialize();
+             $.ajax('action2.php', str, function(result){
+             // the result variable will contain any text echoed by getResult.php
+             });
+             return(false);*/
+            // var selectClause = " * ";
+            var secselectClause = " * ";
+            var whereclause = "";
+            var firstTime = new Boolean(true);
+            $('.Query-filters:visible').each(function (i, obj) {
+                if (firstTime)
+                    whereclause += " Where ";
+                else
+                    whereclause += " AND ";
+
+                whereclause += $(this).find(".colQuery").attr("data-attr");
+                whereclause += $(this).find(".valQuery").attr("data-attr");
+                firstTime = false;
+                //test
+            });
+            var firstTime = new Boolean(true);
+            $('.groupingTagsLive:visible').each(function (i, obj) {
+                if (firstTime) {
+                    whereclause += " group by " + $(this).find(".QueryOption").attr("data-attr").trim();
+                    secselectClause = $(this).find(".QueryOption").attr("data-attr").trim();
+                } else {
+                    whereclause += " , " + $(this).find(".QueryOption").attr("data-attr").trim();
+
+                    secselectClause += " , " + $(this).find(".QueryOption").attr("data-attr").trim();
+                }
+                firstTime = false;
+                //test
+            });
+            var aggData = "";
+            if ($("#rawDataTextField").text().trim() === "Raw data") {
+
+            } else {
+                if (secselectClause.trim() === "*")
+                    secselectClause = $("#rawDataTextField").text();
+                else
+                    secselectClause += " , " + $("#rawDataTextField").text();
+
+            }
+            var sortInfo = ""
+            if ($("#afterSortClick #sortTag").text().trim().length > 0) {
+                //alert($("#sortTag").text()+$("#sortOrder").text());
+                sortInfo = " order by " + "\"" + $("#sortTag").text().trim() + "\"" + " " + $("#sortOrder").attr("data-attr").trim();
+                // selectClause += " ,"+$("#sortTag").text().trim();
+            }
+            var limit = "";
+            if ($("#limit .Button--active").text().trim() === "None") {
+            } else {
+                limit = " LIMIT " + $("#limit .Button--active").text();
+            }
+            var joinclause = "";
+            var tableNameToSend = $("#tableNameText").text().trim();
+
+            if ($("#selectSecondTable").val().trim().length > 0)
+            {
+                tableNameToSend += " , " + $("#selectSecondTable").val()
+                //alert($("#selectSecondTableCustomers").val());
+                joinclause += $("#joinType").val() + " \"" + $("#selectSecondTable").val() + "\" ON \"" + $("#tableNameText").text().trim() + "\"." + "\"" + $("#selectFirstJoinCol").val() + "\" = \"" + $("#selectSecondTable").val() + "\"." + "\"" + $("#selectSecondJoinCol").val() + "\"";
+            }
+            queryMain = "Select " + secselectClause + " from \"" + $("#tableNameText").text().trim() + "\"" + joinclause + whereclause + sortInfo + limit;
+            // alert(queryMain);
+            //alert($("#tableNameText").text().trim());
+            var dataBaseName = $("#tableNameText").attr("data-attr");
+            $.ajax({
+                url: 'action2.php',
+                type: "GET",
+                data: {
+                    queryString: queryMain,
+                    tableName: tableNameToSend,
+                    selectTags: secselectClause,
+                    databaseName: dataBaseName
+                },
+                beforeSend: function () {},
+                complete: function () {},
+                success: function (data) {
+                    // console.log(data);
+                    $('.Visualization').empty();
+                    $('.Visualization').append(data);
+                    $('table').each(function () {
+
+                        $(this).dragtable({
+                            placeholder: 'dragtable-col-placeholder test3',
+                            items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
+                            scroll: true
+                        });
+                    });
+
+                },
+                error: function () {}
+            });
+        });
+        
+         $("#tog_name").click(function () {
+            $("#tog_section").toggle();
+        });
+        $(".Icon-download").click(function ()
+        {
+            $('#hidden-type').val($('.Visualization').html());
+            $('#export-form').submit();
+            $('#hidden-type').val('');
+            /*	$.ajax({
+             url: 'csvDownload.php',
+             type: "POST",
+             data: {
+             table:  $('.Visualization').html()
+             },
+             beforeSend: function() {},
+             complete: function() {},
+             success: function(data) {
+             console.log(data);
+             
+             },
+             error: function() {}
+             });	*/
+
+        });
+        $("#saveTag").click(function ()
+        {
+            var coloumnName = "";
+            $('#displayTable > thead > tr > th').each(function () {
+                coloumnName += $(this).attr("data-attr").trim() + ",";
+            });
+            coloumnName = coloumnName.substring(0, coloumnName.length - 1);
+            // alert(queryMain);
+            //alert(coloumnName);
+            //alert($('#tagName').val());
+            //alert($('#tagDescription').val());
+
+            $.ajax({
+                url: 'saveTag.php',
+                type: "GET",
+                data: {
+                    queryColTagForm: coloumnName,
+                    queryMain: $('#queryForTagForm').val(),
+                    tagName: $('#tagName').val(),
+                    tagDescription: $('#tagDescription').val()
+                },
+                beforeSend: function () {},
+                complete: function () {},
+                success: function (data) {
+                    queryMain = "";
+                    //alert(data);
+
+                    $('.Visualization').empty();
+                    $('.Visualization').append(data);
+                    $('#tagName').val("");
+                    $('#tagDescription').val("");
+                    $('#queryColTagForm').val("");
+                    $('#queryForTagForm').val("");
+                    $(".Modal").hide();
+                },
+                error: function () {
+
+                    alert("error");
+                }
+            });
+
+        });
+
+        function exportTableToCSV($table, filename) {
+            var $rows = $table.find('tr:has(td)'),
+                    // Temporary delimiter characters unlikely to be typed by keyboard
+                    // This is to avoid accidentally splitting the actual contents
+                    tmpColDelim = String.fromCharCode(11), // vertical tab character
+                    tmpRowDelim = String.fromCharCode(0), // null character
+
+                    // actual delimiter characters for CSV format
+                    colDelim = '","',
+                    rowDelim = '"\r\n"',
+                    // Grab text from table into CSV formatted string
+                    csv = '"' + $rows.map(function (i, row) {
+                        var $row = $(row),
+                                $cols = $row.find('td');
+                        return $cols.map(function (j, col) {
+                            var $col = $(col),
+                                    text = $col.text();
+//console.log(text);
+                            return text.replace('"', '""'); // escape double quotes
+
+                        }).get().join(tmpColDelim);
+                    }).get().join(tmpRowDelim)
+                    .split(tmpRowDelim).join(rowDelim)
+                    .split(tmpColDelim).join(colDelim) + '"',
+                    // Data URI
+                    csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
+//alert(encodeURIComponent(csv));
+
+            $(this)
+                    .attr({
+                        'download': filename,
+                        'href': csvData,
+                        'target': '_blank'
+                    });
+        }
+        /*
+         $('.Icon-reference').click(
+         function() { 
+         exportTableToCSV.apply(this, [$('#displayTable'), 'filename.csv']);
+         });*/
+    });</script>
+<Html>
+    <div mb-react-component="Navbar" ng-controller="Nav" class="Nav ng-scope">
+        <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3">
+            <ul class="pl4 pr1 flex align-center">
+                <li class="pl1"><a href="dash.php" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Dashboard">Dashboard</a>
+                </li>
+                <li class="pl1"><a href="#" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Question">Question</a>
+                </li>
+                <li class="pl3"><a href="#" class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show">Question</span></a>
+                </li>
+                <li class="flex-align-right transition-background">
+                    <div class="inline-block text-white">
+                        <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
+                            <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
+                                <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
+                                    <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
+                                        <div id="tog_name" data-reactid=".0.0.5.0.0.0.0.0.0" style="font-size:0.85rem;border-width:1px;border-style:solid;border-radius:99px;width:2rem;height:2rem;background-color:transparent;" class="flex align-center justify-center bg-brand"><?php echo $_SESSION['uname']; ?></div>
+                                        <svg data-reactid=".0.0.5.0.0.0.0.0.1" name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="Dropdown-chevron ml1">
+                                        <path data-reactid=".0.0.5.0.0.0.0.0.1.0" d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </a>
+                            <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
+                                <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
+                                    <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
+                                    <?php
+                                    $a = trim("Admin");
+                                    $b = trim($_SESSION['utype']);
+
+                                    if ($a == $b) {
+                                        echo '<li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>';
+                                    } else {
+                                        
+                                    }
+                                    ?>
+                                    <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
+                                    <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
+
+                                </ul>
+                            </div>
                         </div>
-                    </li>
-
-                    <li class="pl1"><a href="/card/" class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Questions">Dashboard</a>
-                    </li>  <li class="pl3"><a href="/q" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span   class="hide sm-show">Question</span></a>
-                    </li>
-                    <li class="pl3"><a href="queryPage.php" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show"> Question</span></a>
-                    </li>
-                    <li class="flex-align-right transition-background">
-                        <div data-reactid=".0.0.5.0" class="inline-block text-white" >
-                            <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
-                                <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
-                                    <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
-                                        <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
-                                            <div id="tog_name" data-reactid=".0.0.5.0.0.0.0.0.0" style="font-size:0.85rem;border-width:1px;border-style:solid;border-radius:99px;width:2rem;height:2rem;background-color:transparent;" class="flex align-center justify-center bg-brand"><?php echo $_SESSION['uname']; ?></div>
-                                            <svg data-reactid=".0.0.5.0.0.0.0.0.1" name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="Dropdown-chevron ml1">
-                                            <path data-reactid=".0.0.5.0.0.0.0.0.1.0" d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="QueryBuilder-section flex align-center py1 lg-py2 xl-py3 wrapper">
+        <div class="Entity">
+            <div class="flex align-baseline">
+                <h1 class="Header-title-name my1">New question</h1>
+                <span> </span>
+            </div>
+        </div>
+        <div class="flex-align-right">
+            <div class="flex align-center">
+                <span data-reactid=".1.0.1.0.$0" class="Header-buttonSection"><a data-reactid=".1.0.1.0.$0.$save" id="saveQuery" class="no-decoration h4 px1 text-grey-4 text-brand-hover text-uppercase"><span data-reactid=".1.0.1.0.$0.$save.0">Save</span><span data-reactid=".1.0.1.0.$0.$save.1"></span></a></span>
+                <span class="Header-buttonSection">
+                    <div   class="Button-toggle">
+                        <span   class="Button-toggleIndicator">
+                            <svg   fill="currentcolor" viewBox="0 0 16 16" height="14px" width="14px" class="Sql-icon">
+                            <path   d="M-0.237037037,9.10836763 L-0.237037037,11.8518519 L6.16296296,5.92592593 L-0.237037037,8.22888605e-15 L-0.237037037,2.74348422 L3.2,5.92592593 L-0.237037037,9.10836763 Z M4.14814815,13.44 L16,13.44 L16,16 L4.14814815,16 L4.14814815,13.44 Z"/>
+                            </svg>
+                        </span>
+                    </div>
+                </span>
+                <span class="Header-buttonSection">
+                    <a   title="Get help on what data means" class="mx1 transition-color text-grey-4 text-brand-hover">
+                        <svg data-reactid=".7.0.2.1.1.0" name="download" fill="currentcolor" viewBox="0 0 11 17" height="16px" width="16px" class="Icon Icon-download"><path data-reactid=".7.0.2.1.1.0.0" d="M4,8 L4,0 L7,0 L7,8 L10,8 L5.5,13.25 L1,8 L4,8 Z M11,14 L0,14 L0,17 L11,17 L11,14 Z"/></svg>                        </svg>
+                    </a>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="z2" id="react_qb_editor">
+        <div class="wrapper">
+            <div class="GuiBuilder rounded shadowed GuiBuilder--expand">
+                <div class="GuiBuilder-row flex">
+                    <div class="GuiBuilder-section GuiBuilder-data flex align-center arrow-right">
+                        <span class="GuiBuilder-section-label Query-label">Data</span>
+                        <div>
+                            <a id="selectTable" class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled">
+                                <span class="px2 py2 text-bold cursor-pointer text-default">
+                                    <span   class="text-grey-4 no-decoration" id="tableNameText">Select a table</span>
+                                    <svg name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="ml1">
+                                    <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z " />
+                                    </svg>
+                                </span>
+                                <span class="hide"></span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="GuiBuilder-section GuiBuilder-filtered-by flex align-center">
+                        <span class="GuiBuilder-section-label Query-label">Filtered by</span>
+                        <div class="Query-section disabled" id="filterWala">
+                            <div class="Query-filters afterFilter">
+                                <div class="Query-filterList scroll-show scroll-show--horizontal filterRow">
+                                    <div class="Query-filter p1 pl2">
+                                        <div>
+                                            <div>
+                                                <div style="padding:0.5em;padding-top:0.3em;padding-bottom:0.3em;padding-left:0;" class="flex align-center">
+                                                    <div class="flex align-center">
+                                                        <div class="Filter-section Filter-section-field selected"><span class="QueryOption"><span   class="colQuery">BTC selling price</span></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="Filter-section Filter-section-operator"><span>&nbsp;</span><a class="QueryOption flex align-center midQuery">is not</a>
+                                                    </div>
+                                                </div>
+                                                <div class="flex align-center flex-wrap">
+                                                    <div class="Filter-section Filter-section-value"><span class="QueryOption valQuery">as</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a class="text-grey-2 no-decoration px1 flex align-center Query-filter-close">
+                                            <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-close">
+                                            <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mx2">
+                                <a id="selectFilters" class="no-decoration flex align-center">
+                                    <span class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
+                                        <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
+                                            <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
+                                            <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
                                             </svg>
                                         </div>
-                                    </div>
+                                        <span    id="beforeFilter" class="ml1">Add filters to narrow your answer</span>
+                                    </span>
+                                    <span class="hide"></span>
                                 </a>
-                                <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
-                                    <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-                                        <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
-<?php
-$a = trim("Admin");
-$b = trim($_SESSION['utype']);
-
-if ($a == $b) {
-    echo '<li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>';
-} else {
-    
-}
-?>
-                                        <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
-                                        <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
-
-                                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="GuiBuilder-row flex flex-full">
+                    <div class="GuiBuilder-section GuiBuilder-view flex align-center px1">
+                        <span class="GuiBuilder-section-label Query-label">View</span>
+                        <div class="Query-section Query-section-aggregation" id="rawDataGroup">
+                            <div class="tether-target tether-element-attached-center tether-target-attached-center tether-element-attached-top tether-target-attached-bottom">
+                                <div class="Query-section Query-section-aggregation cursor-pointer"><span id="rawDataTextField" class="View-section-aggregation QueryOption py1 pl1">Raw data</span>
                                 </div>
                             </div>
                         </div>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-
-
-    </header>
-    <h3 style="padding-left:5em"><br> Some of the most frequent queries </h3><br>
-    <div data-reactid=".d.0.1" class="wrapper">
-        <div data-reactid=".d.0.1.0" class="flex layout-centered">
-            <div data-reactid=".d.0.1.0.0" style="position: relative; width: 1441px; height: 472px; margin-left: -3px; margin-right: -3px;" class="DashboardGrid">
-<?php
-$con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-$con1 = pg_connect("host=localhost port=5421 dbname=dummy_db user=postgres password=plz");
-$u = "'" . trim($_SESSION['uname']) . "'";
-$s = "select admin_uname from login where uname=$u;";
-$col = pg_query($con, $s);
-$row_1 = pg_fetch_array($col);
-$a_name = "'" . $row_1[0] . "'";
-$_SESSION['admin_uname'] = $a_name;
-
-
-$s1 = "select * from saved_query where uname=$u;";
-$div_count = "select count(*) from saved_query where uname=$u ;";
-$col1 = pg_query($con, $div_count);
-$row_2 = pg_fetch_array($col1);
-$divs = $row_2[0];
-$iCount = 0;
-        $col1 = pg_query($con, $s1);
-
-?>
-                <div data-reactid=".d.0.1.0.0.0:$1" height="230" width="474.33333333333337" >
-                    <div data-reactid=".d.0.1.0.0.0:$1.0" style="opacity: 1;">
-                        <div data-reactid=".d.0.1.0.0.0:$1.0.0" >
-
-
-                            <div data-reactid=".d.0.1.0.0.0:$1.0.0.1" >
-
-                                <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0" >
-
-                                    <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" style="overflow-y:hidden;" >
-
-<?php
-while ($iCount < $divs) {
-    if ($iCount <= $divs) {
-        $iCount++;
-        $row_2 = pg_fetch_array($col1);
-
-        $cols = explode(",", $row_2[3]);
-        $tag_name = $row_2[0];
-        // echo $row_2[2];
-        $query = str_replace(SINGLE_QUOTES_REPLACER, "'", $row_2[2]);
-        echo "   <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0\" class=\"p1 flex-no-shrink\">
-                        <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0\" class=\"NNZY_V33LPAFqCAqUSvzQ Card-title mx1 flex flex-no-shrink flex-row align-center\">
-                           <a data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0\" style=\"overflow-x:hidden;flex:0 1 auto;\" class=\"LegendItem no-decoration flex align-center fullscreen-normal-text fullscreen-night-text mr1\" href=\"/card/3\">
-                              <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1\" style=\"overflow:hidden;white-space:nowrap;text-overflow:ellipsis;\" class=\"\"><span data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1.0\">$tag_name </span></div>
-                           </a>
-                        </div>
-                     </div>";
-
-        echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
-        echo '<thead><tr>';
-
-        for ($j = 0; $j < sizeof($cols); $j++) {
-            echo '<th class="MB-DataTable-header cellData text-brand-hover">' . $cols[$j] . '</th>';
-        }
-
-        echo '</tr></thead><tbody><tr>';
-        $r = pg_query($con1, $query);
-
-
-        while ($row = pg_fetch_array($r)) {
-            $i = 0;
-            for ($i = 0; $i < $j; $i++) {
-                echo '<td class="px1 border-bottom" style="white-space:nowrap;">' . $row[$i] . '</td>';
-            }
-            echo '</tr>';
-        }
-
-        echo '</tbody></table>';
-       // $divs = $divs - 1;
-    }
-    ?>
-                                        
-                        
-           <?php         }
-                                            ?>
-    </div>
+                        <div class="Query-section Query-section-breakout ml1" id="groupByButton">
+                            <div>
+                                <span class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
+                                    <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
+                                        <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
+                                        <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
+                                        </svg>
                                     </div>
-
+                                    <span   class="ml1">Add a grouping</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="Query-section Query-section-breakout ml1 groupingTags">
+                            <span class="text-bold">by</span>
+                            <div class="flex align-center">
+                                <div class="flex align-center">
+                                    <div class="View-section-breakout SelectionModule p1 selected"><span class="QueryOption"><span  >title</span></span>
+                                    </div>
+                                    <a class="text-grey-2 no-decoration pr1 flex align-center groupingTagAnchor">
+                                        <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-close">
+                                        <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
+                                        </svg>
+                                    </a>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="flex-full"></div>
+                    <div class="GuiBuilder-section GuiBuilder-sort-limit flex align-center"><a id="sortButton" class="no-decoration flex align-center"><span   class="EllipsisButton no-decoration text-grey-1 px1">…</span><span   class="hide"></span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="joinContainer" class="z2">
+        <div class="wrapper">
+            <div class="GuiBuilder rounded shadowed GuiBuilder--expand">
+                <div class="GuiBuilder-row flex">
+                    <div class="GuiBuilder-section GuiBuilder-data flex align-center arrow-right">
+                        <span class="GuiBuilder-section-label Query-label">Data</span>
+                        <div>
+                            <span class="px2 py2 text-bold cursor-pointer text-default">
+                                <select class="ui dropdown selectJoin" id="joinType">
+                                    <option value="">Select Join</option>
+                                    <option value="Join">Join</option>
+                                    <option value="Full Outer Join">Outer Join</option>
+                                    <option value="Inner Join">Inner Join</option>
+                                    <option value="Left Join">Left Join</option>
+                                    <option value="Right Join">Right Join</option>
+
+                                </select>
+                            </span>
+                        </div>
+                        <div>
+                            <a class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="selectTable2">
+                                <span class="px2 py2 text-bold cursor-pointer text-default">
+                                    <span id="tableNameText2" class="text-grey-4 no-decoration">Select a table</span>
+                                    <svg class="ml1" width="8px" height="8px" viewBox="0 0 32 32" fill="currentcolor" name="chevrondown">
+                                    <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
+                                    </svg>
+                                </span>
+                                <span class="hide"></span>
+                            </a>
+                        </div>
+                        <div style="display:none;" id="joinTableNameContainer">
+                            <span class="px2 py2 text-bold cursor-pointer text-default">
+                                <select class="ui dropdown selectJoinTable" id="selectSecondTable">
+                                    <option value="">Select Table</option>
+
+                                </select>
+                            </span>
+                        </div>
+                        <div style="display:none;" id="SecondContainer">
+                            <div>
+                                <span class="px2 py2 text-bold cursor-pointer text-default">
+                                    ON
+                                </span>
+                            </div>
+                            <div id="joinFirstColoumnNameContainer">
+                                <span class="px2 py2 text-bold cursor-pointer text-default">
+                                    <select class="ui dropdown selectJoinTable"  id="selectFirstJoinCol">
+                                        <option value=""></option>
+
+                                    </select>
+                                </span>
+                            </div>
+                            <div >
+                                <span class="px2 py2 text-bold cursor-pointer text-default">
+                                    Equals
+                                </span>
+                            </div>
+                            <div  id="joinSecondColoumnNameContainer">
+                                <span class="px2 py2 text-bold cursor-pointer text-default">
+                                    <select class="ui dropdown selectJoinTable"  id="selectSecondJoinCol">
+                                        <option value=""></option>
+
+                                    </select>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="flex z1" id="react_qb_viz">
+        <div class="wrapper full relative mb2 z1 flex flex-column">
+            <div class="relative flex flex-no-shrink mt3 mb1">
+                <span class="relative z3">
+                    <noscript  ></noscript>
+                </span>
+                <form id="formMain" action="javascript:void(0);" method="post" >
+                    <div class="absolute flex layout-centered left right z2">
+                        <input type="submit" class="Button Button--primary circular RunButton">
+                        </button>
+                    </div>
+                </form>
+                <div class="absolute right z3 flex align-center"></div>
+            </div>
+            <div class="flex flex-full z1 px1 Visualization--errors">
+
+                <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0" class="flex-full relative border-bottom">
+
+                    <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" class="absolute top bottom left Visualization right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <span class="PopoverContainer tether-element tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="inoutNavContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(85px) translateY(227px) translateZ(0px); z-index: 3;">
+        <div   class="PopoverBody PopoverBody--withArrow outerNav">
+            <div   style="width:300px;" class="text-brand " id="databaseListDummyContainer">
+                <section style=" display:none;"   class="List-section List-section--open" id="databaseListDummy">
+                    <div   class="p1 border-bottom">
+                        <div   class="List-section-header px1 py1 cursor-pointer full flex align-center">
+                            <span   class="List-section-icon mr2">
+                                <svg   name="database" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon text-default">
+                                <path   d="M1.18693219e-08,10.5691766 C-1.48366539e-08,7.99678991 1.18693222e-08,4.59790181 1.18693222e-08,4.59790181 C1.18693222e-08,4.59790181 1.58917246,5.78437724e-10 15.711134,0 C29.8330955,-5.78436122e-10 32,4.16069339 32,4.59790181 L32,10.5405377 C32,10.5405377 30.5498009,15.2177783 16.5227645,15.2177785 C2.49572804,15.2177788 2.1498337e-08,11.4966675 1.18693219e-08,10.5691766 Z M0.265241902,22.2508255 C0.265241902,22.2508255 3.24765892e-17,22.3239396 0,22.9593732 L3.3438581e-16,28.3247528 C3.3438581e-16,28.3247528 1.42644742,32.8877413 15.943795,32.8877413 C30.4611426,32.8877413 32,28.3654698 32,28.3654698 C32,28.3654698 32,22.9095461 32,22.9095462 C32,22.3279008 31.6616273,22.2210746 31.6616273,22.2210746 C31.6616273,22.2210746 29.7117464,26.2784187 16.0116409,26.2784187 C2.31153546,26.2784187 0.265241902,22.2508255 0.265241902,22.2508255 Z M0.265241902,13.3619366 C0.265241902,13.3619366 3.24765892e-17,13.4350508 0,14.0704843 L3.3438581e-16,19.4358639 C3.3438581e-16,19.4358639 1.42644742,23.9988524 15.943795,23.9988524 C30.4611426,23.9988524 32,19.4765809 32,19.4765809 C32,19.4765809 32,14.0206573 32,14.0206573 C32,13.4390119 31.6616273,13.3321857 31.6616273,13.3321857 C31.6616273,13.3321857 29.7117464,17.3895298 16.0116409,17.3895298 C2.31153546,17.3895298 0.265241902,13.3619366 0.265241902,13.3619366 Z"/>
+                                </svg>
+                            </span>
+                            <h3 class="List-section-title"></h3>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+        <div   class="PopoverBody PopoverBody--withArrow outerNav_">
+
+            <div   style="width:300px;" class="text-brand " id="databaseListDummyContainer2">
+                <section style=" display:none;"   class="List-section List-section--open" id="databaseListDummy2">
+                    <div   class="p1 border-bottom">
+                        <div   class="List-section-header px1 py1 cursor-pointer full flex align-center">
+                            <span   class="List-section-icon mr2">
+                                <svg   name="database" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon text-default">
+                                <path   d="M1.18693219e-08,10.5691766 C-1.48366539e-08,7.99678991 1.18693222e-08,4.59790181 1.18693222e-08,4.59790181 C1.18693222e-08,4.59790181 1.58917246,5.78437724e-10 15.711134,0 C29.8330955,-5.78436122e-10 32,4.16069339 32,4.59790181 L32,10.5405377 C32,10.5405377 30.5498009,15.2177783 16.5227645,15.2177785 C2.49572804,15.2177788 2.1498337e-08,11.4966675 1.18693219e-08,10.5691766 Z M0.265241902,22.2508255 C0.265241902,22.2508255 3.24765892e-17,22.3239396 0,22.9593732 L3.3438581e-16,28.3247528 C3.3438581e-16,28.3247528 1.42644742,32.8877413 15.943795,32.8877413 C30.4611426,32.8877413 32,28.3654698 32,28.3654698 C32,28.3654698 32,22.9095461 32,22.9095462 C32,22.3279008 31.6616273,22.2210746 31.6616273,22.2210746 C31.6616273,22.2210746 29.7117464,26.2784187 16.0116409,26.2784187 C2.31153546,26.2784187 0.265241902,22.2508255 0.265241902,22.2508255 Z M0.265241902,13.3619366 C0.265241902,13.3619366 3.24765892e-17,13.4350508 0,14.0704843 L3.3438581e-16,19.4358639 C3.3438581e-16,19.4358639 1.42644742,23.9988524 15.943795,23.9988524 C30.4611426,23.9988524 32,19.4765809 32,19.4765809 C32,19.4765809 32,14.0206573 32,14.0206573 C32,13.4390119 31.6616273,13.3321857 31.6616273,13.3321857 C31.6616273,13.3321857 29.7117464,17.3895298 16.0116409,17.3895298 C2.31153546,17.3895298 0.265241902,13.3619366 0.265241902,13.3619366 Z"/>
+                                </svg>
+                            </span>
+                            <h3 class="List-section-title"></h3>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="PopoverBody PopoverBody--withArrow innerNav">
+            <div style="width:300px;" class="text-brand ">
+                <section class="List-section List-section--open">
+                    <div class="p1 border-bottom">
+                        <div class="px1 py1 flex align-center">
+                            <h3 class="text-default">
+                                <span   class="flex align-center">
+                                    <span   class="flex align-center text-slate cursor-pointer backOuter">
+                                        <svg   name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
+                                        <path   d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z"/>
+                                        </svg>
+                                        <span   class="ml1 outerNavPointer"></span>
+                                    </span>
+                                    <span  ></span>
+                                </span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="px1 pt1">
+                        <div style="border:2px solid transparent;border-radius:6px;">
+                            <div class="bordered rounded text-grey-2 flex flex-full align-center">
+                                <span class="px1">
+                                    <svg   name="search" fill="currentcolor" viewBox="0 0 32 32" height="16" width="16" class="Icon Icon-search">
+                                    <path   d="M12 0 A12 12 0 0 0 0 12 A12 12 0 0 0 12 24 A12 12 0 0 0 18.5 22.25 L28 32 L32 28 L22.25 18.5 A12 12 0 0 0 24 12 A12 12 0 0 0 12 0 M12 4 A8 8 0 0 1 12 20 A8 8 0 0 1 12 4  "/>
+                                    </svg>
+                                </span>
+                                <input type="text" value="" placeholder="Find a table" class="p1 h4 input--borderless text-default flex-full">
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                        <li style=" display:none;" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer tableName">
+                                <svg name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                <g fill-rule="evenodd" fill="currentcolor">
+                                <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z" />
+                                </g>
+                                </svg>
+                                <h4 class="List-item-title ml2"></h4>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </span>
+    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="beforeColoumnContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(42px) translateY(217px) translateZ(0px); z-index: 3;">
+        <div   style="display:none;"  class="PopoverBody PopoverBody--withArrow beforeColoumn">
+            <div   style="" class="FilterPopover" >
+                <div   style="width:300px;" class="text-purple" >
+                    <section   class="List-section List-section--open">
+                        <div   class="p1 border-bottom">
+                            <div   class="px1 py1 flex align-center">
+                                <span   class="List-section-icon mr2">
+                                    <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                    <g fill-rule="evenodd" fill="currentcolor">
+                                    <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
+                                    </g>
+                                    </svg>
+                                </span>
+                                <h3 class="text-default">Item</h3>
+                            </div>
+                        </div>
+                        <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                            <li style="display:none;" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                    <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                    </svg>
+                                    <h4 class="List-item-title ml2">BTC selling price</h4>
+                                </a>
+                                <div class="flex align-center"></div>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div class="PopoverBody PopoverBody--withArrow" id="afterColoumn">
+            <div style="" class="FilterPopover">
+                <div style="width: 300px;">
+                    <div class="FilterPopover-header text-grey-3 p1 mt1 flex align-center">
+                        <a class="cursor-pointer flex align-center coloumnBack">
+                            <svg name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
+                            <path d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z" />
+                            </svg>
+                            <h3 class="inline-block">Item</h3>
+                        </a>
+                        <h3 class="mx1">-</h3>
+                        <h3 class="text-default">BTC selling price</h3>
+                    </div>
+                    <div>
+                        <div data-reactid=".f.0.1.0" class="border-bottom p1 buttonContainer buttonContainerString">
+                            <button data-reactid=" = '##addText##'" class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
+                            <button data-reactid=" <> '##addText##'" class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
+                            <button data-reactid="> ''" class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
+                            <button data-reactid="<> ''" class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                            <button data-reactid="LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Contains</button>
+                            <button data-reactid=" NOT LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Does not contain</button>
+                            <button data-reactid=" LIKE '##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Starts with</button>
+                            <button data-reactid=" LIKE '%##addText##'" class="Button Button-normal Button--medium mr1 mb1">Ends with</button>
+                        </div>
+                        <div data-reactid=".g.0.1.0" class="border-bottom p1 buttonContainer buttonContainerInt">
+                            <button data-reactid=" = ##addText## " class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
+                            <button data-reactid=" <> ##addText## " class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
+                            <button data-reactid=" > ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than</button>
+                            <button data-reactid=" < ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than</button>
+                            <button data-reactid=" >= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than or equal to</button>
+                            <button data-reactid=" <= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than or equal to</button>
+                            <button data-reactid=" IS NULL " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
+                            <button data-reactid=" IS NOT NULL " class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                        </div>
+                        <div data-reactid=".g.0.1.0" class="border-bottom p1 buttonContainer buttonContainerCal">
+                            <button data-reactid=" = '##addText##' " class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
+                            <button data-reactid=" <> '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
+                            <button data-reactid=" > '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Greater than</button>
+                            <button data-reactid=" < '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Less than</button>
+                            <button data-reactid=" >= '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Greater than or equal to</button>
+                            <button data-reactid=" <= '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Less than or equal to</button>
+                            <button data-reactid=" IS NULL " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
+                            <button data-reactid=" IS NOT NULL " class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                        </div>
+                        <div>
+                            <ul>
+                                <li class="FilterInput px1 pt1 relative">
+                                    <input type="text" placeholder="Enter desired text" class="input block full border-purple FilterInputText">
+                                </li>
+                            </ul>
+                            <div class="p1"></div>
+                        </div>
+                    </div>
+                    <div class="FilterPopover-footer p1">
+                        <button class="Button Button--purple full addFilterButton" data-ui-tag="add-filter">Add filter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </span>
+    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; position: absolute; transform: translateX(267px) translateY(225px) translateZ(0px); z-index: 3;">
+        <div   class="PopoverBody PopoverBody--withArrow FilterPopover" id="rawDataList">
+            <div   style="width:300px;" class="text-green" >
+                <section   class="List-section List-section--open">
+                    <ul   class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                        <li   data-attr="Raw data" class="List-item flex List-item--selected">
+                            <a   style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4   class="List-item-title ml2">Raw data</h4>
+                            </a>
+                            <div   class="p1"><span   class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                        <li data-attr="Count(*) as Count" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4 class="List-item-title ml2">Count of rows</h4>
+                            </a>
+                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                        <li data-attr="Sum(##addText##)" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4 class="List-item-title ml2">Sum of ...</h4>
+                            </a>
+                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                        <li data-attr="Avg(##addText##)" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4 class="List-item-title ml2">Average of ...</h4>
+                            </a>
+                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                        <li data-attr="Count(Distinct ##addText##)" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4 class="List-item-title ml2">Number of distinct values of ...</h4>
+                            </a>
+                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                        <li data-attr="STDDEV(##addText##)" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4 class="List-item-title ml2">Standard deviation of ...</h4>
+                            </a>
+                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                        <li  data-attr="MIN(##addText##)" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4 class="List-item-title ml2">Minimum of ...</h4>
+                            </a>
+                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                        <li data-attr="MAX(##addText##)" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <h4 class="List-item-title ml2">Maximum of ...</h4>
+                            </a>
+                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+        <div class="PopoverBody PopoverBody--withArrow FilterPopover rawSecondLevel">
+            <div style="width:300px;">
+                <div class="text-grey-3 p1 py2 border-bottom flex align-center">
+                    <a class="cursor-pointer flex align-center">
+                        <svg name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
+                        <path d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z" />
+                        </svg>
+                        <h3 class="inline-block pl1">Number of distinct values of ...</h3>
+                    </a>
+                </div>
+                <div id="ColoumnListContents" style="width:300px;" class="text-green">
+                    <section class="List-section List-section--open">
+                        <div class="p1 border-bottom">
+                            <div class="px1 py1 flex align-center">
+                                <span class="List-section-icon mr2">
+                                    <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                    <g fill-rule="evenodd" fill="currentcolor">
+                                    <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
+                                    </g>
+                                    </svg>
+                                </span>
+                                <h3 class="text-default">window</h3>
+                            </div>
+                        </div>
+                        <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                            <li class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                    <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                    </svg>
+                                    <h4 class="List-item-title ml2">title</h4>
+                                </a>
+                                <div class="flex align-center"></div>
+                            </li>
+                            <li class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                    <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                    </svg>
+                                    <h4 class="List-item-title ml2">name</h4>
+                                </a>
+                                <div class="flex align-center"></div>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </span>
+    <span id="groupByContainer" class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; position: absolute; transform: translateX(498px) translateY(223px) translateZ(0px); z-index: 3;">
+        <div   style="display:none" class="PopoverBody PopoverBody--withArrow FieldPopover groupLists">
+            <div   style="width:300px;" class="text-green">
+                <section   class="List-section List-section--open">
+                    <div   class="p1 border-bottom">
+                        <div   class="px1 py1 flex align-center">
+                            <span   class="List-section-icon mr2">
+                                <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                <g fill-rule="evenodd" fill="currentcolor">
+                                <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
+                                </g>
+                                </svg>
+                            </span>
+                            <h3 class="text-default">window</h3>
+                        </div>
+                    </div>
+                    <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                        <li style="display:none;" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                </svg>
+                                <h4 class="List-item-title ml2">date</h4>
+                            </a>
+                            <div class="flex align-center"></div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </span>
+    <span class="PopoverContainer tether-element tether-target-attached-center tether-element-attached-top tether-target-attached-bottom tether-element-attached-right tether-enabled" id="sortSpan" style="top: 0px; left: 0px; position: absolute; transform: translateX(917px) translateY(234px) translateZ(0px); z-index: 3;">
+        <div   class="PopoverBody PopoverBody--withArrow">
+            <div   class="px3 py1">
+                <div   class="py1 border-bottom">
+                    <div   class="Query-label mb1">Sort by:</div>
+                    <a   id="sortFieldPicker" class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
+                        <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
+                            <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
+                            <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
+                            </svg>
+                        </div>
+                        <span id="beforeSortClick"    class="ml1">Pick a field to sort by</span>
+                        <div id="afterSortClick" style="display:none;" class="flex align-center">
+                            <div class="flex align-center">
+                                <div class="flex align-center">
+                                    <div class="Filter-section Filter-section-sort-field SelectionModule selected">
+                                        <span class="QueryOption">
+                                            <span id="sortTag"  >
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="SelectionModule selected Filter-section Filter-section-sort-direction">
+                                <div class="SelectionModule-trigger flex align-center">
+                                    <a id="sortOrder" class="QueryOption p1 flex align-center" data-attr="ASC">ascending</a>
+                                </div>
+                            </div>
+                            <a id="removeSortTag">
+                                <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="12px" width="12px" class="Icon Icon-close">
+                                <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
+                                </svg>
+                            </a>
+                        </div>
+                    </a>
+                </div>
+                <div id="limit" class="py1">
+                    <div class="Query-label mb1">Limit:</div>
+                    <ul class="Button-group Button-group--blue">
+                        <li class="Button Button--active">None</li>
+                        <li class="Button">1</li>
+                        <li class="Button">10</li>
+                        <li class="Button">25</li>
+                        <li class="Button">100</li>
+                        <li class="Button">1000</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </span>
+    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="sortColoumnContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(805px) translateY(302px) translateZ(0px); z-index: 4;">
+        <div   style="display:none;"  class="PopoverBody PopoverBody--withArrow FieldPopover sortColoumn">
+            <div   style="width:300px;" class="text-brand " >
+                <section    class="List-section List-section--open">
+                    <div   class="p1 border-bottom">
+                        <div   class="px1 py1 flex align-center">
+                            <span   class="List-section-icon mr2">
+                                <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                <g fill-rule="evenodd" fill="currentcolor">
+                                <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
+                                </g>
+                                </svg>
+                            </span>
+                            <h3 class="text-default">window</h3>
+                        </div>
+                    </div>
+                    <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                        <li style="display:none;" class="List-item flex">
+                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                </svg>
+                                <h4 class="List-item-title ml2">time</h4>
+                            </a>
+                            <div class="flex align-center"></div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </span>
+
+    <form action="csvDownload.php" method="post" id="export-form">
+        <input type="hidden" value='' id='hidden-type' name='ExportType'/>
+    </form>
+
+
+    <div style="display:none;" id="iconContainer" >
+        <svg data-reactid=".d.0.0.$0.2.$0.0.0" name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string"><path data-reactid=".d.0.0.$0.2.$0.0.0.0" d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z"/></svg>
+        <svg data-reactid=".d.0.0.$0.2.$2.0.0" name="int" fill="currentcolor" viewBox="0 0 24, 24" height="18" width="18" class="Icon Icon-int"><path data-reactid=".d.0.0.$0.2.$2.0.0.0" d="M15.141,15.512 L14.294,20 L13.051,20 C12.8309989,20 12.6403341,19.9120009 12.479,19.736 C12.3176659,19.5599991 12.237,19.343668 12.237,19.087 C12.237,19.0503332 12.2388333,19.0155002 12.2425,18.9825 C12.2461667,18.9494998 12.2516666,18.9146668 12.259,18.878 L12.908,15.512 L10.653,15.512 L10.015,19.01 C9.94899967,19.3620018 9.79866784,19.6149992 9.564,19.769 C9.32933216,19.9230008 9.06900143,20 8.783,20 L7.584,20 L8.42,15.512 L7.155,15.512 C6.92033216,15.512 6.74066729,15.4551672 6.616,15.3415 C6.49133271,15.2278328 6.429,15.0390013 6.429,14.775 C6.429,14.6723328 6.43999989,14.5550007 6.462,14.423 L6.605,13.554 L8.695,13.554 L9.267,10.518 L6.913,10.518 L7.122,9.385 C7.17333359,9.10633194 7.28699912,8.89916734 7.463,8.7635 C7.63900088,8.62783266 7.92499802,8.56 8.321,8.56 L9.542,8.56 L10.224,5.018 C10.282667,4.7246652 10.4183323,4.49733414 10.631,4.336 C10.8436677,4.17466586 11.0929986,4.094 11.379,4.094 L12.611,4.094 L11.775,8.56 L14.019,8.56 L14.866,4.094 L16.076,4.094 C16.3326679,4.094 16.5416659,4.1673326 16.703,4.314 C16.8643341,4.4606674 16.945,4.64766553 16.945,4.875 C16.945,4.9483337 16.9413334,5.00333315 16.934,5.04 L16.252,8.56 L18.485,8.56 L18.276,9.693 C18.2246664,9.97166806 18.1091676,10.1788327 17.9295,10.3145 C17.7498324,10.4501673 17.4656686,10.518 17.077,10.518 L15.977,10.518 L15.416,13.554 L16.978,13.554 C17.2126678,13.554 17.3904994,13.6108328 17.5115,13.7245 C17.6325006,13.8381672 17.693,14.0306653 17.693,14.302 C17.693,14.4046672 17.6820001,14.5219993 17.66,14.654 L17.528,15.512 L15.141,15.512 Z M10.928,13.554 L13.183,13.554 L13.744,10.518 L11.5,10.518 L10.928,13.554 Z"/></svg>
+        <svg data-reactid=".d.0.0.$0.2.$5.0.0" name="calendar" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-calendar"><path data-reactid=".d.0.0.$0.2.$5.0.0.0" d="M21,2 L21,0 L18,0 L18,2 L6,2 L6,0 L3,0 L3,2 L2.99109042,2 C1.34177063,2 0,3.34314575 0,5 L0,6.99502651 L0,20.009947 C0,22.2157067 1.78640758,24 3.99005301,24 L20.009947,24 C22.2157067,24 24,22.2135924 24,20.009947 L24,6.99502651 L24,5 C24,3.34651712 22.6608432,2 21.0089096,2 L21,2 L21,2 Z M22,8 L22,20.009947 C22,21.1099173 21.1102431,22 20.009947,22 L3.99005301,22 C2.89008272,22 2,21.1102431 2,20.009947 L2,8 L22,8 L22,8 Z M6,12 L10,12 L10,16 L6,16 L6,12 Z"/></svg>
+    </div>
+
+
+    <div data-reactid=".2.$=1$modal.0" class="Modal" style="display:none;" ><div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm"><div data-reactid=".2.$=1$modal.0.0.0" class="Modal-header Form-header flex align-center"><h2 data-reactid=".2.$=1$modal.0.0.0.0" class="flex-full">Save Question</h2><a data-reactid=".2.$=1$modal.0.0.0.1" class="text-grey-3 p1"><svg data-reactid=".2.$=1$modal.0.0.0.1.0" name="close" fill="currentcolor" id="closeSaveDiv" viewBox="0 0 32 32" height="16px" width="16px" class="Icon Icon-close"><path data-reactid=".2.$=1$modal.0.0.0.1.0.0" d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z "/></svg></a></div><div data-reactid=".2.$=1$modal.0.0.1" class="Modal-body"><div data-reactid=".2.$=1$modal.0.0.1.0.0" class="Form-inputs"><div data-reactid=".2.$=1$modal.0.0.1.0.0.1" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.1.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.0">Name</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.1"> </span></label><input data-reactid=".2.$=1$modal.0.0.1.0.0.1.1"  placeholder="What is the name of your card?" name="tagName" id="tagName" class="Form-input full"></div><div data-reactid=".2.$=1$modal.0.0.1.0.0.2" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.2.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.0">Description (optional)</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.1"> </span></label><textarea  data-reactid=".2.$=1$modal.0.0.1.0.0.2.1" placeholder="It's optional but oh, so helpful" name="tagDescription" id="tagDescription"class="Form-input full"></textarea></div></div><div data-reactid=".2.$=1$modal.0.0.1.0.1" class="Form-actions"><input type="hidden" value="" name="queryColTagForm" id="queryColTagForm"></input><button data-reactid=".2.$=1$modal.0.0.1.0.1.0" class="Button Button--primary" id="saveTag">Save</button></div></div></div></div>
+</Html>

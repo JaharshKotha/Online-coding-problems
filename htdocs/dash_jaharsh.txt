@@ -1,5 +1,6 @@
 <?php session_start();
 ob_start();
+								 
 ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
@@ -9,32 +10,6 @@ ob_start();
 $("#tog_name").click(function(){
     $("#tog_section").toggle();
 });
-
-$(".save").click(function(){
-	var coloumns="";
-	var table="";
-	var db="";
-	
-	$(document).find("."+$(this).attr("data-attr")).each(function(){
-		if($(this).find("input").is(":checked"))
-		coloumns+=$(this).text()+",";
-	
-			db= $(this).attr("data-attr");
-								table = $(this).attr("class");
-
-				
-
-	});
-	if(coloumns.length>0)
-coloumns = coloumns.substring(0,coloumns.length - 1);
-		
-	$("#dbn").val(db);
-$("#tn").val(table);
-$("#cols").val(coloumns);
-$("#insert_view_control").submit();
-   
-});
-
 
 
 
@@ -1765,6 +1740,7 @@ div.dc-chart {
 }
 .Header-title {
     width: 455px;
+	bgcolor: green;
 }
 .Header-title-name {
     color: #797979;
@@ -1795,7 +1771,8 @@ div.dc-chart {
     background-color: #6cafed;
 }
 .EditHeader-title {
-    color: #fff;
+    color: green;
+	bgcolor:green;
 }
 .EditHeader-subtitle {
     color: hsla(0, 0%, 100%, 0.5);
@@ -5717,21 +5694,61 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-   <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
-      <div data-reactid=".d.0.0.0">
-         <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
-            <div data-reactid=".d.0.0.0.1.0" class="Entity">
-               <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="dash.php">Hi, <?php echo $_SESSION['uname'];?></a> </h2>
-                  <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Admin page</h4>
+   <header data-reactid=".d.0.0" class="DashboardHeader relative z2" >
+  <div mb-react-component="Navbar" ng-controller="Nav" class="Nav ng-scope">
+    <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3" style=" background-color:green;">
+        <ul class="pl4 pr1 flex align-center">
+		 <li>
+		 <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
+			    <?php
+			 $a=trim("Admin");
+			 $p=trim("Privileged");
+			 $b=trim($_SESSION['utype']);
+			 if($a == $b)
+				{
+					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,'.$_SESSION['uname'].'(Admin)'.'</h2>';	
+				}
+			 else if($p == $b)
+			 {
+					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,'.$_SESSION['uname'].'(Privileged)'.'</h2>';
+			 }
+			 else 
+			 {
+					echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,'.$_SESSION['uname'].'</h2>';
+			 }
+			 
+			 
+			 ?>
+                   
+                  <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3" style="color:white;">Your Home page</h4>
+				  
                </div>
-               <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
-            </div>
-            <div data-reactid=".d.0.0.0.1.1" class="flex align-center flex-align-right">
-               <span data-reactid=".d.0.0.0.1.1.$0" class="Header-buttonSection flex align-center">
-                  
-				  <div data-reactid=".0.0.5.0" class="inline-block text-white" >
-   <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
+			   </li>
+            <li class="pl3">
+                <div>
+                    <div class="NavDropdown inline-block cursor-pointer">
+                        <span>
+                        <a   class="NavDropdown-button NavItem text-white text-bold cursor-pointer px2 flex align-center transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Dashboard Dropdown;Toggle">
+                           <span   class="NavDropdown-button-layer">
+                              <span  >Dashboards</span>
+                        <svg name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8" width="8" class="ml1">
+                            <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z " />
+                        </svg>
+                        </span>
+                        </a>
+                        </span>
+                    </div>
+                </div>
+            </li>
+            <li class="pl1"><a href="/card/" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Questions">Questions</a>
+            </li>
+            <li class="pl1"><a href="/pulse/" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Pulses">Pulses</a>
+            </li>
+            <li class="pl3"><a href="/q" class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show">Question</span></a>
+            </li>
+            <li class="flex-align-right transition-background">
+			 <div data-reactid=".0.0.5.0" class="inline-block text-white" >
+                <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
       <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
          <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
             <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
@@ -5745,137 +5762,308 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
       <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
          <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
             <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
+             <?php
+			 $a=trim("Admin");
+			 $b=trim($_SESSION['utype']);
+			 
+			 if($a == $b)
+				{
+					echo '<li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>';
+				}
+			 else 
+			 {
+				 
+			 }				 
+			?>
+			<li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
             <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
-         </ul>
+			
+		 </ul>
       </div>
    </div>
+   </div>
+            </li>
+        </ul>
+    </nav>
 </div>
+
+     
+   </header>
+   <h3 style="padding-left:5em"><br> Some of the most frequent queries </h3><br>
+   <div data-reactid=".d.0.1" class="wrapper">
+      <div data-reactid=".d.0.1.0" class="flex layout-centered">
+         <div data-reactid=".d.0.1.0.0" style="position: relative; width: 1441px; height: 472px; margin-left: -3px; margin-right: -3px;" class="DashboardGrid">
+            <div data-reactid=".d.0.1.0.0.0:$1" height="230" width="474.33333333333337" style="height: 230px; top: 3px; left: 3px; position: absolute; width: 474.333px;" class="DashCard react-resizable">
+               <div data-reactid=".d.0.1.0.0.0:$1.0" class="Card bordered rounded flex flex-column " style="opacity: 1;">
+                  <div data-reactid=".d.0.1.0.0.0:$1.0.0" class="flex-full flex flex-column">
                   
+					 	
+                     <div data-reactid=".d.0.1.0.0.0:$1.0.0.1" class="flex-full relative flex flex-column">
+					 	
+                        <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0" class="flex-full relative border-bottom">
+				 
+                           <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+						   
+                              <?php
+							
+							
+							 $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
+							  $con1 = pg_connect("host=localhost port=5421 dbname=dummy_db user=postgres password=plz");
+							  $u ="'".$_SESSION['uname']."'";
+								$s = "select admin_uname from login where uname=$u;";
+								$col = pg_query($con,$s);
+								$row_1 = pg_fetch_array($col);
+								$ad_name=trim($row_1[0]);
+								$a_name="'".$ad_name."'";
+								
+								
+								
+								
+								$s1= "select * from frequent_query where admin_name=$a_name limit 4 ;";	
+								$div_count ="select count(*) from frequent_query where admin_name=$a_name limit 4 ;";
+								$col1 = pg_query($con,$div_count);
+								$row_2 = pg_fetch_array($col1);
+								$divs = $row_2[0];
+								
+								if($divs >0)
+								{
+								$col1 = pg_query($con,$s1);
+								$row_2 = pg_fetch_array($col1);
+								
+								$cols=explode(",",$row_2[3]);
+								$tag_name=$row_2[0];
+								$query=$row_2[2];
+								echo "   <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0\" class=\"p1 flex-no-shrink\">
+                        <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0\" class=\"NNZY_V33LPAFqCAqUSvzQ Card-title mx1 flex flex-no-shrink flex-row align-center\">
+                           <a data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0\" style=\"overflow-x:hidden;flex:0 1 auto;\" class=\"LegendItem no-decoration flex align-center fullscreen-normal-text fullscreen-night-text mr1\" href=\"/card/3\">
+                              <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1\" style=\"overflow:hidden;white-space:nowrap;text-overflow:ellipsis;\" class=\"\"><span data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1.0\">$tag_name </span></div>
+                           </a>
+                        </div>
+                     </div>";
+								
+								echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
+								echo '<thead><tr>';
+								
+								for($j=0;$j<sizeof($cols);$j++)
+								{
+									echo '<th class="MB-DataTable-header cellData text-brand-hover">'.$cols[$j].'</th>';
+									
+								}
+								
+								echo '</tr></thead><tbody><tr>';
+								$r = pg_query($con1,$query);
+							
+								
+								while($row = pg_fetch_array($r))
+								{
+									$i=0;
+									for($i=0;$i<$j;$i++)
+									{
+										echo '<td class="px1 border-bottom" style="white-space:nowrap;">'.$row[$i].'</td>';
+									}
+									echo '</tr>';
+								}
+								
+								echo '</tbody></table>';
+								$divs =$divs - 1;
+								}
+								
+
+							  ?>
+                           </div>
+                        </div>
+                       
+                     </div>
+                  </div>
+               </div>
+               <span data-reactid=".d.0.1.0.0.0:$1.1" style="touch-action:none;" class="react-resizable-handle"></span>
+            </div>
+            <div data-reactid=".d.0.1.0.0.0:$2" height="230" width="474.33333333333337" style="height: 230px; top: 3px; left: 483.333px; position: absolute; width: 474.333px;" class="DashCard react-resizable">
+               <div data-reactid=".d.0.1.0.0.0:$2.0" class="Card bordered rounded flex flex-column " style="opacity: 1;">
+                  <div data-reactid=".d.0.1.0.0.0:$2.0.0" class="flex-full flex flex-column">
                   
-                  <span data-reactid=".d.0.0.0.1.1.$0.$3" class="Header-button">
-                     <span data-reactid=".d.0.0.0.1.1.$0.$3.0" data-metabase-event="Dashboard;Fullscreen Mode;true">
+                     <div data-reactid=".d.0.1.0.0.0:$2.0.0.1" class="flex-full relative flex flex-column">
+                        <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0" class="flex-full relative border-bottom">
+                           <div data-reactid=".d.0.1.0.0.0:$2.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+                              
+							  
+							  <?php
+							  
+							  if($divs >0)
+							  {$row_2 = pg_fetch_array($col1);
+								
+								$cols=explode(",",$row_2[3]);
+								$tag_name=$row_2[0];
+								$query=$row_2[2];
+								echo "   <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0\" class=\"p1 flex-no-shrink\">
+                        <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0\" class=\"NNZY_V33LPAFqCAqUSvzQ Card-title mx1 flex flex-no-shrink flex-row align-center\">
+                           <a data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0\" style=\"overflow-x:hidden;flex:0 1 auto;\" class=\"LegendItem no-decoration flex align-center fullscreen-normal-text fullscreen-night-text mr1\" href=\"/card/3\">
+                              <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1\" style=\"overflow:hidden;white-space:nowrap;text-overflow:ellipsis;\" class=\"\"><span data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1.0\">$tag_name </span></div>
+                           </a>
+                        </div>
+                     </div>";
+								
+								echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
+								echo '<thead><tr>';
+								
+								for($j=0;$j<sizeof($cols);$j++)
+								{
+									echo '<th class="MB-DataTable-header cellData text-brand-hover">'.$cols[$j].'</th>';
+									
+								}
+								
+								echo '</tr></thead><tbody><tr>';
+								$r = pg_query($con1,$query);
+							
+								
+								while($row = pg_fetch_array($r))
+								{
+									$i=0;
+									for($i=0;$i<$j;$i++)
+									{
+										echo '<td class="px1 border-bottom" style="white-space:nowrap;">'.$row[$i].'</td>';
+									}
+									echo '</tr>';
+								}
+								
+								echo '</tbody></table>';
+								$divs =$divs - 1;
+							  }
+
+							  ?>
+                           </div>
+                        </div>
                         
-                        <span data-reactid=".d.0.0.0.1.1.$0.$3.0.1" class="hide"></span>
-                     </span>
-                  </span>
-               </span>
+                     </div>
+                  </div>
+               </div>
+               <span data-reactid=".d.0.1.0.0.0:$2.1" style="touch-action:none;" class="react-resizable-handle"></span>
+            </div>
+            <div data-reactid=".d.0.1.0.0.0:$4" height="466" width="474.33333333333337" style="height: 466px; top: 3px; left: 963.667px; position: absolute; width: 474.333px;" class="DashCard react-resizable">
+               <div data-reactid=".d.0.1.0.0.0:$4.0" class="Card bordered rounded flex flex-column " style="opacity: 1;">
+                  <div data-reactid=".d.0.1.0.0.0:$4.0.0" class="flex-full flex flex-column">
+                  
+                     <div data-reactid=".d.0.1.0.0.0:$4.0.0.1" class="flex-full relative flex flex-column">
+                        <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0" class="flex-full relative border-bottom">
+                           <div data-reactid=".d.0.1.0.0.0:$4.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+                              
+							   <?php
+							if($divs >0)
+							  {$row_2 = pg_fetch_array($col1);
+								
+								$cols=explode(",",$row_2[3]);
+								$tag_name=$row_2[0];
+								$query=$row_2[2];
+								echo "   <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0\" class=\"p1 flex-no-shrink\">
+                        <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0\" class=\"NNZY_V33LPAFqCAqUSvzQ Card-title mx1 flex flex-no-shrink flex-row align-center\">
+                           <a data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0\" style=\"overflow-x:hidden;flex:0 1 auto;\" class=\"LegendItem no-decoration flex align-center fullscreen-normal-text fullscreen-night-text mr1\" href=\"/card/3\">
+                              <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1\" style=\"overflow:hidden;white-space:nowrap;text-overflow:ellipsis;\" class=\"\"><span data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1.0\">$tag_name </span></div>
+                           </a>
+                        </div>
+                     </div>";
+								
+								echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
+								echo '<thead><tr>';
+								
+								for($j=0;$j<sizeof($cols);$j++)
+								{
+									echo '<th class="MB-DataTable-header cellData text-brand-hover">'.$cols[$j].'</th>';
+									
+								}
+								
+								echo '</tr></thead><tbody><tr>';
+								$r = pg_query($con1,$query);
+							
+								
+								while($row = pg_fetch_array($r))
+								{
+									$i=0;
+									for($i=0;$i<$j;$i++)
+									{
+										echo '<td class="px1 border-bottom" style="white-space:nowrap;">'.$row[$i].'</td>';
+									}
+									echo '</tr>';
+								}
+								
+								echo '</tbody></table>';
+								$divs =$divs - 1;
+							  }
+
+							  ?>
+							  
+							  
+							  
+							  
+							  
+                           </div>
+                        </div>
+                        
+                     </div>
+                  </div>
+               </div>
+               <span data-reactid=".d.0.1.0.0.0:$4.1" style="touch-action:none;" class="react-resizable-handle"></span>
+            </div>
+            <div data-reactid=".d.0.1.0.0.0:$3" height="230" width="954.6666666666667" style="height: 230px; top: 239px; left: 3px; position: absolute; width: 954.667px;" class="DashCard react-resizable">
+               <div data-reactid=".d.0.1.0.0.0:$3.0" class="Card bordered rounded flex flex-column " style="opacity: 1;">
+                  <div data-reactid=".d.0.1.0.0.0:$3.0.0" class="flex-full flex flex-column">
+                  
+                     <div data-reactid=".d.0.1.0.0.0:$3.0.0.1" class="flex-full relative flex flex-column">
+                        <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0" class="flex-full relative border-bottom">
+                           <div data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0" style="overflow-y:hidden;" class="absolute top bottom left right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+                              <?php
+						if($divs >0)
+							  {$row_2 = pg_fetch_array($col1);
+								
+								$cols=explode(",",$row_2[3]);
+								$tag_name=$row_2[0];
+								$query=$row_2[2];
+								echo "   <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0\" class=\"p1 flex-no-shrink\">
+                        <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0\" class=\"NNZY_V33LPAFqCAqUSvzQ Card-title mx1 flex flex-no-shrink flex-row align-center\">
+                           <a data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0\" style=\"overflow-x:hidden;flex:0 1 auto;\" class=\"LegendItem no-decoration flex align-center fullscreen-normal-text fullscreen-night-text mr1\" href=\"/card/3\">
+                              <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1\" style=\"overflow:hidden;white-space:nowrap;text-overflow:ellipsis;\" class=\"\"><span data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1.0\">$tag_name </span></div>
+                           </a>
+                        </div>
+                     </div>";
+								
+								echo ' <table data-reactid=".d.0.1.0.0.0:$3.0.0.1.0.0.0" class="l96_CLxo_PqCKgtKdL8oT oswsGtBEhm6HA5DPrrAWV fullscreen-normal-text fullscreen-night-text">';
+								echo '<thead><tr>';
+								
+								for($j=0;$j<sizeof($cols);$j++)
+								{
+									echo '<th class="MB-DataTable-header cellData text-brand-hover">'.$cols[$j].'</th>';
+									
+								}
+								
+								echo '</tr></thead><tbody><tr>';
+								$r = pg_query($con1,$query);
+							
+								
+								while($row = pg_fetch_array($r))
+								{
+									$i=0;
+									for($i=0;$i<$j;$i++)
+									{
+										echo '<td class="px1 border-bottom" style="white-space:nowrap;">'.$row[$i].'</td>';
+									}
+									echo '</tr>';
+								}
+								
+								echo '</tbody></table>';
+								$divs =$divs - 1;
+							  }
+								
+
+							  ?>
+                           </div>
+                        </div>
+                        
+                     </div>
+                  </div>
+               </div>
+               <span data-reactid=".d.0.1.0.0.0:$3.1" style="touch-action:none;" class="react-resizable-handle"></span>
             </div>
          </div>
+         <span data-reactid=".d.0.1.0.1"></span><span data-reactid=".d.0.1.0.2"></span>
       </div>
-   </header>
-  
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-<script>
-$('.message a').click(function(){
-   $('form').animate({height: "toggle", opacity: "toggle"}, "slow");
-});
-</script>
-<div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1">
-<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink">
-   <ul data-reactid=".2.1.0.0" class="AdminList-items pt1">
-     <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration" href="admin.php">General</a></li>
-     <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="admin_add_a_new_member.php">Create Your Team</a></li>
-      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration " href="admin_create_new_connection.php">Create new DB connection</a></li>
-	   <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration selected" href="view_control.php">View Control</a></li>
-   </ul>
-</div>
-<div class="px2" data-reactid=".2.1.1" style="padding-left:25em">
-<Html>
-<head>
-<link rel="stylesheet" type="text/css" href="master.css">
-</head>
-<style>
-table,td {
-    border: 1px solid black;
-    padding: 5px;
-}
-table {
-    border-spacing: 15px;
-}
-</style>
-<div class="login-page">
-  <?php
-
-$con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-
-
-$u ="'".$_SESSION['uname']."'";
-$s = "select db_name from creat_connections where admin_uname=$u;";
-$r = pg_query($con,$s);
-echo 'Databases on the server<br>';
-$array = array();
-while($row = pg_fetch_array($r))
-{
-	if(trim($row[0])!= trim("postgres"))
-	{
-	$array[]=$row[0];
-	}
-	
-}
-
-$con2 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-$z= "select * from table_view_control where admin_name=$u;";
-$zr = $r = pg_query($con2,$z);
-$tc =array();
-while($zo=pg_fetch_array($r))
-{
-	
-	$tc[$zo[1]]=array();
-	$tc[$zo[1]][]=$zo[2];
-	
-}
-
-
-for($i=0;$i<sizeof($array);$i++)
-{
-	
-$con1 = pg_connect("host=localhost port=5421 dbname=$array[$i] user=postgres password=plz");
-$flg=0;
-
-$s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN('pg_catalog', 'information_schema');";
-$r = pg_query($con1,$s);
-while($ro = pg_fetch_array($r))
-{
-$all_check_col=explode(",",$tc[$ro[0]][0]);
-echo '<br><h3>'.$ro[0].':</h3><br><br>';
-$t_name="'".$ro[0]."'";
-$t = "SELECT column_name FROM information_schema.columns WHERE table_name = $t_name;";
-$t_r = pg_query($con1,$t);
-echo '<table><tr>';
-while($t_row = pg_fetch_array($t_r))
-{
-	for($j=0;$j<sizeof($all_check_col);$j++)
-	{
-	if($all_check_col[$j]==$t_row[0])
-	{$flg=1;}
-	}
-	if($flg==1)
-	{
-	echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'" checked="checked"></td>';
-	}
-	else
-	{
-		echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'"></td>';
-	}
-	$flg=0;
-}
-echo '<input type="submit" value="save" placeholder="save" class="save" data-attr="'.$ro[0].'"></tr></table><br>';
-
-}
-}
-
-?>
-</div>
-<form action="insert_view_control.php" method="post" id="insert_view_control">
-  <input type="hidden" value='' id="dbn" name="dbn"/>
- <input type="hidden" value='' id="tn" name="tn"/>
- <input type="hidden" value='' id="cols" name="cols"/>
-
- </form>
-</Html>
-</div>
-</div>
+   </div>
 </div>

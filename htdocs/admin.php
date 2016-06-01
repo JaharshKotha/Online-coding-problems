@@ -5728,7 +5728,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
          <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
             <div data-reactid=".d.0.0.0.1.0" class="Entity">
                <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="/dash.php">Hi, <?php echo $_SESSION['uname'];?> </a></h2>
+                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="dash.php">Hi, <?php echo $_SESSION['uname'];?> </a></h2>
                   <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Admin page</h4>
                </div>
                <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
@@ -5750,10 +5750,10 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
       </a>
       <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
          <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-            <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="/admin/" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="/logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
+            <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="#" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
+            <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
+            <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="#" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
+            <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
          </ul>
       </div>
    </div>
@@ -5778,9 +5778,9 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 <div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink" style="height:100%;">
    <ul data-reactid=".2.1.0.0" class="AdminList-items pt1">
       <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration selected" href="#">General</a></li>
-      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="/admin_add_a_new_member.php">Add a new member</a></li>
-      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="/admin_create_new_connection.php">Create new DB connection</a></li>
-	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="/view_control.php">View Control</a></li>
+      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="admin_add_a_new_member.php">Add a new member</a></li>
+      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="admin_create_new_connection.php">Create new DB connection</a></li>
+	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="view_control.php">View Control</a></li>
    </ul>
 </div>
 <div class="px2" data-reactid=".2.1.1" style="padding-left:25em ;  background-color:#66AA99">
@@ -5819,7 +5819,7 @@ $u ="'".$_SESSION['uname']."'";
 $s = "select *from LOGIN where admin_uname=$u";
 $r = pg_query($con,$s);
 echo '<table>';
-echo '<th>id</th><th>Member\'s First Name </th>';
+echo '<th>unique id</th><th>Member\'s First Name </th>';
 echo '<th> Member\'s privilege  </th><th> </th><tr>';
 while($row = pg_fetch_array($r))
 {

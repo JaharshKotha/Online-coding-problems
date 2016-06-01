@@ -29,7 +29,7 @@ catch (Exception $e)
 	echo 'Error: ',  $e->getMessage(), "\n";
 		
 }
-header("Location:/admin.php");
+header("Location:admin.php");
 
 
 

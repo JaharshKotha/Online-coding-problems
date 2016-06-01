@@ -8,6 +8,6 @@ $m = "'".$mem_id."'";
 
 $s = "delete from login where id=$m;";
 $r = pg_query($con,$s);
-header("Location:/admin.php");
+header("Location:admin.php");
 
 ?>

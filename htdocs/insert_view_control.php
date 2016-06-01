@@ -26,7 +26,7 @@ catch (Exception $e)
 	echo 'Error: ',  $e->getMessage(), "\n";
 		
 }
-header("Location:/view_control.php");
+header("Location:view_control.php");
 
 
 

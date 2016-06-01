@@ -25,18 +25,18 @@ try
 			echo strcmp($passwd,$row[2]);
 
 			
-			header("Location:/dash.php");
+			header("Location:dash.php");
 			
 		}
 		else
 		{
-			header("Location:/login.php");
+			header("Location:login.php");
 			$_SESSION['login_fail']=1;
 		}
 	}
 	else
 	{
-		header("Location:/login.php");
+		header("Location:login.php");
 		$_SESSION['login_fail']=1;
 		
 	}

@@ -8,6 +8,6 @@ $c = "'".$con_id."'";
 
 $s = "delete from creat_connections where con_id=$c;";
 $r = pg_query($con,$s);
-header("Location:/admin.php");
+header("Location:admin.php");
 
 ?>
