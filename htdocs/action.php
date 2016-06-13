@@ -13,6 +13,7 @@ try
 	$s = "select *from LOGIN where uname=$u and password=$p";
 	if((isset($_POST["uname"])&& isset($_POST["passwd"])) && (($_POST["uname"] !=null)&&($_POST["passwd"] !=null)))
 		{
+			
 		$r = pg_query($con,$s);
 		$row = pg_fetch_array($r);
 		$p=trim($passwd);
@@ -21,8 +22,11 @@ try
 		{
 			$_SESSION['uname']=$row[1];
 			$_SESSION['utype']=$row[3];
+			$_SESSION['login_ok']=1;
+			$_SESSION['timestamp']=time();
 			
 			echo strcmp($passwd,$row[2]);
+			
 
 			
 			header("Location:dash.php");
@@ -30,6 +34,7 @@ try
 		}
 		else
 		{
+
 			header("Location:login.php");
 			$_SESSION['login_fail']=1;
 		}

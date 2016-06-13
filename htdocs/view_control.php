@@ -1,7 +1,19 @@
-<?php session_start();
+<?php
+session_set_cookie_params(0);
+session_start();
 ob_start();
+if($_SESSION['login_ok']==0)
+{
+	header("Location:login.php");;
+}
 ?>
 
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><script src="view_control.php_files/jquery.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <script>
  $(document).ready(function() {
@@ -1248,8 +1260,8 @@ div.dc-chart {
     background-color: #f9fbfc;
 }
 .DashboardHeader {
-    background-color: #fff;
-    border-bottom: 1px solid #f0f0f0;
+    background-color: #21618C;
+    border-bottom: 1px solid black;
 }
 .Dash-wrapper {
     width: 100%;
@@ -4816,7 +4828,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
     z-index: 2;
 }
 .NavDropdown .NavDropdown-content-layer, .NavDropdown.open .NavDropdown-button {
-    background-color: green;
+    background-color: #74AFAD;
 }
 .NavDropdown .NavDropdown-content-layer {
     border-radius: 4px;
@@ -5716,16 +5728,18 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 </style>
 
 
-<div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-   <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
-      <div data-reactid=".d.0.0.0">
-         <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
-            <div data-reactid=".d.0.0.0.1.0" class="Entity">
-               <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="dash.php">Hi, <?php echo $_SESSION['uname'];?></a> </h2>
-                  <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Admin page</h4>
-               </div>
-               <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
+<body style="background-color:#EAECEE">
+	<div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
+		<header data-reactid=".d.0.0" class="DashboardHeader relative z2">
+			<div data-reactid=".d.0.0.0" style = "background-color:#21618C ;  color:white">
+				<div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
+					<div data-reactid=".d.0.0.0.1.0" class="Entity">
+						<div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
+						<h4 data-reactid=".d.0.0.0.1.0.0.0"><a href="dash.php"><b><u> Hi, <?php echo $_SESSION['uname'];?> </u></b></a> </h4>
+						<br>
+						<h4 data-reactid=".d.0.0.0.1.0.0.1"> Admin Page </h4>
+					</div>
+				<div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
             </div>
             <div data-reactid=".d.0.0.0.1.1" class="flex align-center flex-align-right">
                <span data-reactid=".d.0.0.0.1.1.$0" class="Header-buttonSection flex align-center">
@@ -5774,34 +5788,25 @@ $('.message a').click(function(){
 });
 </script>
 <div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1">
-<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink">
+<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink" style="height:35%; background-color:transparent; font-size:1.5rem;
+ color:black">
    <ul data-reactid=".2.1.0.0" class="AdminList-items pt1">
-     <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration" href="admin.php">General</a></li>
-     <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="admin_add_a_new_member.php">Create Your Team</a></li>
-      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration " href="admin_create_new_connection.php">Create new DB connection</a></li>
-	   <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration selected" href="view_control.php">View Control</a></li>
+      <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration " href="admin.php">General</a></li>
+      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="admin_add_a_new_member.php">Add New Member</a></li>
+      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="admin_create_new_connection.php">Create New DB connection</a></li>
+	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration selected" href="view_control.php">View Control</a></li>
    </ul>
 </div>
-<div class="px2" data-reactid=".2.1.1" style="padding-left:25em">
-<Html>
-<head>
-<link rel="stylesheet" type="text/css" href="master.css">
-</head>
-<style>
-table,td {
-    border: 1px solid black;
-    padding: 5px;
-}
-table {
-    border-spacing: 15px;
-}
-</style>
+<div class="container" data-reactid=".2.1.1" style="padding-left:20em ; padding-right:10em ; background-color:white;">
+
 <div class="login-page">
-  <?php
+<div class="form" style="color:black">
+  <br>
+  <h3><b><u> Databases on the server </u></b></h3><br><br>
+
+<?php
 
 $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-
-
 $u ="'".$_SESSION['uname']."'";
 $s = "select db_name from creat_connections where admin_uname=$u;";
 $r = pg_query($con,$s);
@@ -5835,7 +5840,7 @@ for($i=0;$i<sizeof($array);$i++)
 $con1 = pg_connect("host=localhost port=5421 dbname=$array[$i] user=postgres password=plz");
 $flg=0;
 
-$s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN('pg_catalog', 'information_schema');";
+$s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' or table_type = 'VIEW' AND table_schema NOT IN('pg_catalog', 'information_schema');";
 $r = pg_query($con1,$s);
 while($ro = pg_fetch_array($r))
 {
@@ -5875,7 +5880,6 @@ echo '<input type="submit" value="save" placeholder="save" class="save" data-att
  <input type="hidden" value='' id="cols" name="cols"/>
 
  </form>
-</Html>
 </div>
 </div>
 </div>

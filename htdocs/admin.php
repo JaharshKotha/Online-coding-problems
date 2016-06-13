@@ -1,7 +1,18 @@
-<?php session_start();
+<?php
+session_set_cookie_params(0);
+session_start();
 ob_start();
+ if (!isset($_SESSION['admin_uname']))
+   {
+      header("location: login.php");
+   }
 ?>
-
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><script src="admin.php_files/jquery.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <script>
  $(document).ready(function() {
@@ -282,7 +293,7 @@ div.dc-chart {
     stroke: none;
 }
 .dc-chart rect.stack2 {
-    fill: green;
+    fill: #74AFAD;
     stroke: none;
 }
 .dc-chart rect.deselected {
@@ -1254,8 +1265,8 @@ div.dc-chart {
     background-color: #f9fbfc;
 }
 .DashboardHeader {
-    background-color: #fff;
-    border-bottom: 1px solid #f0f0f0;
+    background-color: #21618C;
+    border-bottom: 1px solid black;
 }
 .Dash-wrapper {
     width: 100%;
@@ -4822,7 +4833,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
     z-index: 2;
 }
 .NavDropdown .NavDropdown-content-layer, .NavDropdown.open .NavDropdown-button {
-    background-color: green;
+    background-color: #74AFAD;
 }
 .NavDropdown .NavDropdown-content-layer {
     border-radius: 4px;
@@ -5720,16 +5731,17 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 
 </style>
-<body style="background-color:#66AA99">
+<body style="background-color:#EAECEE">
 
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
    <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
-      <div data-reactid=".d.0.0.0">
+      <div data-reactid=".d.0.0.0" style = "background-color:#21618C ; color:white">
          <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
             <div data-reactid=".d.0.0.0.1.0" class="Entity">
                <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="dash.php">Hi, <?php echo $_SESSION['uname'];?> </a></h2>
-                  <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Admin page</h4>
+                  <h4 data-reactid=".d.0.0.0.1.0.0.0"> <a href="dash.php"><b><u> Hi, <?php echo $_SESSION['uname'];?> </u></b></a></h4>
+				  <br>
+                  <h4 data-reactid=".d.0.0.0.1.0.0.1"> Admin Page</h4>
                </div>
                <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
             </div>
@@ -5750,7 +5762,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
       </a>
       <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
          <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-            <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="#" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
+           
             <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
             <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="#" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
             <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
@@ -5775,25 +5787,22 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 
 <div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1" >
-<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink" style="height:100%;">
+<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink" style="height:35%; background-color:transparent; font-size:1.5rem;
+ color:black">
    <ul data-reactid=".2.1.0.0" class="AdminList-items pt1">
       <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration selected" href="#">General</a></li>
-      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="admin_add_a_new_member.php">Add a new member</a></li>
-      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="admin_create_new_connection.php">Create new DB connection</a></li>
+      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration " href="admin_add_a_new_member.php">Add New Member</a></li>
+      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="admin_create_new_connection.php">Create New DB connection</a></li>
 	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="view_control.php">View Control</a></li>
    </ul>
 </div>
-<div class="px2" data-reactid=".2.1.1" style="padding-left:25em ;  background-color:#66AA99">
-<h4 style="color:black;"> Your existing connections </h4><br>
-<style>
-table,td {
-    border: 1px solid black;
-    padding: 5px;
-}
-table {
-    border-spacing: 15px;
-}
-</style>
+<div class="container" data-reactid=".2.1.1" style="padding-left:20em ; padding-right:10em ; background-color:white;">
+<br>
+<br>
+<h2 style="color:black;"><u> Existing Connections </u></h2><br>
+<table class="table table-bordered" style="border-width:2px;border-style:solid; background-color: #f6f7f8; border-color: #d3d3d3;">
+<thead style="font-size:1.50rem; color:black" ><b><tr><th>CON_ID</th><th>HOST</th><th>PORT</th><th>DATABASE NAME</th><th>  </th> </thead>
+<tbody style="font-size:1.25rem; color:black">
 <?php
 
 $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
@@ -5801,34 +5810,34 @@ $con = pg_connect("host=localhost port=5421 dbname=postgres user=postgres passwo
 $u ="'".$_SESSION['uname']."'";
 $s = "select *from creat_connections where admin_uname=$u";
 $r = pg_query($con,$s);
-echo '<table>';
-echo '<tr><th>con_id</th><th>Host</th>';
-echo '<th>Port</th>';
-echo '<th>Database name</th>';
-echo '<th>  </th><tr>';
 while($row = pg_fetch_array($r))
 {
-	echo '<tr><td style="all:unset;">'.$row[0].'</td><td>'.$row[2].'</td> <td>'.$row[3].'</td><td>'.$row[6].'</td><td><input type="submit" class ="removeButton" value="remove"></td></tr>';
+	echo '<tr><td>'.$row[0].'</td><td>'.$row[2].'</td> <td>'.$row[3].'</td><td>'.$row[6].'</td><td><input type="submit" class ="removeButton" value="remove"></td></tr>';
 }
+echo '</tbody>';
 echo '</table>';
 ?>
 
-<br><br><br><h4 style="color:black;"> Your existing team</h4><br>
+
+<br><br><br>
+<h2 style="color:black;"><u> Existing Team</u></h2><br>
+<table class="table table-bordered" style="border-width:2px;border-style:solid; background-color: #f6f7f8; border-color: #d3d3d3;">
+<thead style="font-size:1.50rem; color:black"><tr><th><b> UNIQUE_ID </b></th><th><b> MEMBER'S FIRST NAME </b></th><th><b> MEMBER'S PRIVILEGE </b></th><th> </th></thead>
+<tbody style="font-size:1.25rem; color:black">
 <?php
 $u ="'".$_SESSION['uname']."'";
 $s = "select *from LOGIN where admin_uname=$u";
 $r = pg_query($con,$s);
-echo '<table>';
-echo '<th>unique id</th><th>Member\'s First Name </th>';
-echo '<th> Member\'s privilege  </th><th> </th><tr>';
+
 while($row = pg_fetch_array($r))
 {
-	echo '<tr><td style="all:unset;">'.$row[0].'</td><td>'.$row[5].'</td> <td >'.$row[3].'</td>';
+	echo '<tr><td>'.$row[0].'</td><td>'.$row[5].'</td> <td >'.$row[3].'</td>';
 	if(trim($row[3])!=trim("Admin"))
 	{
 		echo '<td><input type="submit" class ="removeMember" value="remove"></td></tr>';
 	}
 }
+echo '</tbody>';
 echo '</table>';
 ?>
 

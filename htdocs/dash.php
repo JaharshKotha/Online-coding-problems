@@ -1,6 +1,23 @@
 <?php
+session_set_cookie_params(0);
 session_start();
 ob_start();
+if($_SESSION['login_ok']==0)
+{
+	header("Location:login.php");;
+}
+
+ if(time() - $_SESSION['timestamp'] > 1000000) { //subtract new timestamp from the old one
+    echo"<script>alert('15 Minutes over!');</script>";
+    unset($_SESSION['username'], $_SESSION['password'], $_SESSION['timestamp']);
+    $_SESSION['logged_in'] = false;
+    header("Location:logout.php"); //redirect to index.php
+    exit;
+} else {
+    $_SESSION['timestamp'] = time(); //set new timestamp
+}
+
+
 ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
@@ -251,7 +268,7 @@ ob_start();
         stroke: none;
     }
     .dc-chart rect.stack2 {
-        fill: green;
+        fill: #74AFAD;
         stroke: none;
     }
     .dc-chart rect.deselected {
@@ -1740,7 +1757,7 @@ ob_start();
     }
     .Header-title {
         width: 455px;
-        bgcolor: green;
+        bgcolor: #74AFAD;
     }
     .Header-title-name {
         color: #797979;
@@ -1771,8 +1788,8 @@ ob_start();
         background-color: #6cafed;
     }
     .EditHeader-title {
-        color: green;
-        bgcolor:green;
+        color: #74AFAD;
+        bgcolor:#74AFAD;
     }
     .EditHeader-subtitle {
         color: hsla(0, 0%, 100%, 0.5);
@@ -4793,7 +4810,7 @@ ob_start();
         z-index: 2;
     }
     .NavDropdown .NavDropdown-content-layer, .NavDropdown.open .NavDropdown-button {
-        background-color: green;
+        background-color: #74AFAD;
     }
     .NavDropdown .NavDropdown-content-layer {
         border-radius: 4px;
@@ -5696,7 +5713,7 @@ ob_start();
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
     <header data-reactid=".d.0.0" class="DashboardHeader relative z2" >
         <div mb-react-component="Navbar" ng-controller="Nav" class="Nav ng-scope">
-            <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3" style=" background-color:green;">
+            <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3" style=" background-color:#74AFAD;">
                 <ul class="pl4 pr1 flex align-center">
                     <li>
                         <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
@@ -5719,9 +5736,8 @@ ob_start();
                         </div>
                     </li>
 
-                    <li class="pl1"><a href="/card/" class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Questions">Dashboard</a>
-                    </li>  <li class="pl3"><a href="/q" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span   class="hide sm-show">Question</span></a>
-                    </li>
+                    <li class="pl1"><a href=# class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Questions">Dashboard</a>
+                    </li>  
                     <li class="pl3"><a href="queryPage.php" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show"> Question</span></a>
                     </li>
                     <li class="flex-align-right transition-background">
@@ -5739,7 +5755,6 @@ ob_start();
                                 </a>
                                 <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
                                     <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-                                        <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
 <?php
 $a = trim("Admin");
 $b = trim($_SESSION['utype']);
@@ -5750,7 +5765,6 @@ if ($a == $b) {
     
 }
 ?>
-                                        <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
                                         <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
 
                                     </ul>
@@ -5764,7 +5778,7 @@ if ($a == $b) {
 
 
     </header>
-    <h3 style="padding-left:5em"><br> Some of the most frequent queries </h3><br>
+    <h3 style="padding-left:5em"><br><?php echo $_SESSION['uname'].' , here are your saved queries'; ?></h3><br>
     <div data-reactid=".d.0.1" class="wrapper">
         <div data-reactid=".d.0.1.0" class="flex layout-centered">
             <div data-reactid=".d.0.1.0.0" style="position: relative; width: 1441px; height: 472px; margin-left: -3px; margin-right: -3px;" class="DashboardGrid">
@@ -5811,7 +5825,7 @@ while ($iCount < $divs) {
         $query = str_replace(SINGLE_QUOTES_REPLACER, "'", $row_2[2]);
         echo "   <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0\" class=\"p1 flex-no-shrink\">
                         <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0\" class=\"NNZY_V33LPAFqCAqUSvzQ Card-title mx1 flex flex-no-shrink flex-row align-center\">
-                           <a data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0\" style=\"overflow-x:hidden;flex:0 1 auto;\" class=\"LegendItem no-decoration flex align-center fullscreen-normal-text fullscreen-night-text mr1\" href=\"/card/3\">
+                           <a data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0\" style=\"overflow-x:hidden;flex:0 1 auto;\" class=\"LegendItem no-decoration flex align-center fullscreen-normal-text fullscreen-night-text mr1\" href=\"# \">
                               <div data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1\" style=\"overflow:hidden;white-space:nowrap;text-overflow:ellipsis;\" class=\"\"><span data-reactid=\".d.0.1.0.0.0:$1.0.0.0.0.0:0:$0.1.0\">$tag_name </span></div>
                            </a>
                         </div>

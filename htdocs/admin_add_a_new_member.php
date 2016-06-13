@@ -1,7 +1,28 @@
-<?php session_start();
+<?php
+session_set_cookie_params(0);
+session_start();
 ob_start();
+ if (!isset($_SESSION['admin_uname']))
+   {
+	   
+      header("location: login.php");
+   }
+ if(time() - $_SESSION['timestamp'] > 1000) { //subtract new timestamp from the old one
+    echo"<script>alert('15 Minutes over!');</script>";
+    unset($_SESSION['username'], $_SESSION['password'], $_SESSION['timestamp']);
+    $_SESSION['logged_in'] = false;
+	unset($_SESSION['admin_uname']);
+    header("Location:logout.php"); //redirect to index.php
+    exit;
+} else {
+    $_SESSION['timestamp'] = time(); //set new timestamp
+}
 ?>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <script>
  $(document).ready(function() {
@@ -250,7 +271,7 @@ div.dc-chart {
     stroke: none;
 }
 .dc-chart rect.stack2 {
-    fill: green;
+    fill: #74AFAD;
     stroke: none;
 }
 .dc-chart rect.deselected {
@@ -1222,8 +1243,8 @@ div.dc-chart {
     background-color: #f9fbfc;
 }
 .DashboardHeader {
-    background-color: #fff;
-    border-bottom: 1px solid #f0f0f0;
+    background-color: #21618C;
+    border-bottom: 1px solid black;
 }
 .Dash-wrapper {
     width: 100%;
@@ -4790,7 +4811,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
     z-index: 2;
 }
 .NavDropdown .NavDropdown-content-layer, .NavDropdown.open .NavDropdown-button {
-    background-color: green;
+    background-color: #74AFAD;
 }
 .NavDropdown .NavDropdown-content-layer {
     border-radius: 4px;
@@ -5689,17 +5710,18 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 </style>
 
-
-<div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-   <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
-      <div data-reactid=".d.0.0.0">
-         <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
-            <div data-reactid=".d.0.0.0.1.0" class="Entity">
-               <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name"><a href="dash.php">Hi, <?php echo $_SESSION['uname'];?></a> </h2>
-                  <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3">Your Admin page</h4>
-               </div>
-               <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
+<body style="background-color:#EAECEE">
+	<div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
+		<header data-reactid=".d.0.0" class="DashboardHeader relative z2">
+			<div data-reactid=".d.0.0.0" style = "background-color:#21618C ;  color:white">
+				<div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
+					<div data-reactid=".d.0.0.0.1.0" class="Entity">
+						<div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
+						<h4 data-reactid=".d.0.0.0.1.0.0.0"><a href="dash.php"><b><u> Hi, <?php echo $_SESSION['uname'];?> </u></b></a> </h4>
+						<br>
+						<h4 data-reactid=".d.0.0.0.1.0.0.1"> Admin Page </h4>
+					</div>
+				<div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
             </div>
             <div data-reactid=".d.0.0.0.1.1" class="flex align-center flex-align-right">
                <span data-reactid=".d.0.0.0.1.1.$0" class="Header-buttonSection flex align-center">
@@ -5718,9 +5740,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
       </a>
       <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
          <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-            <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
             <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
             <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
          </ul>
       </div>
@@ -5748,33 +5768,37 @@ $('.message a').click(function(){
 });
 </script>
 <div class="MetadataEditor-main flex flex-row flex-full mt2" data-reactid=".2.1">
-<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink">
+<div data-reactid=".2.1.0" class="MetadataEditor-table-list AdminList flex-no-shrink"  style="height:35%; background-color:transparent; font-size:1.5rem;
+ color:black">
    <ul data-reactid=".2.1.0.0" class="AdminList-items pt1">
      <li data-reactid=".2.1.0.0.$General"><a data-reactid=".2.1.0.0.$General.0" class="AdminList-item flex align-center no-decoration" href="admin.php">General</a></li>
-      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration selected" href="#">Add a new member</a></li>
-      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration  " href="admin_create_new_connection.php">Create new DB connection</a></li>
+      <li data-reactid=".2.1.0.0.$Email"><a data-reactid=".2.1.0.0.$Email.0" class="AdminList-item flex align-center no-decoration selected" href="#">Add New Member</a></li>
+      <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration  " href="admin_create_new_connection.php">Create New DB Connection</a></li>
 	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration" href="view_control.php">View Control</a></li>
    </ul>
 </div>
-<div class="px2" data-reactid=".2.1.1" style="padding-left:25em">
+<div class="container" data-reactid=".2.1.1" style="padding-left:20em ; padding-right:10em ; background-color:white;">
+<br>
+<br>
 <Html>
-<head>
-<link rel="stylesheet" type="text/css" href="master.css">
-</head>
+
 <div class="login-page">
-  <div class="form">
-  <h5> Hey <?php echo $_SESSION['uname'];?> would you like to a new member </h5><br><br>
-  <form action="insert_member.php" method="POST" class="login-form">
+  <div class="form" style="color:black">
+  <br>
+  <h3><b><u> Hey <?php echo $_SESSION['uname'];?> ,  would you like to add a new member? </u></b></h3><br><br>
+  <form action="insert_member.php" method="POST" class="login-form" style="font-size:1.5rem">
 <input type="text" name="fname" placeholder="First name"><br>
+<input type="text" name="lname" placeholder="Last name"><br>
+<input type="text" name="email" placeholder="Email"><br>
  <input type="text" name ="uname" placeholder="Username"><br>
  <input type="password" name ="passwd" placeholder="Password"><br>
  <select name="utype">
   <option value="Admin">Admin</option>
-  <option value="Privileged">Privileged</option>
   <option value="Normal">Normal</option>
 </select>
 <div class="row">
- <input type="submit" value="SUBMIT">
+<br>
+ <input type="submit" value=" SUBMIT ">
  
 </div>
  </form>
@@ -5785,3 +5809,4 @@ $('.message a').click(function(){
 </div>
 </div>
 </div>
+</body>

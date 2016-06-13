@@ -29,7 +29,7 @@ else
 $s = "insert into creat_connections (admin_uname,host,port,db_uname,db_passwd,db_name) values($a,$h,$p,$u,$pa,$d);";
 
 $con1 = pg_connect("host=localhost port=5421 dbname=$db_name user=postgres password=plz") or die("Error connecting");
-$query = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN('pg_catalog', 'information_schema');";
+$query = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' or table_type = 'VIEW' AND table_schema NOT IN('pg_catalog', 'information_schema');";
 $r2 = pg_query($con1,$query);
 
 while($row=pg_fetch_array($r2))

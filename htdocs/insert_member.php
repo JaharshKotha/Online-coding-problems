@@ -7,6 +7,8 @@ $uname =$_POST["uname"];
 $passwd=$_POST["passwd"];
 $fname=$_POST["fname"];
 $utype=$_POST["utype"];
+$lname=$_POST["lname"];
+$email=$_POST["email"];
 
 try
 {
@@ -16,11 +18,13 @@ $u ="'".$uname."'";
 $pa = "'".$passwd."'";
 $ut = "'".$utype."'";
 $f = "'".$fname."'";
+$l = "'".$lname."'";
+$e = "'".$email."'";
 
 
 
 
-$s = "insert into login (uname,password,user_role,admin_uname,first_name) values($u,$pa,$ut,$a,$f);";
+$s = "insert into login (uname,password,user_role,admin_uname,first_name,last_name,email) values($u,$pa,$ut,$a,$f,$l,$e);";
 
 $r = pg_query($con,$s);
 }

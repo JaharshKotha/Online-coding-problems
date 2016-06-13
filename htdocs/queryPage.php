@@ -2,6 +2,22 @@
 session_start();
 ob_start();
 
+if($_SESSION['login_ok']==0)
+{
+	header("Location:login.php");;
+}
+   
+    if(time() - $_SESSION['timestamp'] > 1000) { //subtract new timestamp from the old one
+    echo"<script>alert('15 Minutes over!');</script>";
+    unset($_SESSION['username'], $_SESSION['password'], $_SESSION['timestamp']);
+    $_SESSION['logged_in'] = false;
+	unset($_SESSION['admin_uname']);
+    header("Location:logout.php"); //redirect to index.php
+    exit;
+} else {
+    $_SESSION['timestamp'] = time(); //set new timestamp
+}
+
 $colMaparray = array(
     "smallint" => "integer",
     "integer" => "integer",
@@ -21,22 +37,36 @@ $colMaparray = array(
 );
 
 $con2 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-$aName = $_SESSION['admin_uname'];
+$aName = trim($_SESSION['admin_uname']);
 $z = "select * from table_view_control where admin_name=$aName;";
 $zr = $r = pg_query($con2, $z);
 $dbA = array();
+$dbNAmeTVC = array();
 while ($zo = pg_fetch_array($r)) {
 
     $dbA[] = $zo[3];
 }
+$dbA = array_unique($dbA);
+
+for ($k = 0; $k < sizeof($dbA); $k++) {
+    $z = "select table_name ,table_rows from table_view_control where admin_name=$aName and db_name='$dbA[$k]';";
+    $zr = pg_query($con2, $z);
+    $tableNameTVC = array();
+    while ($zo = pg_fetch_array($zr)) {
+
+        $tableNameTVC[$zo[0]] = explode(',', trim($zo[1]));
+    }
+    $dbNAmeTVC[trim($dbA[$k])] = $tableNameTVC;
+}
+
 
 $associativeArrayMainD = array();
 for ($k = 0; $k < sizeof($dbA); $k++) {
-    //  echo $dbA[$k];
+    //echo $dbA[$k];
 
     $con = pg_connect("host=localhost port=5421 dbname=$dbA[$k] user=postgres password=plz");
-    $s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
-//$s = "SELECT column_name FROM information_schema.columns WHERE table_name = 'login';";
+    $s= "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
+//$s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY (current_schemas(false))";
     $r = pg_query($con, $s);
 
     $associativeArrayMain = array();
@@ -48,9 +78,9 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         $associativeArray = array();
         while ($row2 = pg_fetch_row($r1)) {
             $words = preg_split('/[^\w]/', trim($row2[1]));
-            if (!isset($colMaparray[$words[0]])) {
+            if (!isset($colMaparray[$words[0]]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
                 $associativeArray[$row2[0]] = "string";
-            } else {
+            } else if (isset($dbNAmeTVC[trim($dbA[$k])][trim($row[0])]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
                 $associativeArray[$row2[0]] = $colMaparray[trim($words[0])];
             }
             //    echo $row2[0];
@@ -58,11 +88,48 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             //echo $row2[1];
             //echo "\n";
         }
-        $associativeArrayMain[$row[0]] = $associativeArray;
+        if (array_key_exists(trim($row[0]), $dbNAmeTVC[trim($dbA[$k])])) {
+            $associativeArrayMain[$row[0]] = $associativeArray;
+        }
     }
-    $associativeArrayMainD[$dbA[$k]] = $associativeArrayMain;
+	
+	
+	//echo $dbA[$k];
+
+    $con = pg_connect("host=localhost port=5421 dbname=$dbA[$k] user=postgres password=plz");
+   // $s= "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
+$s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY (current_schemas(false))";
+    $r = pg_query($con, $s);
+
+    //$associativeArrayMain = array();
+
+    while ($row = pg_fetch_row($r)) {
+        $s = "SELECT column_name ,data_type  FROM information_schema.columns WHERE table_name = '$row[0]'";
+        // echo $row[0];
+        $r1 = pg_query($con, $s);
+        $associativeArray = array();
+        while ($row2 = pg_fetch_row($r1)) {
+            $words = preg_split('/[^\w]/', trim($row2[1]));
+            if (!isset($colMaparray[$words[0]]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
+                $associativeArray[$row2[0]] = "string";
+            } else if (isset($dbNAmeTVC[trim($dbA[$k])][trim($row[0])]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
+                $associativeArray[$row2[0]] = $colMaparray[trim($words[0])];
+            }
+            //    echo $row2[0];
+            //echo "\n";
+            //echo $row2[1];
+            //echo "\n";
+        }
+        if (array_key_exists(trim($row[0]), $dbNAmeTVC[trim($dbA[$k])])) {
+            $associativeArrayMain[$row[0]] = $associativeArray;
+        }
+    }
+    if (array_key_exists(trim($dbA[$k]), $dbNAmeTVC)) {
+        $associativeArrayMainD[$dbA[$k]] = $associativeArrayMain;
+    }
 }
 ?>
+
 <style>
     ._1d7NndZU1ZUV8ckJ55iYYR {
         color: #525658;
@@ -564,7 +631,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     .public_Scrollbar_faceActive::after,
     .public_Scrollbar_main:hover .public_Scrollbar_face::after,
     .public_Scrollbar_mainActive .public_Scrollbar_face::after {
-        background-color: #7d7d7d;
+        background-color: #0;
     }
     .public_fixedDataTable_hasBottomBorder,
     .public_fixedDataTable_header,
@@ -836,7 +903,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         text-transform: uppercase;
     }
     .Badge.Badge--permissions {
-        background-color: #a989c5;
+        background-color: #509EE7;
     }
     .Badge.Badge--headsUp {
         background-color: #f5a623;
@@ -934,9 +1001,15 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         color: #aeaeae;
     }
     .Button--purple {
-        background-color: #a989c5;
-        border: 1px solid #885ab1;
+        background-color: #509EE7;
+        border: 1px solid #509EE7;
         color: #fff;
+    }
+    .Button--Grey{
+        background-color: #74AFAD;
+        border: 1px solid #74AFAD;
+        color: #fff; 
+
     }
     .Button--borderless {
         background: transparent none repeat scroll 0 0;
@@ -1086,14 +1159,14 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         font-weight: 700;
     }
     .Calendar-day:hover {
-        color: #a989c5;
+        color: #509EE7;
     }
     .Calendar-day-name {
         color: inherit !important;
     }
     .Calendar-day--selected,
     .Calendar-day--selected-end {
-        background-color: #a989c5;
+        background-color: #509EE7;
         color: #fff !important;
         z-index: 1;
     }
@@ -1143,8 +1216,8 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         z-index: 2;
     }
     .circle-button:hover {
-        border-color: #a989c5;
-        color: #a989c5;
+        border-color: #509EE7;
+        color: #509EE7;
     }
     .circle-button--top {
         position: absolute;
@@ -2478,8 +2551,8 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     .Table {
         border-collapse: collapse;
         border-spacing: 0;
-        font-family: Helvetica Neue, Helvetica, sans-serif;
-        font-size: 0.76rem;
+        font-family: Lato,Helvetica Neue,Helvetica,sans-serif;        
+        font-size: 0.875rem;
         line-height: 0.76rem;
         width: 100%;
     }
@@ -2528,6 +2601,14 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         .EntityTable td {
             padding: 10px;
         }
+    }
+    #loader-icon {
+        position: fixed;
+        top: 50%;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        display: none;
     }
     .EntityTable .EntityTable--columnSelected {
         color: #4a90e2;
@@ -2627,7 +2708,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         border-bottom: 1px solid #d8d8d8;
     }
     .AdminBadge {
-        background-color: #a989c5;
+        background-color: #509EE7;
         border-radius: 4px;
         color: #fff;
         padding: 0.25em;
@@ -3012,7 +3093,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         border-color: rgba(0, 0, 0, 0.2) !important;
     }
     .border-purple {
-        border-color: #a989c5 !important;
+        border-color: #509EE7 !important;
     }
     .border-error {
         border-color: #ef8c8c !important;
@@ -3118,7 +3199,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     }
     .text-purple,
     .text-purple-hover:hover {
-        color: #a989c5;
+        color: #509EE7;
     }
     .text-purple-light,
     .text-purple-light-hover:hover {
@@ -3141,7 +3222,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         background-color: #f9d45c;
     }
     .bg-purple {
-        background-color: #a989c5;
+        background-color: #509EE7;
     }
     .bg-purple-light {
         background-color: #c5abdb;
@@ -5015,7 +5096,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         position: relative;
     }
     .bullet::before {
-        color: #6fb0eb;
+        color: #74AFAD;
         content: "•";
         left: -0.85em;
         margin-top: 16px;
@@ -5077,7 +5158,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     }
     .NavDropdown .NavDropdown-content-layer,
     .NavDropdown.open .NavDropdown-button {
-        background-color: #6fb0eb;
+        background-color: #74AFAD;
     }
     .NavDropdown .NavDropdown-content-layer {
         border-radius: 4px;
@@ -5515,6 +5596,8 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     .Visualization.Visualization--loading {
         transition: background 0.3s linear 0s;
         margin-top: 20px;
+        -ms-overflow-style: scrollbar;
+
     }
     .Visualization--scalar,
     .Visualization.Visualization--error {
@@ -5681,14 +5764,14 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     .Filter-section-field,
     .Filter-section-field .QueryOption,
     .Filter-section-operator {
-        color: #a989c5;
+        color: #509EE7;
     }
     .Filter-section-operator .QueryOption {
-        color: #a989c5;
+        color: #509EE7;
         text-transform: lowercase;
     }
     .Filter-section-value .QueryOption {
-        background-color: #a989c5;
+        background-color: #509EE7;
         border: 1px solid #76608a;
         border-radius: 6px;
         color: #fff;
@@ -5705,10 +5788,10 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     }
     .FilterPopover .ColumnarSelector-row--selected,
     .FilterPopover .PopoverHeader-item.selected {
-        color: #a989c5 !important;
+        color: #509EE7 !important;
     }
     .FilterPopover .ColumnarSelector-row:hover {
-        background-color: #a989c5 !important;
+        background-color: #509EE7 !important;
     }
     .View-section-aggregation,
     .View-section-aggregation-target,
@@ -5880,7 +5963,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     }
     .List-item--segment .Icon,
     .List-item--segment .List-item-title {
-        color: #a989c5;
+        color: #509EE7;
     }
     .List-item--selected,
     .List-item:hover {
@@ -5925,8 +6008,8 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     }
     .FilterRemove-field {
         align-items: center;
-        background-color: #a989c5;
-        border: 1px solid #a989c5;
+        background-color: #509EE7;
+        border: 1px solid #509EE7;
         border-radius: 99px;
         display: flex;
         height: 20px;
@@ -6029,6 +6112,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
     table tbody td{
         padding:3px 10px;
         white-space: no
+
     }
     table tbody tr:nth-of-type(2n+1) td{
         background:#CCCCCC;
@@ -6051,33 +6135,108 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         float: right;
         background:green;
     }
+    td div{
 
+
+        overflow: hidden;
+
+        -webkit-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
+        -moz-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
+        transition: max-height 1.5s ease cubic-bezier(0, 1.05, 0, 1);
+        max-height: 38px;
+        max-width: 200px;
+
+    }
+
+    td div:hover{
+        -webkit-transition: max-height 2s ease;
+        -moz-transition: max-height 2s ease;
+        transition: max-height 2s ease;
+        cursor: hand;
+        cursor: pointer;
+        opacity: .9;
+        max-height: 800px;
+    }
 
     .test3{
         /*border-right: 5px solid red !important;*/
     }
+    select {
+        border: 0 !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background: #0088cc url(img/demo/select-arrow.png) no-repeat 90% center;
+        width: 100px;
+        text-indent: 0.01px;
+        text-overflow: "";
+        color: #FFF;
+        border-radius: 15px;
+        padding: 5px;
+        box-shadow: inset 0 0 5px rgba(000,000,000, 0.5);
+        border-radius: 10px 0;
+    }
+    .withIE{
+        margin-top:78px;
+    }
+    .formLink{
+        color:blue;
+    }
+
+.closeTable{
+    display:block;
+    float:right;
+    width:30px;
+    height:29px;
+    background:url(close.png) no-repeat center center;
+}
+
+
 </style>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
+
+<script type="text/javascript" src="jquery-1.7.2.js"></script>
+
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>    
-
 <script type="text/javascript" src="src/js/jquery.dragtable.js"></script>
+
 <link rel="stylesheet" href="src/css/dragtable-default.css" type="text/css" />
 <script>
-    //alert("1asdas");
+
+    jQuery.fn.outerHTML = function (s) {
+        return s
+                ? this.before(s).remove()
+                : jQuery("<p>").append(this.eq(0).clone()).html();
+    };
     var i = 0;
 
     $(document).ready(function () {
 
+        function isIE() {
+            return ((navigator.appName == 'Microsoft Internet Explorer') || ((navigator.appName == 'Netscape') && (new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})").exec(navigator.userAgent) != null)));
+        }
         var queryMain = "";
-        $('table').each(function () {
+        var ua = window.navigator.userAgent;
+        msie = ua.indexOf("MSIE ");
+        if (isIE()) // If Internet Explorer, return version number
+        {
+            //alert(navigator.appName);
 
-            $(this).dragtable({
-                placeholder: 'dragtable-col-placeholder test3',
-                items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
-                scroll: true
+            $('.withoutIE').remove();
+
+        } else {
+            //alert('.withoutIE');
+
+            $('.withIE').remove();
+
+            $('table').each(function () {
+
+                $(this).dragtable({
+                    placeholder: 'dragtable-col-placeholder test3',
+                    items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
+                    scroll: true
+                });
             });
-        });
+        }
         function hideAll() {
             $(".outerNav").hide();
             $(".outerNav_").hide();
@@ -6158,10 +6317,13 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                     dummyColNavAft.removeAttr("id");
                     dummyColNavAft.addClass("afterColoumn" + k1 + "_" + k2);
                     $("#beforeColoumnContainer").append(dummyColNavAft[0]['outerHTML']);
-                    $(".afterColoumn" + k1 + "_" + k2 + " .inline-block").text(k1);
+                    $(".afterColoumn" + k1 + "_" + k2 + " h3.inline-block").text(k1);
                     $(".afterColoumn" + k1 + "_" + k2 + " .coloumnBack").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
                     $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                    $(".afterColoumn" + k1 + "_" + k2 + " .addCustomDateFilter").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
                     $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-tableName", k1);
+                    $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-ColoumnName", k2);
+
 
                     $(".afterColoumn" + k1 + "_" + k2 + " .text-default").text(k2);
                     $(".sortColoumn li h4").text(k2);
@@ -6176,14 +6338,15 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                         cloneIcon = $("#iconContainer .Icon-calendar").clone(true);
                     $(".sortColoumn li svg").remove();
                     var someHtml = $(".sortColoumn li a").html();
+                    //console.log(  $(".sortColoumn li a").outerHTML());
                     $(".sortColoumn li a").empty();
-                    $(".sortColoumn li a").append(cloneIcon[0]['outerHTML'] + someHtml);
+                    $(".sortColoumn li a").append(cloneIcon.outerHTML() + someHtml);
                     $(".beforeColoumn li svg").remove();
                     $(".beforeColoumn li a").empty();
-                    $(".beforeColoumn li a").append(cloneIcon[0]['outerHTML'] + someHtml);
+                    $(".beforeColoumn li a").append(cloneIcon.outerHTML() + someHtml);
                     $(".groupLists li svg").remove();
                     $(".groupLists li a").empty();
-                    $(".groupLists li a").append(cloneIcon[0]['outerHTML'] + someHtml);
+                    $(".groupLists li a").append(cloneIcon.outerHTML() + someHtml);
                     var li1 = $(".sortColoumn li").clone(true);
                     var li2 = $(".beforeColoumn li").clone(true);
                     var li3 = $(".groupLists li").clone(true);
@@ -6239,7 +6402,10 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
 
             $(".outerNav_").hide();
         });
+        $("#joinType").change(function () {
+            $("#selectTable2").show();
 
+        });
         $('#joinTableNameContainer .selectJoinTable').change(function () {
             var first = 0;
             var second = 0;
@@ -6320,8 +6486,12 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
 
                 $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerInt").show();
             } else if ($(this).find("svg").attr("class").indexOf("Icon-calendar") >= 0)
+            {
                 $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerCal").show();
-            else
+                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".forDateOnly").show();
+               $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".forDateOnly .relativeDate").trigger('click');
+               $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".FilterInput").hide();
+            } else
             {
                 $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerString").show();
             }
@@ -6343,7 +6513,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             $(".afterFilter_" + tableName + "_" + i + " .midQuery").attr("data-reactid", $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid"));
             $(".afterFilter_" + tableName + "_" + i + " .valQuery").text($("." + tableName + " .FilterInputText").val());
             $(".afterFilter_" + tableName + "_" + i + " .Query-filter-close").attr("data-attr", "afterFilter_" + tableName + "_" + i)
-            var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val());
+            var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val()).replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"").replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"");
             $(".afterFilter_" + tableName + "_" + i + " .valQuery").attr("data-attr", qVal);
             // alert(tableName);
             $(".afterFilter_" + tableName + "_" + i).show();
@@ -6351,6 +6521,36 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             $("." + tableName).hide();
             $("#beforeColoumnContainer").hide();
         });
+
+        $(".addCustomDateFilter").click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            i++;
+            var dummyColFilAft = $(".afterFilter").clone(true);
+            dummyColFilAft.removeClass("afterFilter");
+            var tableName = $(this).attr("data-colName").replace(/ /g, '');
+            dummyColFilAft.addClass("afterFilter_" + tableName + "_" + i);
+            dummyColFilAft.css('display', 'block');
+            $("#filterWala").append(dummyColFilAft);
+            var dumTbl = $("#tableNameText").text().trim();
+            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").text($("." + tableName + " .text-default").text());
+            var refTabName = "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"";
+            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").attr("data-attr", refTabName);
+            $(".afterFilter_" + tableName + "_" + i + " .midQuery").text("Between");
+            $(".afterFilter_" + tableName + "_" + i + " .midQuery").attr("data-reactid", "");
+            var valueS = $("." + tableName + " #dateRangeStart").val();
+            var valueE = $("." + tableName + " #dateRangeEnd").val();
+            var dateQuery = $(this).attr("data-attr").replace("##firstVal##", valueS.trim()).replace("##secVal##", valueE.trim()).replace("##addText##", refTabName).replace("##addText##", refTabName);
+            $(".afterFilter_" + tableName + "_" + i + " .valQuery").text(valueS + "-" + valueE);
+            $(".afterFilter_" + tableName + "_" + i + " .Query-filter-close").attr("data-attr", "afterFilter_" + tableName + "_" + i)
+            // var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val()).replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"").replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"");
+            $(".afterFilter_" + tableName + "_" + i + " .valQuery").attr("data-attr", dateQuery);
+            $(".afterFilter_" + tableName + "_" + i).show();
+            $("#beforeFilter").hide();
+            $("." + tableName).hide();
+            $("#beforeColoumnContainer").hide();
+        });
+
         $(".Query-filter-close").click(function () {
             //alert("."+$(this).attr("data-attr"));
             var tableName = $(this).attr("data-attr").replace(/ /g, '');
@@ -6454,7 +6654,8 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             $("#groupByButton").show();
         });
         $("#sortButton").click(function () {
-            $("#sortSpan").toggle();
+            //alert("das");
+            $("#sortSpan").show();
         });
         $("#sortFieldPicker").click(function () {
 
@@ -6495,18 +6696,41 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             $("#limit>ul>li.Button--active").removeClass("Button--active");
             $(this).addClass("Button--active");
         });
-        $(".FilterPopover button").click(function () {
-            $(".FilterPopover button.Button--purple").removeClass("Button--purple");
+
+
+        $(".filterButtonList button").click(function () {
+            $(".filterButtonList button.Button--purple").removeClass("Button--purple");
             $(this).addClass("Button--purple");
+        });
+        $(".forDateOnly button").click(function () {
+            $(".forDateOnly button.Button--Grey").removeClass("Button--Grey");
+            $(this).addClass("Button--Grey");
+            var parSome = $(this).parent().parent();
+            if ($(this).hasClass("specificDate"))
+            {
+                parSome.find(".buttonContainerCal").hide();
+               // parSome.find(".FilterInput").hide();
+                parSome.find(".FilterPopover-footer").hide();
+                parSome.find(".forCustomDateOnly").show();
+
+            } else
+            {
+                parSome.find(".buttonContainerCal").show();
+               // parSome.find(".FilterInput").show();
+                parSome.find(".FilterPopover-footer").show();
+                parSome.find(".forCustomDateOnly").hide();
+
+            }
         });
 
         $("#saveQuery").click(function () {
-            $(".Modal").css("z-index", 9);
-            $(".Modal").show();
+            // aler("");
+            $(".Modal1").css("z-index", 9);
+            $(".Modal1").show();
         });
         $("#closeSaveDiv").click(function () {
-            $(".Modal").css("z-index", 0);
-            $(".Modal").hide();
+            $(".Modal1").css("z-index", 0);
+            $(".Modal1").hide();
         });
 
         $("#formMain").submit(function () {
@@ -6526,7 +6750,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                 else
                     whereclause += " AND ";
 
-                whereclause += $(this).find(".colQuery").attr("data-attr");
+                // whereclause += $(this).find(".colQuery").attr("data-attr");
                 whereclause += $(this).find(".valQuery").attr("data-attr");
                 firstTime = false;
                 //test
@@ -6575,7 +6799,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                 joinclause += $("#joinType").val() + " \"" + $("#selectSecondTable").val() + "\" ON \"" + $("#tableNameText").text().trim() + "\"." + "\"" + $("#selectFirstJoinCol").val() + "\" = \"" + $("#selectSecondTable").val() + "\"." + "\"" + $("#selectSecondJoinCol").val() + "\"";
             }
             queryMain = "Select " + secselectClause + " from \"" + $("#tableNameText").text().trim() + "\"" + joinclause + whereclause + sortInfo + limit;
-            // alert(queryMain);
+            //alert(queryMain);
             //alert($("#tableNameText").text().trim());
             var dataBaseName = $("#tableNameText").attr("data-attr");
             $.ajax({
@@ -6587,27 +6811,46 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                     selectTags: secselectClause,
                     databaseName: dataBaseName
                 },
-                beforeSend: function () {},
-                complete: function () {},
+                beforeSend: function () {
+                    $('#loader-icon').show();
+
+                },
+                complete: function () {
+                    $('#loader-icon').hide();
+
+
+                },
                 success: function (data) {
                     // console.log(data);
                     $('.Visualization').empty();
                     $('.Visualization').append(data);
-                    $('table').each(function () {
+                    $('#loader-icon').hide();
 
-                        $(this).dragtable({
-                            placeholder: 'dragtable-col-placeholder test3',
-                            items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
-                            scroll: true
+                    if (msie > 0) // If Internet Explorer, return version number
+                    {
+
+                    } else {
+                        //alert('.Visualization');
+                        $('table').each(function () {
+
+                            $(this).dragtable({
+                                placeholder: 'dragtable-col-placeholder test3',
+                                items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
+                                scroll: true
+                            });
                         });
-                    });
+                    }
+
+
 
                 },
                 error: function () {}
             });
         });
-        
-         $("#tog_name").click(function () {
+        $("#closeTable").click(function(){
+         $("#formAfterClick").hide();          
+        });
+        $("#tog_name").click(function () {
             $("#tog_section").toggle();
         });
         $(".Icon-download").click(function ()
@@ -6630,6 +6873,10 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
              error: function() {}
              });	*/
 
+        });
+
+        $('#refresh').click(function () {
+            location.reload();
         });
         $("#saveTag").click(function ()
         {
@@ -6664,13 +6911,45 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                     $('#tagDescription').val("");
                     $('#queryColTagForm').val("");
                     $('#queryForTagForm').val("");
-                    $(".Modal").hide();
+                    $(".Modal1").hide();
                 },
                 error: function () {
 
                     alert("error");
                 }
             });
+
+        });
+
+
+        $(document).mouseup(function (e)
+        {
+            var container = $(".PopoverBody--withArrow");
+
+            if (!container.is(e.target) // if the target of the click isn't the container...
+                    && container.has(e.target).length === 0) // ... nor a descendant of the container
+            {
+                container.hide();
+               // $(".forCustomDateOnly").hide();
+                
+            }
+            container = $("#sortSpan");
+
+            if (!container.is(e.target) // if the target of the click isn't the container...
+                    && container.has(e.target).length === 0) // ... nor a descendant of the container
+            {
+                container.hide();
+               // $(".forCustomDateOnly").hide();
+            }
+            container = $("#formAfterClick");
+
+            if (!container.is(e.target) // if the target of the click isn't the container...
+                    && container.has(e.target).length === 0) // ... nor a descendant of the container
+            {
+                container.hide();
+             //   $(".forCustomDateOnly").hide();
+            }
+
 
         });
 
@@ -6702,13 +6981,45 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                     csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
 //alert(encodeURIComponent(csv));
 
-            $(this)
-                    .attr({
-                        'download': filename,
-                        'href': csvData,
-                        'target': '_blank'
-                    });
+            $(this).attr({
+                'download': filename,
+                'href': csvData,
+                'target': '_blank'
+            });
         }
+        $(document).on('click', ".formLink", function () {
+            //alert();
+            $("#f_GridContainer").empty();
+            var formAfterClick = $("#formAfterClick");
+            var trPar = $(this).parent();
+            var thlist = new Array();
+
+            $(this).parent().parent().parent().find("th").each(function () {
+                thlist.push($(this).text());
+
+            });
+            var tdlist = new Array();
+
+            $("#tableName_Form").text($("#tableNameText").text().trim());
+            $("#clickedId_Form").text($(this).text().trim());
+            var Grid_mb2 = formAfterClick.find(".gridList_f");
+            trPar.find("td").each(function () {
+                tdlist.push($(this).text());
+
+            });
+
+            for (var i = 0; i < thlist.length; i++)
+            {
+                Grid_mb2.find(".f_colName").text(thlist[i]);
+                Grid_mb2.find(".f_colVal").text(tdlist[i]);
+                var cloneGr = Grid_mb2.clone(true)
+                //  cloneGr.show();
+
+                $("#f_GridContainer").append(cloneGr);
+                // alert( + "===>" + );
+            }
+            $("#formAfterClick").show();
+        });
         /*
          $('.Icon-reference').click(
          function() { 
@@ -6721,7 +7032,6 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             <ul class="pl4 pr1 flex align-center">
                 <li class="pl1"><a href="dash.php" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Dashboard">Dashboard</a>
                 </li>
-                <li class="pl1"><a href="#" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Question">Question</a>
                 </li>
                 <li class="pl3"><a href="#" class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show">Question</span></a>
                 </li>
@@ -6740,7 +7050,6 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                             </a>
                             <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
                                 <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-                                    <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
                                     <?php
                                     $a = trim("Admin");
                                     $b = trim($_SESSION['utype']);
@@ -6751,7 +7060,6 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                                         
                                     }
                                     ?>
-                                    <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
                                     <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
 
                                 </ul>
@@ -6772,17 +7080,9 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         <div class="flex-align-right">
             <div class="flex align-center">
                 <span data-reactid=".1.0.1.0.$0" class="Header-buttonSection"><a data-reactid=".1.0.1.0.$0.$save" id="saveQuery" class="no-decoration h4 px1 text-grey-4 text-brand-hover text-uppercase"><span data-reactid=".1.0.1.0.$0.$save.0">Save</span><span data-reactid=".1.0.1.0.$0.$save.1"></span></a></span>
+             
                 <span class="Header-buttonSection">
-                    <div   class="Button-toggle">
-                        <span   class="Button-toggleIndicator">
-                            <svg   fill="currentcolor" viewBox="0 0 16 16" height="14px" width="14px" class="Sql-icon">
-                            <path   d="M-0.237037037,9.10836763 L-0.237037037,11.8518519 L6.16296296,5.92592593 L-0.237037037,8.22888605e-15 L-0.237037037,2.74348422 L3.2,5.92592593 L-0.237037037,9.10836763 Z M4.14814815,13.44 L16,13.44 L16,16 L4.14814815,16 L4.14814815,13.44 Z"/>
-                            </svg>
-                        </span>
-                    </div>
-                </span>
-                <span class="Header-buttonSection">
-                    <a   title="Get help on what data means" class="mx1 transition-color text-grey-4 text-brand-hover">
+                    <a   title="Download Data" class="mx1 transition-color text-grey-4 text-brand-hover">
                         <svg data-reactid=".7.0.2.1.1.0" name="download" fill="currentcolor" viewBox="0 0 11 17" height="16px" width="16px" class="Icon Icon-download"><path data-reactid=".7.0.2.1.1.0.0" d="M4,8 L4,0 L7,0 L7,8 L10,8 L5.5,13.25 L1,8 L4,8 Z M11,14 L0,14 L0,17 L11,17 L11,14 Z"/></svg>                        </svg>
                     </a>
                 </span>
@@ -6810,7 +7110,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                     <div class="GuiBuilder-section GuiBuilder-filtered-by flex align-center">
                         <span class="GuiBuilder-section-label Query-label">Filtered by</span>
                         <div class="Query-section disabled" id="filterWala">
-                            <div class="Query-filters afterFilter">
+                            <div style = "display:none" class="Query-filters afterFilter">
                                 <div class="Query-filterList scroll-show scroll-show--horizontal filterRow">
                                     <div class="Query-filter p1 pl2">
                                         <div>
@@ -6874,7 +7174,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                                 </span>
                             </div>
                         </div>
-                        <div class="Query-section Query-section-breakout ml1 groupingTags">
+                        <div style="display:none" class="Query-section Query-section-breakout ml1 groupingTags">
                             <span class="text-bold">by</span>
                             <div class="flex align-center">
                                 <div class="flex align-center">
@@ -6890,13 +7190,13 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                         </div>
                     </div>
                     <div class="flex-full"></div>
-                    <div class="GuiBuilder-section GuiBuilder-sort-limit flex align-center"><a id="sortButton" class="no-decoration flex align-center"><span   class="EllipsisButton no-decoration text-grey-1 px1">…</span><span   class="hide"></span></a>
+                    <div class="GuiBuilder-section GuiBuilder-sort-limit flex align-center"><a id="sortButton" class="no-decoration flex align-center"><span   class=" no-decoration text-brand text-bold ">Sort and LIMIT Options</span></a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="joinContainer" class="z2">
+    <div id="joinContainer" style="display:none;"class="z2">
         <div class="wrapper">
             <div class="GuiBuilder rounded shadowed GuiBuilder--expand">
                 <div class="GuiBuilder-row flex">
@@ -6916,9 +7216,9 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                             </span>
                         </div>
                         <div>
-                            <a class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="selectTable2">
+                            <a style="display:none;"class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="selectTable2">
                                 <span class="px2 py2 text-bold cursor-pointer text-default">
-                                    <span id="tableNameText2" class="text-grey-4 no-decoration">Select a table</span>
+                                    <span id="tableNameText2" class="text-grey-4 no-decoration">Select Database</span>
                                     <svg class="ml1" width="8px" height="8px" viewBox="0 0 32 32" fill="currentcolor" name="chevrondown">
                                     <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
                                     </svg>
@@ -6961,7 +7261,12 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                                     </select>
                                 </span>
                             </div>
+
                         </div>
+                        <div >
+                            <input type="submit" id="refresh"class="Button Button--primary circular" value="Refresh"></input>
+                        </div>
+
                     </div>
                 </div>
 
@@ -6982,14 +7287,16 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                 </form>
                 <div class="absolute right z3 flex align-center"></div>
             </div>
-            <div class="flex flex-full z1 px1 Visualization--errors">
+            <div class="withoutIE flex flex-full z1 px1">
 
                 <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0" class="flex-full relative border-bottom">
-
                     <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" class="absolute top bottom left Visualization right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
 
                     </div>
-                </div>
+                </div>    
+            </div>
+            <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" class="withIE absolute top bottom left Visualization right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+
             </div>
         </div>
     </div>
@@ -7011,7 +7318,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             </div>
 
         </div>
-        <div   class="PopoverBody PopoverBody--withArrow outerNav_">
+        <div  style=" display:none;" class="PopoverBody PopoverBody--withArrow outerNav_">
 
             <div   style="width:300px;" class="text-brand " id="databaseListDummyContainer2">
                 <section style=" display:none;"   class="List-section List-section--open" id="databaseListDummy2">
@@ -7028,7 +7335,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                 </section>
             </div>
         </div>
-        <div class="PopoverBody PopoverBody--withArrow innerNav">
+        <div style="display:none" class="PopoverBody PopoverBody--withArrow innerNav">
             <div style="width:300px;" class="text-brand ">
                 <section class="List-section List-section--open">
                     <div class="p1 border-bottom">
@@ -7047,16 +7354,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                         </div>
                     </div>
                     <div class="px1 pt1">
-                        <div style="border:2px solid transparent;border-radius:6px;">
-                            <div class="bordered rounded text-grey-2 flex flex-full align-center">
-                                <span class="px1">
-                                    <svg   name="search" fill="currentcolor" viewBox="0 0 32 32" height="16" width="16" class="Icon Icon-search">
-                                    <path   d="M12 0 A12 12 0 0 0 0 12 A12 12 0 0 0 12 24 A12 12 0 0 0 18.5 22.25 L28 32 L32 28 L22.25 18.5 A12 12 0 0 0 24 12 A12 12 0 0 0 12 0 M12 4 A8 8 0 0 1 12 20 A8 8 0 0 1 12 4  "/>
-                                    </svg>
-                                </span>
-                                <input type="text" value="" placeholder="Find a table" class="p1 h4 input--borderless text-default flex-full">
-                            </div>
-                        </div>
+                      
                     </div>
                     <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
                         <li style=" display:none;" class="List-item flex">
@@ -7074,7 +7372,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             </div>
         </div>
     </span>
-    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="beforeColoumnContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(42px) translateY(217px) translateZ(0px); z-index: 3;">
+    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="beforeColoumnContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(42px) translateY(217px) translateZ(0px); z-index: 3; display:none;">
         <div   style="display:none;"  class="PopoverBody PopoverBody--withArrow beforeColoumn">
             <div   style="" class="FilterPopover" >
                 <div   style="width:300px;" class="text-purple" >
@@ -7106,7 +7404,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                 </div>
             </div>
         </div>
-        <div class="PopoverBody PopoverBody--withArrow" id="afterColoumn">
+        <div style="display:none" class="PopoverBody PopoverBody--withArrow" id="afterColoumn">
             <div style="" class="FilterPopover">
                 <div style="width: 300px;">
                     <div class="FilterPopover-header text-grey-3 p1 mt1 flex align-center">
@@ -7119,36 +7417,61 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                         <h3 class="mx1">-</h3>
                         <h3 class="text-default">BTC selling price</h3>
                     </div>
-                    <div>
-                        <div data-reactid=".f.0.1.0" class="border-bottom p1 buttonContainer buttonContainerString">
-                            <button data-reactid=" = '##addText##'" class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
-                            <button data-reactid=" <> '##addText##'" class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
-                            <button data-reactid="> ''" class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
-                            <button data-reactid="<> ''" class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
-                            <button data-reactid="LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Contains</button>
-                            <button data-reactid=" NOT LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Does not contain</button>
-                            <button data-reactid=" LIKE '##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Starts with</button>
-                            <button data-reactid=" LIKE '%##addText##'" class="Button Button-normal Button--medium mr1 mb1">Ends with</button>
+                    <div style="display: none;" data-reactid=".h.$=10.0.1.0" class="border-bottom p1 forDateOnly"><button data-reactid=".h.$=10.0.1.0.0:$relative" class="Button Button-normal Button--medium relativeDate mr1 mb1 Button--Grey">Relative date</button><button  data-reactid=".h.$=10.0.1.0.0:$specific" class="Button Button-normal Button--medium mr1 specificDate mb1">Specific date</button></div>
+                    <div class="filterButtonList">
+                        <div data-reactid=".f.0.1.0"style="display: none;" class="border-bottom p1 buttonContainer buttonContainerString">
+                            <button data-reactid="##addVar## = '##addText##'" class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
+                            <button data-reactid="##addVar## <> '##addText##'" class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
+                            <button data-reactid="##addVar## > ''" class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
+                            <button data-reactid="##addVar## <> ''" class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                            <button data-reactid="##addVar## LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Contains</button>
+                            <button data-reactid="##addVar## NOT LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Does not contain</button>
+                            <button data-reactid="##addVar## LIKE '##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Starts with</button>
+                            <button data-reactid="##addVar## LIKE '%##addText##'" class="Button Button-normal Button--medium mr1 mb1">Ends with</button>
                         </div>
-                        <div data-reactid=".g.0.1.0" class="border-bottom p1 buttonContainer buttonContainerInt">
-                            <button data-reactid=" = ##addText## " class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
-                            <button data-reactid=" <> ##addText## " class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
-                            <button data-reactid=" > ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than</button>
-                            <button data-reactid=" < ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than</button>
-                            <button data-reactid=" >= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than or equal to</button>
-                            <button data-reactid=" <= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than or equal to</button>
-                            <button data-reactid=" IS NULL " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
-                            <button data-reactid=" IS NOT NULL " class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                        <div data-reactid=".g.0.1.0" style="display: none;"class="border-bottom p1 buttonContainer buttonContainerInt">
+                            <button data-reactid="##addVar## = ##addText## " class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
+                            <button data-reactid="##addVar## <> ##addText## " class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
+                            <button data-reactid="##addVar## > ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than</button>
+                            <button data-reactid="##addVar## < ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than</button>
+                            <button data-reactid="##addVar## >= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than or equal to</button>
+                            <button data-reactid="##addVar## <= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than or equal to</button>
+                            <button data-reactid="##addVar## IS NULL " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
+                            <button data-reactid="##addVar## IS NOT NULL " class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
                         </div>
-                        <div data-reactid=".g.0.1.0" class="border-bottom p1 buttonContainer buttonContainerCal">
-                            <button data-reactid=" = '##addText##' " class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
-                            <button data-reactid=" <> '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
-                            <button data-reactid=" > '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Greater than</button>
-                            <button data-reactid=" < '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Less than</button>
-                            <button data-reactid=" >= '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Greater than or equal to</button>
-                            <button data-reactid=" <= '##addText##' " class="Button Button-normal Button--medium mr1 mb1">Less than or equal to</button>
-                            <button data-reactid=" IS NULL " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
-                            <button data-reactid=" IS NOT NULL " class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                        <div data-reactid=".g.0.1.0"style="display: none;" class="border-bottom p1 buttonContainer buttonContainerCal">
+                            <section data-reactid=".g.$=10.0.1.1.0"><span data-reactid=".g.$=10.0.1.1.0.$0" class="inline-block half pb1 pr1">
+                                    <button data-reactid="DATE(##addVar##) = CURRENT_DATE" class="Button Button-normal Button--medium text-normal text-centered full">Today</button>
+                                </span>
+                                <span data-reactid=".g.$=10.0.1.1.0.$1" class="inline-block half pb1">
+                                    <button data-reactid="DATE(##addVar##) = CURRENT_DATE - 1" class="Button Button-normal Button--medium text-normal text-centered full">Yesterday</button>
+                                </span>
+                                <span data-reactid=".g.$=10.0.1.1.0.$2" class="inline-block half pb1 pr1">
+                                    <button data-reactid="DATE(##addVar##) > CURRENT_DATE- INTERVAL '7' DAY" class="Button Button-normal Button--medium text-normal text-centered full">Past 7 days</button></span>
+                                <span data-reactid=".g.$=10.0.1.1.0.$3" class="inline-block half pb1">
+                                    <button data-reactid="DATE(##addVar##) > CURRENT_DATE- INTERVAL '30' DAY" class="Button Button-normal Button--medium text-normal text-centered full">Past 30 days</button></span>
+                            </section>
+                            <section data-reactid=".g.$=10.0.1.1.1:$Last">
+                                <div data-reactid=".g.$=10.0.1.1.1:$Last.0" class="border-bottom text-uppercase flex layout-centered mb2">
+                                    <h6 data-reactid=".g.$=10.0.1.1.1:$Last.0.0" class="px2" style="position:relative;background-color:white;top:6px;">Last</h6>
+                                </div>
+                                <div data-reactid=".g.$=10.0.1.1.1:$Last.1" class="flex">
+                                    <button data-reactid="DATE(##addVar##) BETWEEN CURRENT_DATE ::DATE-EXTRACT(DOW FROM CURRENT_DATE)::INTEGER-7 AND CURRENT_DATE::DATE-EXTRACT(DOW from CURRENT_DATE)::INTEGER" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-last-week">Week</button>
+                                    <button data-reactid="Extract (YEAR from DATE(##addVar##)) = Extract (YEAR from CURRENT_DATE - INTERVAL '1 MONTH') AND Extract (MONTH from DATE(##addVar##)) = Extract (MONTH from CURRENT_DATE - INTERVAL '1 MONTH')" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-last-month">Month</button>
+                                    <button data-reactid="DATE(##addVar##) >= date_trunc('year', CURRENT_DATE - INTERVAL '1 year' ) AND    DATE(##addVar##) <  date_trunc('year', CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1" data-ui-tag="relative-date-shortcut-last-year">Year</button></div>
+                            </section>
+                            <section data-reactid=".g.$=10.0.1.1.1:$This">
+                                <div data-reactid=".g.$=10.0.1.1.1:$This.0" class="border-bottom text-uppercase flex layout-centered mb2">
+                                    <h6 data-reactid=".g.$=10.0.1.1.1:$This.0.0" class="px2" style="position:relative;background-color:white;top:6px;">This</h6>
+                                </div>
+                                <div data-reactid=".g.$=10.0.1.1.1:$This.1" class="flex">
+                                    <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE) AND Extract(week from DATE(##addVar##)) =  Extract(week from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-this-week">Week</button>
+                                    <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE) AND Extract(month from DATE(##addVar##)) =  Extract(month from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-this-month">Month</button>
+                                    <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1" data-ui-tag="relative-date-shortcut-this-year">Year</button>
+                                </div>
+                            </section>
+
+
                         </div>
                         <div>
                             <ul>
@@ -7162,12 +7485,30 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                     <div class="FilterPopover-footer p1">
                         <button class="Button Button--purple full addFilterButton" data-ui-tag="add-filter">Add filter</button>
                     </div>
+
+
+                    <div style="display: none;" class="p1 forCustomDateOnly">
+
+                        <section  data-reactid=".g.$=10.0.1.1.1:$This">
+                            <div data-reactid=".g.$=10.0.1.1.1:$This.1" class="flex">
+                                <span>Start Date</span>
+                                <input type="text"  class="input block full border-purple" name="dateRangeStart" id="dateRangeStart" value="01/01/2015" />
+
+                            </div>
+                            <div data-reactid=".g.$=10.0.1.1.1:$This.1" class="flex">
+                                <span>End Date</span>
+                                <input type="text" class="input block full border-purple"  name="dateRangeEnd" id="dateRangeEnd" value="01/01/2015" />
+
+                            </div>
+                        </section>
+                        <button data-attr=" ##addText## >= '##firstVal##' AND ##addText## <= '##secVal##' " class="Button Button--purple full addCustomDateFilter" data-ui-tag="add-filter">Add Date</button>
+                    </div>
                 </div>
             </div>
         </div>
     </span>
     <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; position: absolute; transform: translateX(267px) translateY(225px) translateZ(0px); z-index: 3;">
-        <div   class="PopoverBody PopoverBody--withArrow FilterPopover" id="rawDataList">
+        <div  style="display:none" class="PopoverBody PopoverBody--withArrow FilterPopover" id="rawDataList">
             <div   style="width:300px;" class="text-green" >
                 <section   class="List-section List-section--open">
                     <ul   class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
@@ -7231,7 +7572,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                 </section>
             </div>
         </div>
-        <div class="PopoverBody PopoverBody--withArrow FilterPopover rawSecondLevel">
+        <div style="display:none" class="PopoverBody PopoverBody--withArrow FilterPopover rawSecondLevel">
             <div style="width:300px;">
                 <div class="text-grey-3 p1 py2 border-bottom flex align-center">
                     <a class="cursor-pointer flex align-center">
@@ -7280,7 +7621,7 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             </div>
         </div>
     </span>
-    <span id="groupByContainer" class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; position: absolute; transform: translateX(498px) translateY(223px) translateZ(0px); z-index: 3;">
+    <span id="groupByContainer" class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; display:none; position: absolute; transform: translateX(498px) translateY(223px) translateZ(0px); z-index: 3;">
         <div   style="display:none" class="PopoverBody PopoverBody--withArrow FieldPopover groupLists">
             <div   style="width:300px;" class="text-green">
                 <section   class="List-section List-section--open">
@@ -7311,8 +7652,8 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
             </div>
         </div>
     </span>
-    <span class="PopoverContainer tether-element tether-target-attached-center tether-element-attached-top tether-target-attached-bottom tether-element-attached-right tether-enabled" id="sortSpan" style="top: 0px; left: 0px; position: absolute; transform: translateX(917px) translateY(234px) translateZ(0px); z-index: 3;">
-        <div   class="PopoverBody PopoverBody--withArrow">
+    <span class="PopoverContainer tether-element tether-target-attached-center tether-element-attached-top tether-target-attached-bottom tether-element-attached-right tether-enabled" id="sortSpan" style="display:none;top: 0px; left: 0px; position: absolute; transform: translateX(917px) translateY(234px) translateZ(0px); z-index: 3;">
+        <div   class="PopoverBody ">
             <div   class="px3 py1">
                 <div   class="py1 border-bottom">
                     <div   class="Query-label mb1">Sort by:</div>
@@ -7350,11 +7691,11 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
                 <div id="limit" class="py1">
                     <div class="Query-label mb1">Limit:</div>
                     <ul class="Button-group Button-group--blue">
-                        <li class="Button Button--active">None</li>
+                        <li class="Button">None</li>
                         <li class="Button">1</li>
                         <li class="Button">10</li>
                         <li class="Button">25</li>
-                        <li class="Button">100</li>
+                        <li class="Button Button--active">100</li>
                         <li class="Button">1000</li>
                     </ul>
                 </div>
@@ -7403,7 +7744,40 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
         <svg data-reactid=".d.0.0.$0.2.$2.0.0" name="int" fill="currentcolor" viewBox="0 0 24, 24" height="18" width="18" class="Icon Icon-int"><path data-reactid=".d.0.0.$0.2.$2.0.0.0" d="M15.141,15.512 L14.294,20 L13.051,20 C12.8309989,20 12.6403341,19.9120009 12.479,19.736 C12.3176659,19.5599991 12.237,19.343668 12.237,19.087 C12.237,19.0503332 12.2388333,19.0155002 12.2425,18.9825 C12.2461667,18.9494998 12.2516666,18.9146668 12.259,18.878 L12.908,15.512 L10.653,15.512 L10.015,19.01 C9.94899967,19.3620018 9.79866784,19.6149992 9.564,19.769 C9.32933216,19.9230008 9.06900143,20 8.783,20 L7.584,20 L8.42,15.512 L7.155,15.512 C6.92033216,15.512 6.74066729,15.4551672 6.616,15.3415 C6.49133271,15.2278328 6.429,15.0390013 6.429,14.775 C6.429,14.6723328 6.43999989,14.5550007 6.462,14.423 L6.605,13.554 L8.695,13.554 L9.267,10.518 L6.913,10.518 L7.122,9.385 C7.17333359,9.10633194 7.28699912,8.89916734 7.463,8.7635 C7.63900088,8.62783266 7.92499802,8.56 8.321,8.56 L9.542,8.56 L10.224,5.018 C10.282667,4.7246652 10.4183323,4.49733414 10.631,4.336 C10.8436677,4.17466586 11.0929986,4.094 11.379,4.094 L12.611,4.094 L11.775,8.56 L14.019,8.56 L14.866,4.094 L16.076,4.094 C16.3326679,4.094 16.5416659,4.1673326 16.703,4.314 C16.8643341,4.4606674 16.945,4.64766553 16.945,4.875 C16.945,4.9483337 16.9413334,5.00333315 16.934,5.04 L16.252,8.56 L18.485,8.56 L18.276,9.693 C18.2246664,9.97166806 18.1091676,10.1788327 17.9295,10.3145 C17.7498324,10.4501673 17.4656686,10.518 17.077,10.518 L15.977,10.518 L15.416,13.554 L16.978,13.554 C17.2126678,13.554 17.3904994,13.6108328 17.5115,13.7245 C17.6325006,13.8381672 17.693,14.0306653 17.693,14.302 C17.693,14.4046672 17.6820001,14.5219993 17.66,14.654 L17.528,15.512 L15.141,15.512 Z M10.928,13.554 L13.183,13.554 L13.744,10.518 L11.5,10.518 L10.928,13.554 Z"/></svg>
         <svg data-reactid=".d.0.0.$0.2.$5.0.0" name="calendar" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-calendar"><path data-reactid=".d.0.0.$0.2.$5.0.0.0" d="M21,2 L21,0 L18,0 L18,2 L6,2 L6,0 L3,0 L3,2 L2.99109042,2 C1.34177063,2 0,3.34314575 0,5 L0,6.99502651 L0,20.009947 C0,22.2157067 1.78640758,24 3.99005301,24 L20.009947,24 C22.2157067,24 24,22.2135924 24,20.009947 L24,6.99502651 L24,5 C24,3.34651712 22.6608432,2 21.0089096,2 L21,2 L21,2 Z M22,8 L22,20.009947 C22,21.1099173 21.1102431,22 20.009947,22 L3.99005301,22 C2.89008272,22 2,21.1102431 2,20.009947 L2,8 L22,8 L22,8 Z M6,12 L10,12 L10,16 L6,16 L6,12 Z"/></svg>
     </div>
+    <div id="loader-icon">
+        <img src="LoaderIcon.gif" />
+    </div>
+    <div data-reactid=".2.$=1$modal.0" class="Modal Modal1" style="display:none;" >
+        <a data-reactid=".2.$=1$modal.0.0.0.1" id="closeSaveDiv"  class="closeTable"></a>
+        <div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm"><div data-reactid=".2.$=1$modal.0.0.0" class="Modal-header Form-header flex align-center"><h2 data-reactid=".2.$=1$modal.0.0.0.0" class="flex-full">Save Question</h2></div><div data-reactid=".2.$=1$modal.0.0.1" class="Modal-body"><div data-reactid=".2.$=1$modal.0.0.1.0.0" class="Form-inputs"><div data-reactid=".2.$=1$modal.0.0.1.0.0.1" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.1.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.0">Name</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.1"> </span></label><input data-reactid=".2.$=1$modal.0.0.1.0.0.1.1"  placeholder="Name your Query" name="tagName" id="tagName" class="Form-input full"></div><div data-reactid=".2.$=1$modal.0.0.1.0.0.2" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.2.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.0">Description (optional)</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.1"> </span></label><textarea  data-reactid=".2.$=1$modal.0.0.1.0.0.2.1" placeholder="Describe" name="tagDescription" id="tagDescription"class="Form-input full"></textarea></div></div><div data-reactid=".2.$=1$modal.0.0.1.0.1" class="Form-actions"><input type="hidden" value="" name="queryColTagForm" id="queryColTagForm"></input><button data-reactid=".2.$=1$modal.0.0.1.0.1.0" class="Button Button--primary" id="saveTag">Save</button></div></div></div></div>
+
+    <div data-reactid=".2.$=1$modal.0" class="Modal" style="z-index:9; display:none;" id="formAfterClick">
+        <a id="closeTable" href="#" class="closeTable"></a>
+        <div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm">
+            <div data-reactid=".7.2.0.0" class="Grid ObjectDetail-headingGroup">
+                <div data-reactid=".7.2.0.0.0" class="Grid-cell ObjectDetail-infoMain px4 py3 ml2 arrow-right">
+                    <div data-reactid=".7.2.0.0.0.0" class="text-brand text-bold">
+                        <span data-reactid=".7.2.0.0.0.0.0" id="tableName_Form"></span>
+                        <h1 data-reactid=".7.2.0.0.0.0.1" id="clickedId_Form"></h1>
+                    </div>
+                </div>
+            </div>
+            <div data-reactid=".7.2.0.1.0"  style="display:none;" class="Grid-cell ObjectDetail-infoMain p4">
+
+                <div data-reactid=".7.2.0.1.0.$19" class="Grid mb2 gridList_f" >
+                    <div data-reactid=".7.2.0.1.0.$19.0" class="Grid-cell">
+                        <div class="f_colName" data-reactid=".7.2.0.1.0.$19.0.$cl19_field"></div>
+                    </div>
+                    <div data-reactid=".7.2.0.1.0.$19.1" class="Grid-cell text-bold text-dark" style="word-wrap:break-word;">
+                        <div data-reactid=".7.2.0.1.0.$19.1.$cl19_value"><span class="f_colVal" data-reactid=".7.2.0.1.0.$19.1.$cl19_value.0.0"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div data-reactid=".7.2.0.1.0" id="f_GridContainer" class="Grid-cell ObjectDetail-infoMain p4">
 
 
-    <div data-reactid=".2.$=1$modal.0" class="Modal" style="display:none;" ><div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm"><div data-reactid=".2.$=1$modal.0.0.0" class="Modal-header Form-header flex align-center"><h2 data-reactid=".2.$=1$modal.0.0.0.0" class="flex-full">Save Question</h2><a data-reactid=".2.$=1$modal.0.0.0.1" class="text-grey-3 p1"><svg data-reactid=".2.$=1$modal.0.0.0.1.0" name="close" fill="currentcolor" id="closeSaveDiv" viewBox="0 0 32 32" height="16px" width="16px" class="Icon Icon-close"><path data-reactid=".2.$=1$modal.0.0.0.1.0.0" d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z "/></svg></a></div><div data-reactid=".2.$=1$modal.0.0.1" class="Modal-body"><div data-reactid=".2.$=1$modal.0.0.1.0.0" class="Form-inputs"><div data-reactid=".2.$=1$modal.0.0.1.0.0.1" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.1.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.0">Name</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.1"> </span></label><input data-reactid=".2.$=1$modal.0.0.1.0.0.1.1"  placeholder="What is the name of your card?" name="tagName" id="tagName" class="Form-input full"></div><div data-reactid=".2.$=1$modal.0.0.1.0.0.2" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.2.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.0">Description (optional)</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.1"> </span></label><textarea  data-reactid=".2.$=1$modal.0.0.1.0.0.2.1" placeholder="It's optional but oh, so helpful" name="tagDescription" id="tagDescription"class="Form-input full"></textarea></div></div><div data-reactid=".2.$=1$modal.0.0.1.0.1" class="Form-actions"><input type="hidden" value="" name="queryColTagForm" id="queryColTagForm"></input><button data-reactid=".2.$=1$modal.0.0.1.0.1.0" class="Button Button--primary" id="saveTag">Save</button></div></div></div></div>
+            </div>
+
+        </div>
+    </div>
 </Html>
