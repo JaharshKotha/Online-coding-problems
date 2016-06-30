@@ -2,10 +2,25 @@
 session_set_cookie_params(0);
 session_start();
 ob_start();
-if($_SESSION['login_ok']==0)
+if(!isset($_SESSION['admin_uname'])|| trim($_SESSION['utype'])!=trim("Admin"))
 {
 	header("Location:login.php");;
 }
+
+ if (time() - $_SESSION['timestamp'] > 500) { //subtract new timestamp from the old one
+    
+    unset($_SESSION['username'], $_SESSION['password'], $_SESSION['timestamp']);
+    $_SESSION['logged_in'] = false;
+	echo "<script>
+alert('Session Timeout (5 min)');
+window.location.href='logout.php';
+</script>";
+   
+    exit;
+} else {
+    $_SESSION['timestamp'] = time(); //set new timestamp
+}
+
 ?>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,15 +29,13 @@ if($_SESSION['login_ok']==0)
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <script>
- $(document).ready(function() {
-	 
-$("#tog_name").click(function(){
-    $("#tog_section").toggle();
+$("#csubmit").click(function(){
+	//alert("as");
+	$("#Table_Column_Duplicate").submit();
+    
+	
+	
 });
-
-
-
- });
 </script>
 <style>
 
@@ -5701,53 +5714,7 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 <body style="background-color:#EAECEE">
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-   <header data-reactid=".d.0.0" class="DashboardHeader relative z2">
-      <div data-reactid=".d.0.0.0" style = "background-color:#21618C ;  color:white">
-         <div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
-            <div data-reactid=".d.0.0.0.1.0" class="Entity">
-               <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                  <h4 data-reactid=".d.0.0.0.1.0.0.0" ><a href="dash.php"><b><u> Hi, <?php echo $_SESSION['uname'];?> </u></b></a></h4>
-				  <br>
-                  <h4 data-reactid=".d.0.0.0.1.0.0.1"> Admin Page </h4>
-               </div>
-               <div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
-            </div>
-            <div data-reactid=".d.0.0.0.1.1" class="flex align-center flex-align-right">
-               <span data-reactid=".d.0.0.0.1.1.$0" class="Header-buttonSection flex align-center">
-                  
-				  <div data-reactid=".0.0.5.0" class="inline-block text-white" >
-   <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
-      <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
-         <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
-            <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
-               <div id="tog_name" data-reactid=".0.0.5.0.0.0.0.0.0" style="font-size:0.85rem;border-width:1px;border-style:solid;border-radius:99px;width:2rem;height:2rem;background-color:transparent;" class="flex align-center justify-center bg-brand"><?php echo $_SESSION['uname'];?></div>
-               <svg data-reactid=".0.0.5.0.0.0.0.0.1" name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="Dropdown-chevron ml1">
-                  <path data-reactid=".0.0.5.0.0.0.0.0.1.0" d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
-               </svg>
-            </div>
-         </div>
-      </a>
-      <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
-         <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-            <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
-         </ul>
-      </div>
-   </div>
-</div>
-                  
-                  
-                  <span data-reactid=".d.0.0.0.1.1.$0.$3" class="Header-button">
-                     <span data-reactid=".d.0.0.0.1.1.$0.$3.0" data-metabase-event="Dashboard;Fullscreen Mode;true">
-                        
-                        <span data-reactid=".d.0.0.0.1.1.$0.$3.0.1" class="hide"></span>
-                     </span>
-                  </span>
-               </span>
-            </div>
-         </div>
-      </div>
-   </header>
+   <?php include("navHeader.php");?>
   
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
@@ -5781,13 +5748,19 @@ $('.message a').click(function(){
  <input type="text" name ="port" placeholder="port"><br>
 <div class="row">
 <br>
- <input type="submit" value=" SUBMIT ">
+ <input type="submit" value=" SUBMIT " id="csubmit">
  
 </div>
  </form>
 
+ 
   </div>
 </div>
+
+<form action="Table_Column_Duplicate.php" method="post" id="Table_Column_Duplicate">
+ 
+
+ </form>
 </Html>
 </div>
 </div>

@@ -1,0 +1,22 @@
+[19/Jun/2016:17:02:52] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:03:37] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "items" Where  "items"."date_item" >= '06/20/2014' AND "items"."date_item" <= '06/20/2016'  LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:03:50] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select Count(*) as Count from "items" Where  "items"."date_item" >= '06/20/2014' AND "items"."date_item" <= '06/20/2016'  LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:04:05] ;;;; (saveTag) ;;;; UserName :::: PS1 ;;;; Action:::: Save Query ;;;; Query :::: (Select Count(*) as Count from "items" Where  "items"."date_item" >= "@slashes06/20/2014"@slashes AND "items"."date_item" <= "@slashes06/20/2016"@slashes  LIMIT 10; ) ;;;; Tag :::: Count;;;; PageVisited :::: QueryPage(Saved Question)
+[19/Jun/2016:17:04:43] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:05:03] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "t_currency_master" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:05:10] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "t_item_classification_map" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:05:18] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "t_marketplaces" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:05:31] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "marketplaces" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:05:40] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:17:13] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:17:21] ;;;; (csvDownload) ;;;; UserName :::: PS1 ;;;; Action:::: CSVDownload ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:17:50] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select Sum("items"."id_mk") from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:17:56] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select Avg("items"."views_item") from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:18:02] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select MIN("items"."id_ve") from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:18:10] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select "items"."cve_item" , MIN("items"."id_ve") from "items" group by "items"."cve_item" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:18:16] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select "items"."cve_item" , MIN("items"."id_ve") from "items" group by "items"."cve_item" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[19/Jun/2016:17:28:02] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[20/Jun/2016:00:50:28] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "items" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[20/Jun/2016:00:50:56] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "t_marketplaces" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[20/Jun/2016:00:51:05] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "v_t_items_related_super" LIMIT 10; ) ;;;; PageVisited :::: QueryPage
+[20/Jun/2016:00:52:56] ;;;; (action2) ;;;; UserName :::: PS1 ;;;; Action:::: Query ;;;; Query :::: (Select  *  from "v_t_items_related_super" order by "item_ms" DESC LIMIT 10; ) ;;;; PageVisited :::: QueryPage

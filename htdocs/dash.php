@@ -2,31 +2,32 @@
 session_set_cookie_params(0);
 session_start();
 ob_start();
-if($_SESSION['login_ok']==0)
-{
-	header("Location:login.php");;
+if ($_SESSION['login_ok'] == 0) {
+    header("Location:login.php");
+    
 }
-
- if(time() - $_SESSION['timestamp'] > 1000000) { //subtract new timestamp from the old one
-    echo"<script>alert('15 Minutes over!');</script>";
+include 'Config.php';
+if (time() - $_SESSION['timestamp'] > 500) { //subtract new timestamp from the old one
+    
     unset($_SESSION['username'], $_SESSION['password'], $_SESSION['timestamp']);
     $_SESSION['logged_in'] = false;
-    header("Location:logout.php"); //redirect to index.php
+	echo "<script>
+alert('Session Timeout (5 min)');
+window.location.href='logout.php';
+</script>";
+   
     exit;
 } else {
     $_SESSION['timestamp'] = time(); //set new timestamp
 }
-
-
 ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <script>
     $(document).ready(function () {
 
-        $("#tog_name").click(function () {
-            $("#tog_section").toggle();
-        });
+
+
 
 
 
@@ -5711,74 +5712,8 @@ if($_SESSION['login_ok']==0)
 
 
 <div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-    <header data-reactid=".d.0.0" class="DashboardHeader relative z2" >
-        <div mb-react-component="Navbar" ng-controller="Nav" class="Nav ng-scope">
-            <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3" style=" background-color:#74AFAD;">
-                <ul class="pl4 pr1 flex align-center">
-                    <li>
-                        <div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-                            <?php
-                            include_once 'config.php';
-                            $a = trim("Admin");
-                            $p = trim("Privileged");
-                            $b = trim($_SESSION['utype']);
-                            if ($a == $b) {
-                                echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,' . $_SESSION['uname'] . '(Admin)' . '</h2>';
-                            } else if ($p == $b) {
-                                echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,' . $_SESSION['uname'] . '(Privileged)' . '</h2>';
-                            } else {
-                                echo '<h2 data-reactid=".d.0.0.0.1.0.0.0" class="Header-title-name" style="color:black;">Hi,' . $_SESSION['uname'] . '</h2>';
-                            }
-                            ?>
-
-                            <h4 data-reactid=".d.0.0.0.1.0.0.1" class="Header-title-description text-grey-3" style="color:white;">Your Home page</h4>
-
-                        </div>
-                    </li>
-
-                    <li class="pl1"><a href=# class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Questions">Dashboard</a>
-                    </li>  
-                    <li class="pl3"><a href="queryPage.php" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show"> Question</span></a>
-                    </li>
-                    <li class="flex-align-right transition-background">
-                        <div data-reactid=".0.0.5.0" class="inline-block text-white" >
-                            <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
-                                <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
-                                    <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
-                                        <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
-                                            <div id="tog_name" data-reactid=".0.0.5.0.0.0.0.0.0" style="font-size:0.85rem;border-width:1px;border-style:solid;border-radius:99px;width:2rem;height:2rem;background-color:transparent;" class="flex align-center justify-center bg-brand"><?php echo $_SESSION['uname']; ?></div>
-                                            <svg data-reactid=".0.0.5.0.0.0.0.0.1" name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="Dropdown-chevron ml1">
-                                            <path data-reactid=".0.0.5.0.0.0.0.0.1.0" d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </a>
-                                <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
-                                    <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-<?php
-$a = trim("Admin");
-$b = trim($_SESSION['utype']);
-
-if ($a == $b) {
-    echo '<li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>';
-} else {
-    
-}
-?>
-                                        <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
-
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-
-
-    </header>
-    <h3 style="padding-left:5em"><br><?php echo $_SESSION['uname'].' , here are your saved queries'; ?></h3><br>
+<?php include("navHeader.php"); ?>
+    <h3 style="padding-left:5em"><br><?php echo $_SESSION['uname'] . ' , here are your saved queries'; ?></h3><br>
     <div data-reactid=".d.0.1" class="wrapper">
         <div data-reactid=".d.0.1.0" class="flex layout-centered">
             <div data-reactid=".d.0.1.0.0" style="position: relative; width: 1441px; height: 472px; margin-left: -3px; margin-right: -3px;" class="DashboardGrid">
@@ -5789,7 +5724,7 @@ $u = "'" . trim($_SESSION['uname']) . "'";
 $s = "select admin_uname from login where uname=$u;";
 $col = pg_query($con, $s);
 $row_1 = pg_fetch_array($col);
-$a_name = "'" . $row_1[0] . "'";
+$a_name = trim($row_1[0]);
 $_SESSION['admin_uname'] = $a_name;
 
 
@@ -5799,8 +5734,7 @@ $col1 = pg_query($con, $div_count);
 $row_2 = pg_fetch_array($col1);
 $divs = $row_2[0];
 $iCount = 0;
-        $col1 = pg_query($con, $s1);
-
+$col1 = pg_query($con, $s1);
 ?>
                 <div data-reactid=".d.0.1.0.0.0:$1" height="230" width="474.33333333333337" >
                     <div data-reactid=".d.0.1.0.0.0:$1.0" style="opacity: 1;">
@@ -5851,16 +5785,19 @@ while ($iCount < $divs) {
         }
 
         echo '</tbody></table>';
-       // $divs = $divs - 1;
+        // $divs = $divs - 1;
     }
     ?>
-                                        
-                        
-           <?php         }
-                                            ?>
-    </div>
-                                    </div>
 
+
+                                        <?php }
+                                        ?>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
+                    </div>
+                    <footer><div id="wrapper" style="text-align: center; background:#B0C4DE;position: fixed;bottom: 0;width: 100%;">  
+                <div style="display: inline-block;width:517px;padding-left: 2em;text-indent: --7em;">IntelliSpyre Inc. Copyright 2016 </div>
+            </div></footer>

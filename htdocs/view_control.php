@@ -6,6 +6,19 @@ if($_SESSION['login_ok']==0)
 {
 	header("Location:login.php");;
 }
+if (time() - $_SESSION['timestamp'] > 500) { //subtract new timestamp from the old one
+    
+    unset($_SESSION['username'], $_SESSION['password'], $_SESSION['timestamp']);
+    $_SESSION['logged_in'] = false;
+	echo "<script>
+alert('Session Timeout (5 min)');
+window.location.href='logout.php';
+</script>";
+   
+    exit;
+} else {
+    $_SESSION['timestamp'] = time(); //set new timestamp
+}
 ?>
 
 <meta http-equiv="content-type" content="text/html; charset=UTF-8"><script src="view_control.php_files/jquery.js"></script>
@@ -47,7 +60,104 @@ $("#insert_view_control").submit();
    
 });
 
+$(".filter").click(function(){
+	var colname="";
+	var fromd="";
+	var tod="";
+	
+	
+	var dbnam=$(this).attr("dbnam");
+	var tn=$(this).attr("data-attr");
+		var x=0;
+		
+	//console.log(".filter_"+$(this).attr("data-attr"));	
+	$(document).find(".filter_"+$(this).attr("data-attr")).each(function(){
+		if(x===0)
+		{
+			
+			 colname=$(this).val();
+			//x=+;
+			++x;
+		}
+		else if(x===1)
+		{
+			
+			 fromd=$(this).val();
+			++x;
+		}
+		else 
+		{
 
+			 tod=$(this).val();
+
+			
+			
+		}
+					 						
+
+
+
+
+});
+
+
+x=0;
+
+$("#dbna").val(dbnam);
+$("#tna").val(tn);
+$("#cn").val(colname);
+$("#from_date").val(fromd);
+$("#to_date").val(tod);
+
+$("#insert_filter").submit();
+
+ });
+ 
+ $(".filter_id").click(function(){
+ 
+ 
+ 
+ var databa="";
+ var tabna="";
+ var colna="";
+ 
+ tabna=$(this).attr("data-attr1db");
+ databna=$(this).attr("data-attr2tb");
+ colna=$(this).attr("data-attr3");
+ 
+$("#databna").val(databna);
+$("#tabna").val(tabna);
+$("#colna").val(colna);
+
+
+
+$("#remove_filter").submit();
+ 
+ 
+  });
+ 
+ 
+$(".filt").hide();
+
+$(".filter_show").mouseenter(function(){
+	
+	var ide="";
+
+		ide= $(this).attr("id");
+		ide="show"+ide;
+		$(".filt").show();
+	
+});
+
+$(".filter_show").mouseleave(function(){
+	
+	var ide="";
+
+		ide= $(this).attr("id");
+		ide="show"+ide;
+		$(".filt").hide();
+	
+});
 
 
  });
@@ -5726,59 +5836,24 @@ article, body, div, fieldset, footer, form, header, input, li, main, nav, sectio
 
 
 </style>
+<style>
+td {
+    border: 1px solid black;
+    padding: 5px;
+	padding-left: 5px;
+   padding-right: 5px;
+}
+
+
+
+
+
+</style>
 
 
 <body style="background-color:#EAECEE">
 	<div data-reactid=".d.0" class="full" style="overflow-x: hidden;">
-		<header data-reactid=".d.0.0" class="DashboardHeader relative z2">
-			<div data-reactid=".d.0.0.0" style = "background-color:#21618C ;  color:white">
-				<div data-reactid=".d.0.0.0.1" class="QueryBuilder-section flex align-center wrapper">
-					<div data-reactid=".d.0.0.0.1.0" class="Entity">
-						<div data-reactid=".d.0.0.0.1.0.0" class="Header-title my1 py2">
-						<h4 data-reactid=".d.0.0.0.1.0.0.0"><a href="dash.php"><b><u> Hi, <?php echo $_SESSION['uname'];?> </u></b></a> </h4>
-						<br>
-						<h4 data-reactid=".d.0.0.0.1.0.0.1"> Admin Page </h4>
-					</div>
-				<div data-reactid=".d.0.0.0.1.0.1" class="Header-attribution"><span data-reactid=".d.0.0.0.1.0.1.0">Asked by </span><span data-reactid=".d.0.0.0.1.0.1.1">Admin X</span></div>
-            </div>
-            <div data-reactid=".d.0.0.0.1.1" class="flex align-center flex-align-right">
-               <span data-reactid=".d.0.0.0.1.1.$0" class="Header-buttonSection flex align-center">
-                  
-				  <div data-reactid=".0.0.5.0" class="inline-block text-white" >
-   <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
-      <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
-         <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
-            <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
-               <div id="tog_name" data-reactid=".0.0.5.0.0.0.0.0.0" style="font-size:0.85rem;border-width:1px;border-style:solid;border-radius:99px;width:2rem;height:2rem;background-color:transparent;" class="flex align-center justify-center bg-brand"><?php echo $_SESSION['uname'];?></div>
-               <svg data-reactid=".0.0.5.0.0.0.0.0.1" name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="Dropdown-chevron ml1">
-                  <path data-reactid=".0.0.5.0.0.0.0.0.1.0" d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
-               </svg>
-            </div>
-         </div>
-      </a>
-      <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
-         <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-            <li data-reactid=".0.0.5.0.0.1.0.0"><a data-reactid=".0.0.5.0.0.1.0.0.0" href="/user/edit_current" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Edit Profile">Account Settings</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.3"><a data-reactid=".0.0.5.0.0.1.0.3.0" target="_blank" href="http://www.metabase.com/docs/v0.16.1" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Help v0.16.1">Help</a></li>
-            <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
-         </ul>
-      </div>
-   </div>
-</div>
-                  
-                  
-                  <span data-reactid=".d.0.0.0.1.1.$0.$3" class="Header-button">
-                     <span data-reactid=".d.0.0.0.1.1.$0.$3.0" data-metabase-event="Dashboard;Fullscreen Mode;true">
-                        
-                        <span data-reactid=".d.0.0.0.1.1.$0.$3.0.1" class="hide"></span>
-                     </span>
-                  </span>
-               </span>
-            </div>
-         </div>
-      </div>
-   </header>
+		<?php include("navHeader.php"); ?>
   
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
@@ -5797,7 +5872,7 @@ $('.message a').click(function(){
 	  <li data-reactid=".2.1.0.0.$Slack"><a data-reactid=".2.1.0.0.$Slack.0" class="AdminList-item flex align-center no-decoration selected" href="view_control.php">View Control</a></li>
    </ul>
 </div>
-<div class="container" data-reactid=".2.1.1" style="padding-left:20em ; padding-right:10em ; background-color:white;">
+<div class="container" data-reactid=".2.1.1" style="padding-left:20em ; padding-right:10em ; background-color:white; overflow-x:scroll; width:100%;" >
 
 <div class="login-page">
 <div class="form" style="color:black">
@@ -5840,7 +5915,9 @@ for($i=0;$i<sizeof($array);$i++)
 $con1 = pg_connect("host=localhost port=5421 dbname=$array[$i] user=postgres password=plz");
 $flg=0;
 
-$s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' or table_type = 'VIEW' AND table_schema NOT IN('pg_catalog', 'information_schema');";
+$s = "SELECT table_name FROM information_schema.tables WHERE table_type IN ('BASE TABLE' , 'VIEW') AND table_schema NOT IN('pg_catalog', 'information_schema');";
+echo '<br><h3 style= "text-transform: uppercase;">'.$array[$i].':</h3><br><br>';
+
 $r = pg_query($con1,$s);
 while($ro = pg_fetch_array($r))
 {
@@ -5850,6 +5927,7 @@ $t_name="'".$ro[0]."'";
 $t = "SELECT column_name FROM information_schema.columns WHERE table_name = $t_name;";
 $t_r = pg_query($con1,$t);
 echo '<table><tr>';
+
 while($t_row = pg_fetch_array($t_r))
 {
 	for($j=0;$j<sizeof($all_check_col);$j++)
@@ -5859,15 +5937,41 @@ while($t_row = pg_fetch_array($t_r))
 	}
 	if($flg==1)
 	{
-	echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'" checked="checked"></td>';
+		$sq = "select * from filters where dbname='".$array[$i]."' and tablename='".$ro[0]."' and colname='".$t_row[0]."' and admin_uname=$u" ;
+		$resu = pg_query($con2,$sq);
+		if($che = pg_fetch_array($resu))
+		{	echo '<img src="img/show.jpg" height="10" width="10" class="filter_show">';
+			echo '<td class="filt" target="_blank" id="show_'.$che[3].$che[5].$che[6].'">'.$che[3].$che[5].$che[6].'</td>';
+	echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'" checked="checked"><img src="img/funnel.jpg" height="10" width="10" class="filter_id"  data-attr1db="'.$ro[0].'"  data-attr2tb="'.$array[$i].'"  data-attr3="'.$t_row[0].'"  id="'.$che[3].$che[5].$che[6].'"></td>';
+	
+		}
+		else{
+			echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'" checked="checked"></td>';
+		}
 	}
 	else
 	{
-		echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'"></td>';
+		$sq = "select * from filters where dbname='".$array[$i]."' and tablename='".$ro[0]."' and colname='".$t_row[0]."' and admin_uname=$u" ;
+		$resu1 = pg_query($con2,$sq);
+		if($che = pg_fetch_array($resu1))
+		{	echo '<img src="img/show.jpg" height="10" width="10" class="filter_show">';
+			echo '<td class="filt" target="_blank">'.$che[3].$che[5].$che[6].'</td>';
+		echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'"><img src="img/funnel.jpg" height="10" width="10" class="filter_id"  data-attr1db="'.$ro[0].'"  data-attr2tb="'.$array[$i].'"  data-attr3="'.$t_row[0].'"  id="'.$che[3].$che[5].$che[6].'"></td>';
+		}
+		else{
+			echo '<td class="'.$ro[0].'" data-attr="'.$array[$i].'">'.$t_row[0].'<input type ="checkbox" value="'.$t_row[0].'"></td>';
+	
+		}
 	}
 	$flg=0;
 }
-echo '<input type="submit" value="save" placeholder="save" class="save" data-attr="'.$ro[0].'"></tr></table><br>';
+echo '<input type="submit" value="save" placeholder="save" class="save" data-attr="'.$ro[0].'"></tr><br><br>
+
+<tr>Filter : <input type="text"  class="filter_'.$ro[0].'" id="colnam">&nbsp;&nbsp;&nbsp;From <input type="text" value="mm/dd/yyyy"  class="filter_'.$ro[0].'"  id="from_d"> To <input type="text" value="mm/dd/yyyy" class="filter_'.$ro[0].'" id="to_d"><input type="submit" value="Add Filter" class="filter" data-attr="'.$ro[0].'" dbnam="'.$array[$i].'"> </tr>';
+
+
+
+echo '</table><br>';
 
 }
 }
@@ -5878,6 +5982,23 @@ echo '<input type="submit" value="save" placeholder="save" class="save" data-att
   <input type="hidden" value='' id="dbn" name="dbn"/>
  <input type="hidden" value='' id="tn" name="tn"/>
  <input type="hidden" value='' id="cols" name="cols"/>
+
+ </form>
+ 
+ <form action="insert_filter.php" method="post" id="insert_filter">
+  <input type="hidden" value='' id="dbna" name="dbna"/>
+ <input type="hidden" value='' id="tna" name="tna"/>
+ <input type="hidden" value='' id="cn" name="cn"/>
+ <input type="hidden" value='' id="from_date" name="from_date"/>
+ <input type="hidden" value='' id="to_date" name="to_date"/> 
+
+ </form>
+ 
+ <form action="remove_filter.php" method="post" id="remove_filter">
+  <input type="hidden" value='' id="databna" name="databna"/>
+ <input type="hidden" value='' id="tabna" name="tabna"/>
+ <input type="hidden" value='' id="colna" name="colna"/>
+ 
 
  </form>
 </div>

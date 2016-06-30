@@ -1,18 +1,22 @@
 <?php
+include_once("Config.php");
+include_once("BlackList.php");
+
 session_start();
 ob_start();
 
-if($_SESSION['login_ok']==0)
-{
-	header("Location:login.php");;
+if ($_SESSION['login_ok'] == 0) {
+    header("Location:login.php");
+    ;
 }
-   
-    if(time() - $_SESSION['timestamp'] > 1000) { //subtract new timestamp from the old one
-    echo"<script>alert('15 Minutes over!');</script>";
+if (time() - $_SESSION['timestamp'] > 500) { //subtract new timestamp from the old one
     unset($_SESSION['username'], $_SESSION['password'], $_SESSION['timestamp']);
     $_SESSION['logged_in'] = false;
-	unset($_SESSION['admin_uname']);
-    header("Location:logout.php"); //redirect to index.php
+    echo "<script>
+alert('Session Timeout (5 min)');
+window.location.href='logout.php';
+</script>";
+
     exit;
 } else {
     $_SESSION['timestamp'] = time(); //set new timestamp
@@ -34,25 +38,43 @@ $colMaparray = array(
     "text" => "string",
     "timestamp" => "calender",
     "date" => "calender",
+    "money" => "integer",
 );
 
-$con2 = pg_connect("host=localhost port=5421 dbname=postgres user=postgres password=plz");
-$aName = trim($_SESSION['admin_uname']);
-$z = "select * from table_view_control where admin_name=$aName;";
-$zr = $r = pg_query($con2, $z);
+$u = $_SESSION['admin_uname'];
+$con1 = new PDO('pgsql:dbname=postgres;host=localhost;port=5421', 'postgres', 'plz');
+$tQuer = 'select * from table_view_control where admin_name =:aname ';
+$statement = $con1->prepare($tQuer);
+$statement->bindValue(':aname', $u, PDO::PARAM_STR);
+//  echo $u;
+$statement->execute();
+
+
+
+
+
 $dbA = array();
 $dbNAmeTVC = array();
-while ($zo = pg_fetch_array($r)) {
+while ($zo = $statement->fetch()) {
 
     $dbA[] = $zo[3];
 }
-$dbA = array_unique($dbA);
 
+$dbA = array_unique($dbA);
+$colMappingDummy = array();
+$tblMappingDummy = array();
 for ($k = 0; $k < sizeof($dbA); $k++) {
-    $z = "select table_name ,table_rows from table_view_control where admin_name=$aName and db_name='$dbA[$k]';";
-    $zr = pg_query($con2, $z);
+    $z = "select table_name ,table_rows from table_view_control where admin_name=:aname and db_name=:dname;";
+    $statement = $con1->prepare($z);
+    $statement->bindValue(':aname', $u, PDO::PARAM_STR);
+    // echo  sizeof($dbA).$dbA[$k];
+    $statement->bindValue(':dname', $dbA[$k], PDO::PARAM_STR);
+
+    //  echo $u;
+    $statement->execute();
+    //$zr = pg_query($con2, $z);
     $tableNameTVC = array();
-    while ($zo = pg_fetch_array($zr)) {
+    while ($zo = $statement->fetch()) {
 
         $tableNameTVC[$zo[0]] = explode(',', trim($zo[1]));
     }
@@ -63,70 +85,130 @@ for ($k = 0; $k < sizeof($dbA); $k++) {
 $associativeArrayMainD = array();
 for ($k = 0; $k < sizeof($dbA); $k++) {
     //echo $dbA[$k];
+    $con12 = new PDO('pgsql:dbname=postgres;host=localhost;port=5421', 'postgres', 'plz');
+    $tQuer2 = 'select db_uname,db_passwd,port,host from creat_connections where admin_uname =:aname and db_name = :dbname';
+    $statement2 = $con12->prepare($tQuer2);
+    $statement2->bindValue(':aname', $u, PDO::PARAM_STR);
+    $statement2->bindValue(':dbname', $dbA[$k], PDO::PARAM_STR);
 
-    $con = pg_connect("host=localhost port=5421 dbname=$dbA[$k] user=postgres password=plz");
-    $s= "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
+//  echo $u;
+    $statement2->execute();
+
+    $uCred = $statement2->fetch();
+
+    // echo $uCred[0] . "--".$uCred[1];
+    $con = pg_connect("host=$uCred[3] port=$uCred[2] dbname=$dbA[$k] user=$uCred[0] password=$uCred[1]");
+    $s = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
 //$s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY (current_schemas(false))";
     $r = pg_query($con, $s);
+    $blackListedTables = explode(',', BLACKLISTED_TABLES);
 
     $associativeArrayMain = array();
 
     while ($row = pg_fetch_row($r)) {
-        $s = "SELECT column_name ,data_type  FROM information_schema.columns WHERE table_name = '$row[0]'";
-        // echo $row[0];
-        $r1 = pg_query($con, $s);
-        $associativeArray = array();
-        while ($row2 = pg_fetch_row($r1)) {
-            $words = preg_split('/[^\w]/', trim($row2[1]));
-            if (!isset($colMaparray[$words[0]]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
-                $associativeArray[$row2[0]] = "string";
-            } else if (isset($dbNAmeTVC[trim($dbA[$k])][trim($row[0])]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
-                $associativeArray[$row2[0]] = $colMaparray[trim($words[0])];
+        if (!in_array($row[0], $blackListedTables)) {
+
+            $tblMappingDummy[$row[0]]=$row[0];
+            $s = "SELECT column_name ,data_type  FROM information_schema.columns WHERE table_name = '$row[0]'";
+				
+            $r1 = pg_query($con, $s);
+            $associativeArray = array();
+            while ($row2 = pg_fetch_row($r1)) {
+                $colMappingDummy[$row2[0]] = $row2[0];
+                $words = preg_split('/[^\w]/', trim($row2[1]));
+                if (!isset($colMaparray[$words[0]]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
+                    $associativeArray[$row2[0]] = "string";
+                } else if (isset($dbNAmeTVC[trim($dbA[$k])][trim($row[0])]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
+                    $associativeArray[$row2[0]] = $colMaparray[trim($words[0])];
+                }
+                //    echo $row2[0];
+                //echo "\n";
+                //echo $row2[1];
+                //echo "\n";
             }
-            //    echo $row2[0];
-            //echo "\n";
-            //echo $row2[1];
-            //echo "\n";
-        }
-        if (array_key_exists(trim($row[0]), $dbNAmeTVC[trim($dbA[$k])])) {
-            $associativeArrayMain[$row[0]] = $associativeArray;
+            if (array_key_exists(trim($row[0]), $dbNAmeTVC[trim($dbA[$k])])) {
+                $associativeArrayMain[$row[0]] = $associativeArray;
+            }
         }
     }
-	
-	
-	//echo $dbA[$k];
 
-    $con = pg_connect("host=localhost port=5421 dbname=$dbA[$k] user=postgres password=plz");
-   // $s= "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
-$s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY (current_schemas(false))";
+
+    //echo $dbA[$k];
+
+    $con = pg_connect("host=$uCred[3] port=$uCred[2] dbname=$dbA[$k] user=$uCred[0] password=$uCred[1]");
+    // $s= "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema')";
+    $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY (current_schemas(false))";
     $r = pg_query($con, $s);
 
     //$associativeArrayMain = array();
 
     while ($row = pg_fetch_row($r)) {
-        $s = "SELECT column_name ,data_type  FROM information_schema.columns WHERE table_name = '$row[0]'";
-        // echo $row[0];
-        $r1 = pg_query($con, $s);
-        $associativeArray = array();
-        while ($row2 = pg_fetch_row($r1)) {
-            $words = preg_split('/[^\w]/', trim($row2[1]));
-            if (!isset($colMaparray[$words[0]]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
-                $associativeArray[$row2[0]] = "string";
-            } else if (isset($dbNAmeTVC[trim($dbA[$k])][trim($row[0])]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
-                $associativeArray[$row2[0]] = $colMaparray[trim($words[0])];
+        if (!in_array($row[0], $blackListedTables)) {
+
+                        $tblMappingDummy[$row[0]]=$row[0];
+            $s = "SELECT column_name ,data_type  FROM information_schema.columns WHERE table_name = '$row[0]'";
+            // echo $row[0];
+            $r1 = pg_query($con, $s);
+            $associativeArray = array();
+			//$some='';
+            while ($row2 = pg_fetch_row($r1)) {
+				 $colMappingDummy[$row2[0]] = $row2[0];
+                $words = preg_split('/[^\w]/', trim($row2[1]));
+                if (!isset($colMaparray[$words[0]]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
+                    $associativeArray[$row2[0]] = "string";
+					//$some=$row2[0];
+					
+                } else if (isset($dbNAmeTVC[trim($dbA[$k])][trim($row[0])]) && in_array($row2[0], $dbNAmeTVC[trim($dbA[$k])][trim($row[0])])) {
+                    $associativeArray[$row2[0]] = $colMaparray[trim($words[0])];
+				//	 echo  $colMaparray[trim($words[0])];
+					//  $some=$row2[0];
+                }
+                //    echo $row2[0];
+                //echo "\n";
+                //echo $row2[1];
+                //echo "\n";
             }
-            //    echo $row2[0];
-            //echo "\n";
-            //echo $row2[1];
-            //echo "\n";
-        }
-        if (array_key_exists(trim($row[0]), $dbNAmeTVC[trim($dbA[$k])])) {
-            $associativeArrayMain[$row[0]] = $associativeArray;
+            if (array_key_exists(trim($row[0]), $dbNAmeTVC[trim($dbA[$k])])) {
+				//echo $associativeArray[$some];
+                $associativeArrayMain[$row[0]] = $associativeArray;
+
+            }
         }
     }
     if (array_key_exists(trim($dbA[$k]), $dbNAmeTVC)) {
         $associativeArrayMainD[$dbA[$k]] = $associativeArrayMain;
     }
+
+
+    $tQuer = 'select DISTINCT  existing_col_name,new_col_name from metatable2 where existing_col_name <> new_col_name';
+    $statement = $con1->prepare($tQuer);
+//  echo $u;
+    $statement->execute();
+       
+
+    $zo = $statement->fetchAll();
+    for ($k = 0; $k < sizeof($zo); $k++) {
+		//echo 'here';
+        $colMappingDummy[$zo[$k]['existing_col_name']] = $zo[$k]['new_col_name'];
+		//echo 'here';
+		// echo     sizeof($zo[$k]['new_col_name']);
+    }
+    
+
+    $tQuer = 'select DISTINCT  existing_table_name,new_table_name from metatable where existing_table_name <> new_table_name';
+    $statement = $con1->prepare($tQuer);
+//  echo $u;
+    $statement->execute();
+
+    $zo = $statement->fetchAll();
+    for ($k = 0; $k < sizeof($zo); $k++) {
+        $tblMappingDummy[$zo[$k]['existing_table_name']] = $zo[$k]['new_table_name'];
+        //echo   $tblMappingDummy[$zo[$k]['existing_table_name']];
+    }
+//echo str_replace('""', '"', stripslashes(json_encode($colMappingDummy)));
+    $conn = null;
+    $con1 = null;
+    $con12 = null;
 }
 ?>
 
@@ -598,9 +680,7 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
     .z1 {
         z-index: 1;
     }
-    .z2 {
-        z-index: 2;
-    }
+
     .z3 {
         z-index: 3;
     }
@@ -2609,6 +2689,7 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
         height: 100%;
         text-align: center;
         display: none;
+        z-index: 15;
     }
     .EntityTable .EntityTable--columnSelected {
         color: #4a90e2;
@@ -5158,7 +5239,7 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
     }
     .NavDropdown .NavDropdown-content-layer,
     .NavDropdown.open .NavDropdown-button {
-        background-color: #74AFAD;
+        background-color: rgb(0, 113, 167);
     }
     .NavDropdown .NavDropdown-content-layer {
         border-radius: 4px;
@@ -5803,6 +5884,7 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
     }
     .GuiBuilder-sort-limit {
         min-width: 0;
+        padding: 10px;
     }
     .EllipsisButton {
         font-size: 3em;
@@ -6096,45 +6178,8 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
     ._3TLsalUZYdJqkR3JEsP5Cb {
         cursor: pointer;
     }
-    /* tables still need 'cellspacing="0"' in the markup */
-    table {
-        border-collapse: collapse;
-        border-spacing: 0;
-    }
 
-    /* add some styling to the table, padding etc*/
-    table thead th{
-        padding:3px 10px;
-        border-bottom:1px solid #000000;
-        background:#74AFAD;
-        background-size: 50%;
-    }
-    table tbody td{
-        padding:3px 10px;
-        white-space: no
 
-    }
-    table tbody tr:nth-of-type(2n+1) td{
-        background:#CCCCCC;
-    }
-
-    tfoot td{
-        background: #ccc;
-    }
-    #three tbody tr:nth-of-type(2n+1) td{
-        background:#82CE76;
-    }
-    .drag{
-        background:#CCCCCC !important;
-        color:#cCCCCC;
-    }
-
-    .dragtable-drag-handle{
-        height:.5em;
-        width: 5px;
-        float: right;
-        background:green;
-    }
     td div{
 
 
@@ -6182,954 +6227,181 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
         color:blue;
     }
 
-.closeTable{
-    display:block;
-    float:right;
-    width:30px;
-    height:29px;
-    background:url(close.png) no-repeat center center;
-}
+    .closeTable{
+        display:block;
+        float:right;
+        width:30px;
+        height:29px;
+        background:url(close.png) no-repeat center center;
+    }
 
+    #loading {
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        position: fixed;
+        display: block;
+        opacity: 0.7;
+        background-color: #fff;
+        z-index: 99;
+        text-align: center;
+    }
 
+    #loading-image {
+        position: absolute;
+        top: 100px;
+        left: 240px;
+        z-index: 100;
+    }
+    .loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('LoaderIcon.gif') 50% 50% no-repeat rgb(249,249,249);
+    }
+    caption {
+        /* override bootstrap adding 8px to the top & bottom of the caption */
+        padding: 0;
+    }
+    .ui-sortable-placeholder {
+        /* change placeholder (seen while dragging) background color */
+        background: #ddd;
+    }
+    div.table-handle-disabled {
+        /* optional red background color indicating a disabled drag handle */
+        background-color: rgba(255,128,128,0.5);
+        /* opacity set to zero for disabled handles in the dragtable.mod.css file */
+        opacity: 0.7;
+    }
+    /* fix cursor */
+    .tablesorter-blue .tablesorter-header {
+        cursor: default;
+    }
+    .sorter {
+        cursor: pointer;
+    }
 </style>
 
-<script type="text/javascript" src="jquery-1.7.2.js"></script>
-
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>    
-<script type="text/javascript" src="src/js/jquery.dragtable.js"></script>
-
-<link rel="stylesheet" href="src/css/dragtable-default.css" type="text/css" />
-<script>
-
-    jQuery.fn.outerHTML = function (s) {
-        return s
-                ? this.before(s).remove()
-                : jQuery("<p>").append(this.eq(0).clone()).html();
-    };
-    var i = 0;
-
-    $(document).ready(function () {
-
-        function isIE() {
-            return ((navigator.appName == 'Microsoft Internet Explorer') || ((navigator.appName == 'Netscape') && (new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})").exec(navigator.userAgent) != null)));
-        }
-        var queryMain = "";
-        var ua = window.navigator.userAgent;
-        msie = ua.indexOf("MSIE ");
-        if (isIE()) // If Internet Explorer, return version number
-        {
-            //alert(navigator.appName);
-
-            $('.withoutIE').remove();
-
-        } else {
-            //alert('.withoutIE');
-
-            $('.withIE').remove();
-
-            $('table').each(function () {
-
-                $(this).dragtable({
-                    placeholder: 'dragtable-col-placeholder test3',
-                    items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
-                    scroll: true
-                });
-            });
-        }
-        function hideAll() {
-            $(".outerNav").hide();
-            $(".outerNav_").hide();
-
-
-            $(".innerNav").hide();
-            $("#509797").hide();
-            $("#beforeColoumnContainer").hide();
-            $(".rawSecondLevel").hide();
-            $("afterSortClick").hide();
-            $(".groupingTags").hide();
-            $("#sortSpan").hide();
-            $("#sortColoumnList").hide();
-            $("#groupByContainer").hide();
-
-            $("#rawDataList").hide();
-            $(".afterFilter").hide();
-            $(".beforeColoumn").hide();
-            $("#afterColoumn").hide();
-        }
-
-        // var json='{  	"database2": {  		"window": {  			"title": "int",  			"name": "date",  			"width": "date",  			"height": "var"  		},  		"image": {  			"src": "int",  			"name": "var",  			"hOffset": "var",  			"vOffset": "date",  			"alignment": "int"  		},  		"text": {  			"data": "date",  			"size": "int",  			"style": "int",  			"name": "string",  			"hOffset": "string",  			"vOffset": "int",  			"alignment": "string",  			"onMouseUp": "date"  		}  	},  	"database1": {  		"window1": {  			"title": "int",  			"name": "date",  			"width": "date",  			"height": "var"  		},  		"image1": {  			"src": "int",  			"name": "var",  			"hOffset": "var",  			"vOffset": "date",  			"alignment": "int"  		},  		"text1": {  			"data": "date",  			"size": "int",  			"style": "int",  			"name": "string",  			"hOffset": "string",  			"vOffset": "int",  			"alignment": "string",  			"onMouseUp": "date"  		}  	}  }';
-
-        // var json = '{"postgres":{"company":{"id":"integer","name":"text"},"Staff":{"EmpId":"char","Name":"ARRAY","Address":"ARRAY","UID":"integer"},"POSTTYPE":{"ID":"text","POSTTYPE":"text","TITLE":"text"}}}';
-        var result = <?php echo str_replace('""', '"', stripslashes(json_encode($associativeArrayMainD))); ?>;
-        //alert(json.to);
-        //var result = $.parseJSON(json);
-        hideAll();
-        $.each(result, function (k, v) {
-
-            $("#databaseListDummy .List-section-title").text(k);
-            var dummyDB = $("#databaseListDummy").clone();
-            dummyDB.removeAttr("id");
-            dummyDB.prop("class", "outerNav1");
-            dummyDB.css('display', 'block');
-            $("#databaseListDummyContainer").append(dummyDB[0]['outerHTML']);
-
-            $("#databaseListDummy2 .List-section-title").text(k);
-            dummyDB = $("#databaseListDummy2").clone();
-            dummyDB.removeAttr("id");
-            dummyDB.prop("class", "outerNav2");
-            dummyDB.css('display', 'block');
-            $("#databaseListDummyContainer2").append(dummyDB[0]['outerHTML']);
-
-            var dummyInnerNav = $(".innerNav").clone();
-            dummyInnerNav.removeClass("innerNav");
-            dummyInnerNav.addClass("innerNav" + k);
-            $("#inoutNavContainer").append(dummyInnerNav[0]['outerHTML']);
-            $(".innerNav" + k + " .outerNavPointer").text(k);
-
-            var rowResult = $.parseJSON(JSON.stringify(v));
-            $.each(rowResult, function (k1, v1) {
-                $(".innerNav li h4").text(k1);
-                var li = $(".innerNav li").clone();
-                li.children().attr("data-val", k);
-                li.css('display', 'block');
-                li.css('display', 'block');
-
-                $(".innerNav" + k + " ul").append(li[0]['outerHTML']);
-                var colResult = $.parseJSON(JSON.stringify(v1));
-                var dummyColNav = $(".beforeColoumn").clone();
-                dummyColNav.removeClass("beforeColoumn");
-                dummyColNav.addClass("beforeColoumn" + k1);
-                $("#beforeColoumnContainer").append(dummyColNav[0]['outerHTML']);
-                $(".beforeColoumn" + k1 + " .text-default").text(k1);
-                var dummyColNav = $(".sortColoumn").clone();
-                dummyColNav.removeClass("sortColoumn");
-                dummyColNav.addClass("sortColoumn" + k1);
-                $("#sortColoumnContainer").append(dummyColNav[0]['outerHTML']);
-                $(".sortColoumn" + k1 + " .text-default").text(k1);
-                var dummyColNav = $(".groupLists").clone();
-                dummyColNav.removeClass("groupLists");
-                dummyColNav.addClass("groupLists" + k1);
-                $("#groupByContainer").append(dummyColNav[0]['outerHTML']);
-                $(".groupLists" + k1 + " .text-default").text(k1);
-                $.each(colResult, function (k2, v2) {
-                    var dummyColNavAft = $("#afterColoumn").clone();
-                    dummyColNavAft.removeAttr("id");
-                    dummyColNavAft.addClass("afterColoumn" + k1 + "_" + k2);
-                    $("#beforeColoumnContainer").append(dummyColNavAft[0]['outerHTML']);
-                    $(".afterColoumn" + k1 + "_" + k2 + " h3.inline-block").text(k1);
-                    $(".afterColoumn" + k1 + "_" + k2 + " .coloumnBack").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
-                    $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
-                    $(".afterColoumn" + k1 + "_" + k2 + " .addCustomDateFilter").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
-                    $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-tableName", k1);
-                    $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-ColoumnName", k2);
-
-
-                    $(".afterColoumn" + k1 + "_" + k2 + " .text-default").text(k2);
-                    $(".sortColoumn li h4").text(k2);
-                    $(".beforeColoumn li h4").text(k2);
-                    $(".groupLists li h4").text(k2);
-                    var cloneIcon;
-                    if (v2 === "string")
-                        cloneIcon = $("#iconContainer .Icon-string").clone(true);
-                    else if (v2 === "integer")
-                        cloneIcon = $("#iconContainer .Icon-int").clone(true);
-                    else
-                        cloneIcon = $("#iconContainer .Icon-calendar").clone(true);
-                    $(".sortColoumn li svg").remove();
-                    var someHtml = $(".sortColoumn li a").html();
-                    //console.log(  $(".sortColoumn li a").outerHTML());
-                    $(".sortColoumn li a").empty();
-                    $(".sortColoumn li a").append(cloneIcon.outerHTML() + someHtml);
-                    $(".beforeColoumn li svg").remove();
-                    $(".beforeColoumn li a").empty();
-                    $(".beforeColoumn li a").append(cloneIcon.outerHTML() + someHtml);
-                    $(".groupLists li svg").remove();
-                    $(".groupLists li a").empty();
-                    $(".groupLists li a").append(cloneIcon.outerHTML() + someHtml);
-                    var li1 = $(".sortColoumn li").clone(true);
-                    var li2 = $(".beforeColoumn li").clone(true);
-                    var li3 = $(".groupLists li").clone(true);
-                    // console.log(li2.html());
-                    li1.children().attr("data-val", k1);
-                    //console.log(k2);
-                    li1.css('display', 'block');
-                    $(".sortColoumn" + k1 + " ul").append(li1);
-                    li2.children().attr("data-val", k1);
-                    //console.log(k2);
-                    li2.css('display', 'block');
-                    $(".beforeColoumn" + k1 + " ul").append(li2);
-                    li3.children().attr("data-val", k1);
-                    //console.log(k2);
-                    li3.css('display', 'block');
-                    $(".groupLists" + k1 + " ul").append(li3);
-                });
-            });
-        });
-        $("#selectTable").click(function () {
-            $(".outerNav").toggle();
-        });
-        $("#selectTable2").click(function () {
-            $(".outerNav_").css({
-                'position': 'absolute',
-                'left': $(this).offset().left,
-                'top': $("#react_qb_editor").height()
-            }).show();
-        });
-
-        $(".outerNav1").click(function () {
-            $(".innerNav" + $(this).text().trim()).show();
-            $(".outerNav").hide();
-
-
-        });
-        $(".outerNav2").click(function () {
-            $("#tableNameText2").text($(this).text().trim());
-            $.each(result, function (k, v) {
-
-                if ($("#tableNameText2").text().trim() === k.trim())
-                {
-                    var rowResult = $.parseJSON(JSON.stringify(v));
-                    $.each(rowResult, function (k1, v1) {
-                        $("#joinTableNameContainer .selectJoinTable").append("<option value='" + k1.trim() + "'>" + k1.trim() + "</option>");
-
-
-                    });
-
-                }
-            });
-            $("#joinTableNameContainer").show();
-
-            $(".outerNav_").hide();
-        });
-        $("#joinType").change(function () {
-            $("#selectTable2").show();
-
-        });
-        $('#joinTableNameContainer .selectJoinTable').change(function () {
-            var first = 0;
-            var second = 0;
-
-            $.each(result, function (k, v) {
-                if ($("#tableNameText2").text().trim() === k.trim())
-                {
-                    var rowResult = $.parseJSON(JSON.stringify(v));
-                    $.each(rowResult, function (k1, v1) {
-
-                        if ($("#selectSecondTable").val().trim() === k1.trim())
-                        {
-                            $("#joinSecondColoumnNameContainer").find("option").text("Select Coloumn Name for Table:" + $("#selectSecondTable").val());
-
-                            var rowResult2 = $.parseJSON(JSON.stringify(v1));
-
-                            $.each(rowResult2, function (k2, v2) {
-
-
-                                $("#joinSecondColoumnNameContainer .selectJoinTable").append("<option value='" + k2.trim() + "'>" + k2.trim() + "</option>");
-                                first = 1;
-                            });
-
-                        } else if ($("#tableNameText").text().trim() === k1.trim())
-                        {
-                            $("#joinFirstColoumnNameContainer").find("option").text("Select Coloumn Name for Table:" + $("#tableNameText").text().trim());
-
-                            var rowResult2 = $.parseJSON(JSON.stringify(v1));
-
-                            $.each(rowResult2, function (k2, v2) {
-
-
-                                $("#joinFirstColoumnNameContainer .selectJoinTable").append("<option value='" + k2.trim() + "'>" + k2.trim() + "</option>");
-                                second = 1;
-                            });
-
-                        }
-
-                    });
-                }
-            });
-            $("#SecondContainer").show();
-
-        });
-        $(".backOuter").click(function () {
-            // alert("asd");
-            $(".innerNav" + $(this).text().trim()).hide();
-            $(".outerNav").show();
-        });
-        $(".tableName").click(function () {
-            $("#filterWala").removeClass("disabled");
-            $(".innerNav" + $(this).attr("data-val")).hide();
-            $("#tableNameText").text($(this).text());
-            $("#tableNameText").attr("data-attr", $(this).attr("data-val").trim());
-        });
-        $("#selectFilters").click(function () {
-            //  alert(".beforeColoumn"+ $("#tableNameText").text().trim())
-            $("#beforeColoumnContainer").toggle();
-            $(".beforeColoumn" + $("#tableNameText").text().trim()).toggle();
-//            if ($("#selectSecondTable").val().trim().length > 0)
-//            {
-//                console.log(".beforeColoumn" + $("#selectSecondTable").val().trim());
-//                $(".beforeColoumn" + $("#selectSecondTable").val().trim()).toggle();
-//
-//
-//            }
-
-
-        });
-        $("#beforeColoumnContainer .List-item").click(function () {
-            $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).show();
-            $(".beforeColoumn" + $("#tableNameText").text().trim()).hide();
-            $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainer").each(function () {
-                $(this).hide();
-            });
-            if ($(this).find("svg").attr("class").indexOf("Icon-int") >= 0)
-            {
-
-                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerInt").show();
-            } else if ($(this).find("svg").attr("class").indexOf("Icon-calendar") >= 0)
-            {
-                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerCal").show();
-                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".forDateOnly").show();
-               $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".forDateOnly .relativeDate").trigger('click');
-               $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".FilterInput").hide();
-            } else
-            {
-                $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).text().trim()).find(".buttonContainerString").show();
-            }
-        });
-        $(".addFilterButton").click(function () {
-            i++;
-            var dummyColFilAft = $(".afterFilter").clone(true);
-            dummyColFilAft.removeClass("afterFilter");
-            var tableName = $(this).attr("data-colName").replace(/ /g, '');
-            dummyColFilAft.addClass("afterFilter_" + tableName + "_" + i);
-            dummyColFilAft.css('display', 'block');
-            $("#filterWala").append(dummyColFilAft);
-            var dumTbl = $(this).attr("data-tableName").replace(/ /g, '')
-            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").text($("." + tableName + " .text-default").text());
-            //console.log("\""+dumTbl+"\".\""+$("." + tableName + " .text-default").text()+"\"");
-            // alert("\""+tableName+"\".\""+$("." + tableName + " .text-default").text()+"\"");
-            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").attr("data-attr", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"");
-            $(".afterFilter_" + tableName + "_" + i + " .midQuery").text($("." + tableName + " .buttonContainer .Button--purple").text());
-            $(".afterFilter_" + tableName + "_" + i + " .midQuery").attr("data-reactid", $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid"));
-            $(".afterFilter_" + tableName + "_" + i + " .valQuery").text($("." + tableName + " .FilterInputText").val());
-            $(".afterFilter_" + tableName + "_" + i + " .Query-filter-close").attr("data-attr", "afterFilter_" + tableName + "_" + i)
-            var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val()).replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"").replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"");
-            $(".afterFilter_" + tableName + "_" + i + " .valQuery").attr("data-attr", qVal);
-            // alert(tableName);
-            $(".afterFilter_" + tableName + "_" + i).show();
-            $("#beforeFilter").hide();
-            $("." + tableName).hide();
-            $("#beforeColoumnContainer").hide();
-        });
-
-        $(".addCustomDateFilter").click(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            i++;
-            var dummyColFilAft = $(".afterFilter").clone(true);
-            dummyColFilAft.removeClass("afterFilter");
-            var tableName = $(this).attr("data-colName").replace(/ /g, '');
-            dummyColFilAft.addClass("afterFilter_" + tableName + "_" + i);
-            dummyColFilAft.css('display', 'block');
-            $("#filterWala").append(dummyColFilAft);
-            var dumTbl = $("#tableNameText").text().trim();
-            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").text($("." + tableName + " .text-default").text());
-            var refTabName = "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"";
-            $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").attr("data-attr", refTabName);
-            $(".afterFilter_" + tableName + "_" + i + " .midQuery").text("Between");
-            $(".afterFilter_" + tableName + "_" + i + " .midQuery").attr("data-reactid", "");
-            var valueS = $("." + tableName + " #dateRangeStart").val();
-            var valueE = $("." + tableName + " #dateRangeEnd").val();
-            var dateQuery = $(this).attr("data-attr").replace("##firstVal##", valueS.trim()).replace("##secVal##", valueE.trim()).replace("##addText##", refTabName).replace("##addText##", refTabName);
-            $(".afterFilter_" + tableName + "_" + i + " .valQuery").text(valueS + "-" + valueE);
-            $(".afterFilter_" + tableName + "_" + i + " .Query-filter-close").attr("data-attr", "afterFilter_" + tableName + "_" + i)
-            // var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val()).replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"").replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"");
-            $(".afterFilter_" + tableName + "_" + i + " .valQuery").attr("data-attr", dateQuery);
-            $(".afterFilter_" + tableName + "_" + i).show();
-            $("#beforeFilter").hide();
-            $("." + tableName).hide();
-            $("#beforeColoumnContainer").hide();
-        });
-
-        $(".Query-filter-close").click(function () {
-            //alert("."+$(this).attr("data-attr"));
-            var tableName = $(this).attr("data-attr").replace(/ /g, '');
-            $("." + tableName).remove();
-        });
-        $(".coloumnBack").click(function () {
-            //  alert($("#tableNameText").text().trim());
-
-            $("." + $(this).attr("data-colName")).hide();
-            $(".beforeColoumn" + $("#tableNameText").text().trim()).show();
-        });
-        $("#rawDataGroup").click(function () {
-            $("#rawDataList").toggle();
-        });
-        $("#groupByButton").click(function () {
-            // alert("asd");
-            $(".groupLists" + $("#tableNameText").text().trim()).show();
-            $("#groupByContainer").toggle();
-        });
-        $("#rawDataList li").click(function () {
-
-            if (($(this).attr("data-attr").trim() === "*") || ($(this).attr("data-attr").toLowerCase() === "count(*) as count")) {
-                $("#rawDataTextField").text($(this).attr("data-attr"));
-            } else if ($(this).attr("data-attr").trim().toLowerCase() === "count(distinct ##addtext##)") {
-                $("#rawDataTextField").text($(this).text().trim());
-                $(".rawSecondLevel").show();
-                var clonedColoumnList = $(".groupLists" + $("#tableNameText").text().trim()).clone(true);
-                $(".rawSecondLevel .inline-block").text($(this).text().trim());
-
-                clonedColoumnList.removeClass("groupLists" + $("#tableNameText").text().trim());
-                clonedColoumnList.find("li").attr("data-attr", "rawDataOne");
-                clonedColoumnList.find("li").attr("data-tblName", $("#tableNameText").text().trim());
-                clonedColoumnList.find("li").attr("data-val", $(this).attr("data-attr"));
-                clonedColoumnList.addClass("rawDataListDummy");
-                $("#ColoumnListContents").empty();
-                $("#ColoumnListContents").append(clonedColoumnList);
-                $(".rawDataListDummy").show();
-            } else
-            {
-                $("#rawDataTextField").text($(this).text().trim());
-                $(".rawSecondLevel").show();
-                $(".rawSecondLevel .inline-block").text($(this).text().trim());
-
-                var clonedColoumnList = $(".groupLists" + $("#tableNameText").text().trim()).clone(true);
-                clonedColoumnList.removeClass("groupLists" + $("#tableNameText").text().trim());
-                clonedColoumnList.find("li").attr("data-attr", "rawDataOne");
-                clonedColoumnList.find("li").attr("data-tblName", $("#tableNameText").text().trim());
-                clonedColoumnList.find("li").attr("data-val", $(this).attr("data-attr"));
-                clonedColoumnList.find("li .Icon-string").each(function () {
-                    $(this).parent().parent().hide();
-                });
-                clonedColoumnList.find("li .Icon-calendar").each(function () {
-                    $(this).parent().parent().hide();
-                });
-                ;
-
-                clonedColoumnList.addClass("rawDataListDummy");
-                $("#ColoumnListContents").empty();
-                $("#ColoumnListContents").append(clonedColoumnList);
-                $(".rawDataListDummy").show();
-            }
-            $("#rawDataList").hide();
-        });
-        $(".rawSecondLevel .text-grey-3").click(function () {
-            $(".rawSecondLevel").toggle();
-            $(".rawDataList").toggle();
-        });
-        $("#groupByContainer li").click(function () {
-            if ($(this).attr("data-attr") === "rawDataOne")
-            {
-                var mainChar = "\"" + $(this).attr("data-tblName") + "\".\"" + $(this).text().trim() + "\"";
-                var someData = $("#rawDataTextField").text();
-                var upperCase = new RegExp('[A-Z]');
-                var text = "";
-                if (mainChar.match(upperCase))
-                    text = $(this).attr("data-val").replace('##addText##', "\"" + mainChar + "\"");
-                else
-                    text = $(this).attr("data-val").replace('##addText##', mainChar);
-
-                $("#rawDataTextField").text(text);
-                $(".rawSecondLevel").hide();
-            } else {
-                $(".groupingTags .QueryOption span").text($(this).text().trim());
-                $(".groupingTags .QueryOption").attr("data-attr", "\"" + $("#tableNameText").text().trim() + "\".\"" + $(this).text().trim() + "\"");
-                $(".groupingTags .groupingTagAnchor").attr("data-attr", "groupingTags_" + $(this).text().trim());
-                var grpClone = $(".groupingTags").clone(true);
-                grpClone.removeClass("groupingTags");
-                grpClone.addClass("groupingTags_" + $(this).text().trim());
-                grpClone.addClass("groupingTagsLive");
-                $(".groupingTags_" + $(this).text().trim()).remove();
-                $(".groupingTags").parent().append(grpClone);
-                $(".groupingTags_" + $(this).text().trim()).show();
-                //$("#groupByButton").hide();
-                $("#groupByContainer").hide();
-            }
-
-        });
-        //  $(".").show();
-        $(".groupingTagAnchor").click(function () {
-            $("." + $(this).attr("data-attr")).hide();
-            $("#groupByButton").show();
-        });
-        $("#sortButton").click(function () {
-            //alert("das");
-            $("#sortSpan").show();
-        });
-        $("#sortFieldPicker").click(function () {
-
-            // alert("da");
-            $(".sortColoumn" + $("#tableNameText").text().trim()).show();
-            $("#sortColoumnContainer").toggle();
-        });
-        $("#sortColoumnContainer .List-item").click(function () {
-            var someData = $(this).text();
-            // alert(someData);
-
-            $("#sortTag").text(someData);
-            $("#sortTag").attr("data-attr", "\"" + $("#tableNameText").text().trim() + "\".\"" + someData.trim() + "\"")
-            $("#beforeSortClick").hide();
-            $("#afterSortClick").show();
-            $("#sortColoumnContainer").hide();
-            //$(".sortColoumn"+ $("#tableNameText").text().trim()).hide();
-
-
-        });
-        $("#removeSortTag").click(function () {
-            $("#afterSortClick").hide();
-            $("beforeSortClick").show();
-            $("#sortTag").text("");
-
-        });
-        $("#sortOrder").click(function () {
-            if ($("#sortOrder").text().trim() === "ascending") {
-                $("#sortOrder").text("descending");
-                $("#sortOrder").attr("data-attr", "DESC");
-            } else {
-                $("#sortOrder").attr("data-attr", "ASC");
-                $("#sortOrder").text("ascending");
-            }
-
-        });
-        $("#limit>ul>li").click(function () {
-            $("#limit>ul>li.Button--active").removeClass("Button--active");
-            $(this).addClass("Button--active");
-        });
-
-
-        $(".filterButtonList button").click(function () {
-            $(".filterButtonList button.Button--purple").removeClass("Button--purple");
-            $(this).addClass("Button--purple");
-        });
-        $(".forDateOnly button").click(function () {
-            $(".forDateOnly button.Button--Grey").removeClass("Button--Grey");
-            $(this).addClass("Button--Grey");
-            var parSome = $(this).parent().parent();
-            if ($(this).hasClass("specificDate"))
-            {
-                parSome.find(".buttonContainerCal").hide();
-               // parSome.find(".FilterInput").hide();
-                parSome.find(".FilterPopover-footer").hide();
-                parSome.find(".forCustomDateOnly").show();
-
-            } else
-            {
-                parSome.find(".buttonContainerCal").show();
-               // parSome.find(".FilterInput").show();
-                parSome.find(".FilterPopover-footer").show();
-                parSome.find(".forCustomDateOnly").hide();
-
-            }
-        });
-
-        $("#saveQuery").click(function () {
-            // aler("");
-            $(".Modal1").css("z-index", 9);
-            $(".Modal1").show();
-        });
-        $("#closeSaveDiv").click(function () {
-            $(".Modal1").css("z-index", 0);
-            $(".Modal1").hide();
-        });
-
-        $("#formMain").submit(function () {
-            /*
-             var str = $(this).serialize();
-             $.ajax('action2.php', str, function(result){
-             // the result variable will contain any text echoed by getResult.php
-             });
-             return(false);*/
-            // var selectClause = " * ";
-            var secselectClause = " * ";
-            var whereclause = "";
-            var firstTime = new Boolean(true);
-            $('.Query-filters:visible').each(function (i, obj) {
-                if (firstTime)
-                    whereclause += " Where ";
-                else
-                    whereclause += " AND ";
-
-                // whereclause += $(this).find(".colQuery").attr("data-attr");
-                whereclause += $(this).find(".valQuery").attr("data-attr");
-                firstTime = false;
-                //test
-            });
-            var firstTime = new Boolean(true);
-            $('.groupingTagsLive:visible').each(function (i, obj) {
-                if (firstTime) {
-                    whereclause += " group by " + $(this).find(".QueryOption").attr("data-attr").trim();
-                    secselectClause = $(this).find(".QueryOption").attr("data-attr").trim();
-                } else {
-                    whereclause += " , " + $(this).find(".QueryOption").attr("data-attr").trim();
-
-                    secselectClause += " , " + $(this).find(".QueryOption").attr("data-attr").trim();
-                }
-                firstTime = false;
-                //test
-            });
-            var aggData = "";
-            if ($("#rawDataTextField").text().trim() === "Raw data") {
-
-            } else {
-                if (secselectClause.trim() === "*")
-                    secselectClause = $("#rawDataTextField").text();
-                else
-                    secselectClause += " , " + $("#rawDataTextField").text();
-
-            }
-            var sortInfo = ""
-            if ($("#afterSortClick #sortTag").text().trim().length > 0) {
-                //alert($("#sortTag").text()+$("#sortOrder").text());
-                sortInfo = " order by " + "\"" + $("#sortTag").text().trim() + "\"" + " " + $("#sortOrder").attr("data-attr").trim();
-                // selectClause += " ,"+$("#sortTag").text().trim();
-            }
-            var limit = "";
-            if ($("#limit .Button--active").text().trim() === "None") {
-            } else {
-                limit = " LIMIT " + $("#limit .Button--active").text();
-            }
-            var joinclause = "";
-            var tableNameToSend = $("#tableNameText").text().trim();
-
-            if ($("#selectSecondTable").val().trim().length > 0)
-            {
-                tableNameToSend += " , " + $("#selectSecondTable").val()
-                //alert($("#selectSecondTableCustomers").val());
-                joinclause += $("#joinType").val() + " \"" + $("#selectSecondTable").val() + "\" ON \"" + $("#tableNameText").text().trim() + "\"." + "\"" + $("#selectFirstJoinCol").val() + "\" = \"" + $("#selectSecondTable").val() + "\"." + "\"" + $("#selectSecondJoinCol").val() + "\"";
-            }
-            queryMain = "Select " + secselectClause + " from \"" + $("#tableNameText").text().trim() + "\"" + joinclause + whereclause + sortInfo + limit;
-            //alert(queryMain);
-            //alert($("#tableNameText").text().trim());
-            var dataBaseName = $("#tableNameText").attr("data-attr");
-            $.ajax({
-                url: 'action2.php',
-                type: "GET",
-                data: {
-                    queryString: queryMain,
-                    tableName: tableNameToSend,
-                    selectTags: secselectClause,
-                    databaseName: dataBaseName
-                },
-                beforeSend: function () {
-                    $('#loader-icon').show();
-
-                },
-                complete: function () {
-                    $('#loader-icon').hide();
-
-
-                },
-                success: function (data) {
-                    // console.log(data);
-                    $('.Visualization').empty();
-                    $('.Visualization').append(data);
-                    $('#loader-icon').hide();
-
-                    if (msie > 0) // If Internet Explorer, return version number
-                    {
-
-                    } else {
-                        //alert('.Visualization');
-                        $('table').each(function () {
-
-                            $(this).dragtable({
-                                placeholder: 'dragtable-col-placeholder test3',
-                                items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
-                                scroll: true
-                            });
-                        });
-                    }
-
-
-
-                },
-                error: function () {}
-            });
-        });
-        $("#closeTable").click(function(){
-         $("#formAfterClick").hide();          
-        });
-        $("#tog_name").click(function () {
-            $("#tog_section").toggle();
-        });
-        $(".Icon-download").click(function ()
-        {
-            $('#hidden-type').val($('.Visualization').html());
-            $('#export-form').submit();
-            $('#hidden-type').val('');
-            /*	$.ajax({
-             url: 'csvDownload.php',
-             type: "POST",
-             data: {
-             table:  $('.Visualization').html()
-             },
-             beforeSend: function() {},
-             complete: function() {},
-             success: function(data) {
-             console.log(data);
-             
-             },
-             error: function() {}
-             });	*/
-
-        });
-
-        $('#refresh').click(function () {
-            location.reload();
-        });
-        $("#saveTag").click(function ()
-        {
-            var coloumnName = "";
-            $('#displayTable > thead > tr > th').each(function () {
-                coloumnName += $(this).attr("data-attr").trim() + ",";
-            });
-            coloumnName = coloumnName.substring(0, coloumnName.length - 1);
-            // alert(queryMain);
-            //alert(coloumnName);
-            //alert($('#tagName').val());
-            //alert($('#tagDescription').val());
-
-            $.ajax({
-                url: 'saveTag.php',
-                type: "GET",
-                data: {
-                    queryColTagForm: coloumnName,
-                    queryMain: $('#queryForTagForm').val(),
-                    tagName: $('#tagName').val(),
-                    tagDescription: $('#tagDescription').val()
-                },
-                beforeSend: function () {},
-                complete: function () {},
-                success: function (data) {
-                    queryMain = "";
-                    //alert(data);
-
-                    $('.Visualization').empty();
-                    $('.Visualization').append(data);
-                    $('#tagName').val("");
-                    $('#tagDescription').val("");
-                    $('#queryColTagForm').val("");
-                    $('#queryForTagForm').val("");
-                    $(".Modal1").hide();
-                },
-                error: function () {
-
-                    alert("error");
-                }
-            });
-
-        });
-
-
-        $(document).mouseup(function (e)
-        {
-            var container = $(".PopoverBody--withArrow");
-
-            if (!container.is(e.target) // if the target of the click isn't the container...
-                    && container.has(e.target).length === 0) // ... nor a descendant of the container
-            {
-                container.hide();
-               // $(".forCustomDateOnly").hide();
-                
-            }
-            container = $("#sortSpan");
-
-            if (!container.is(e.target) // if the target of the click isn't the container...
-                    && container.has(e.target).length === 0) // ... nor a descendant of the container
-            {
-                container.hide();
-               // $(".forCustomDateOnly").hide();
-            }
-            container = $("#formAfterClick");
-
-            if (!container.is(e.target) // if the target of the click isn't the container...
-                    && container.has(e.target).length === 0) // ... nor a descendant of the container
-            {
-                container.hide();
-             //   $(".forCustomDateOnly").hide();
-            }
-
-
-        });
-
-        function exportTableToCSV($table, filename) {
-            var $rows = $table.find('tr:has(td)'),
-                    // Temporary delimiter characters unlikely to be typed by keyboard
-                    // This is to avoid accidentally splitting the actual contents
-                    tmpColDelim = String.fromCharCode(11), // vertical tab character
-                    tmpRowDelim = String.fromCharCode(0), // null character
-
-                    // actual delimiter characters for CSV format
-                    colDelim = '","',
-                    rowDelim = '"\r\n"',
-                    // Grab text from table into CSV formatted string
-                    csv = '"' + $rows.map(function (i, row) {
-                        var $row = $(row),
-                                $cols = $row.find('td');
-                        return $cols.map(function (j, col) {
-                            var $col = $(col),
-                                    text = $col.text();
-//console.log(text);
-                            return text.replace('"', '""'); // escape double quotes
-
-                        }).get().join(tmpColDelim);
-                    }).get().join(tmpRowDelim)
-                    .split(tmpRowDelim).join(rowDelim)
-                    .split(tmpColDelim).join(colDelim) + '"',
-                    // Data URI
-                    csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
-//alert(encodeURIComponent(csv));
-
-            $(this).attr({
-                'download': filename,
-                'href': csvData,
-                'target': '_blank'
-            });
-        }
-        $(document).on('click', ".formLink", function () {
-            //alert();
-            $("#f_GridContainer").empty();
-            var formAfterClick = $("#formAfterClick");
-            var trPar = $(this).parent();
-            var thlist = new Array();
-
-            $(this).parent().parent().parent().find("th").each(function () {
-                thlist.push($(this).text());
-
-            });
-            var tdlist = new Array();
-
-            $("#tableName_Form").text($("#tableNameText").text().trim());
-            $("#clickedId_Form").text($(this).text().trim());
-            var Grid_mb2 = formAfterClick.find(".gridList_f");
-            trPar.find("td").each(function () {
-                tdlist.push($(this).text());
-
-            });
-
-            for (var i = 0; i < thlist.length; i++)
-            {
-                Grid_mb2.find(".f_colName").text(thlist[i]);
-                Grid_mb2.find(".f_colVal").text(tdlist[i]);
-                var cloneGr = Grid_mb2.clone(true)
-                //  cloneGr.show();
-
-                $("#f_GridContainer").append(cloneGr);
-                // alert( + "===>" + );
-            }
-            $("#formAfterClick").show();
-        });
-        /*
-         $('.Icon-reference').click(
-         function() { 
-         exportTableToCSV.apply(this, [$('#displayTable'), 'filename.csv']);
-         });*/
-    });</script>
 <Html>
-    <div mb-react-component="Navbar" ng-controller="Nav" class="Nav ng-scope">
-        <nav class="CheckBg CheckBg-offset relative bg-brand sm-py2 sm-py1 xl-py3">
-            <ul class="pl4 pr1 flex align-center">
-                <li class="pl1"><a href="dash.php" class="NavItem cursor-pointer text-white text-bold no-decoration flex align-center px2 transition-background" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;Dashboard">Dashboard</a>
-                </li>
-                </li>
-                <li class="pl3"><a href="#" class="NavNewQuestion rounded inline-block bg-white text-brand text-bold cursor-pointer px2 no-decoration transition-all" style="padding-left:1.0rem;padding-right:1.0rem;padding-top:0.75rem;padding-bottom:0.75rem;" data-metabase-event="Navbar;New Question"><span  >New </span><span   class="hide sm-show">Question</span></a>
-                </li>
-                <li class="flex-align-right transition-background">
-                    <div class="inline-block text-white">
-                        <div data-reactid=".0.0.5.0.0" class="NavDropdown inline-block cursor-pointer open" >
-                            <a data-reactid=".0.0.5.0.0.0" class="NavDropdown-button NavItem flex align-center p2 transition-background" data-metabase-event="Navbar;Profile Dropdown;Toggle">
-                                <div data-reactid=".0.0.5.0.0.0.0" class="NavDropdown-button-layer" >
-                                    <div data-reactid=".0.0.5.0.0.0.0.0" class="flex align-center" >
-                                        <div id="tog_name" data-reactid=".0.0.5.0.0.0.0.0.0" style="font-size:0.85rem;border-width:1px;border-style:solid;border-radius:99px;width:2rem;height:2rem;background-color:transparent;" class="flex align-center justify-center bg-brand"><?php echo $_SESSION['uname']; ?></div>
-                                        <svg data-reactid=".0.0.5.0.0.0.0.0.1" name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="Dropdown-chevron ml1">
-                                        <path data-reactid=".0.0.5.0.0.0.0.0.1.0" d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
+    <body>
+        <div class="loader"></div>
+        <?php include("navHeader.php"); ?>
+        <div class="QueryBuilder-section flex align-center py1 lg-py2 xl-py3 wrapper">
+            <div class="Entity">
+                <div class="flex align-baseline">
+                    <h1 class="Header-title-name my1">New question</h1>
+                    <span> </span>
+                </div>
+            </div>
+            <div class="flex-align-right">
+                <div class="flex align-center">
+                    
+                    <span class="Header-buttonSection">
+                        <a   title="Download Data" class="mx1 transition-color text-grey-4 text-brand-hover">
+                            <svg data-reactid=".7.0.2.1.1.0" name="download" fill="currentcolor" viewBox="0 0 11 17" height="16px" width="16px" class="Icon Icon-download"><path data-reactid=".7.0.2.1.1.0.0" d="M4,8 L4,0 L7,0 L7,8 L10,8 L5.5,13.25 L1,8 L4,8 Z M11,14 L0,14 L0,17 L11,17 L11,14 Z"/></svg>                        </svg>
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="z2" id="react_qb_editor">
+            <div class="wrapper">
+                <div class="GuiBuilder rounded shadowed GuiBuilder--expand">
+                    <div class="GuiBuilder-row flex">
+                        <div class="GuiBuilder-section GuiBuilder-data flex align-center arrow-right">
+                            <span class="GuiBuilder-section-label Query-label">Data</span>
+                            <div>
+                                <a id="selectTable" class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled">
+                                    <span class="px2 py2 text-bold cursor-pointer text-default">
+                                        <span   class="text-bold no-decoration" id="tableNameText" style="display:none">Select a table</span>
+                                        <span   class="text-bold no-decoration" id="tableNameTextDummy">Select a table or view</span>
+
+                                        <svg name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="ml1">
+                                        <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z " />
                                         </svg>
-                                    </div>
-                                </div>
-                            </a>
-                            <div data-reactid=".0.0.5.0.0.1" class="NavDropdown-content right" id="tog_section" style="display:none;">
-                                <ul data-reactid=".0.0.5.0.0.1.0" class="NavDropdown-content-layer">
-                                    <?php
-                                    $a = trim("Admin");
-                                    $b = trim($_SESSION['utype']);
-
-                                    if ($a == $b) {
-                                        echo '<li data-reactid=".0.0.5.0.0.1.0.1"><a data-reactid=".0.0.5.0.0.1.0.1.0" href="admin.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Enter Admin">Admin Panel</a></li>';
-                                    } else {
-                                        
-                                    }
-                                    ?>
-                                    <li data-reactid=".0.0.5.0.0.1.0.5" class="border-top border-light"><a data-reactid=".0.0.5.0.0.1.0.5.0" href="logout.php" class="Dropdown-item block text-white no-decoration" data-metabase-event="Navbar;Profile Dropdown;Logout">Logout</a></li>
-
-                                </ul>
+                                    </span>
+                                    <span class="hide"></span>
+                                </a>
                             </div>
                         </div>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="QueryBuilder-section flex align-center py1 lg-py2 xl-py3 wrapper">
-        <div class="Entity">
-            <div class="flex align-baseline">
-                <h1 class="Header-title-name my1">New question</h1>
-                <span> </span>
-            </div>
-        </div>
-        <div class="flex-align-right">
-            <div class="flex align-center">
-                <span data-reactid=".1.0.1.0.$0" class="Header-buttonSection"><a data-reactid=".1.0.1.0.$0.$save" id="saveQuery" class="no-decoration h4 px1 text-grey-4 text-brand-hover text-uppercase"><span data-reactid=".1.0.1.0.$0.$save.0">Save</span><span data-reactid=".1.0.1.0.$0.$save.1"></span></a></span>
-             
-                <span class="Header-buttonSection">
-                    <a   title="Download Data" class="mx1 transition-color text-grey-4 text-brand-hover">
-                        <svg data-reactid=".7.0.2.1.1.0" name="download" fill="currentcolor" viewBox="0 0 11 17" height="16px" width="16px" class="Icon Icon-download"><path data-reactid=".7.0.2.1.1.0.0" d="M4,8 L4,0 L7,0 L7,8 L10,8 L5.5,13.25 L1,8 L4,8 Z M11,14 L0,14 L0,17 L11,17 L11,14 Z"/></svg>                        </svg>
-                    </a>
-                </span>
-            </div>
-        </div>
-    </div>
-    <div class="z2" id="react_qb_editor">
-        <div class="wrapper">
-            <div class="GuiBuilder rounded shadowed GuiBuilder--expand">
-                <div class="GuiBuilder-row flex">
-                    <div class="GuiBuilder-section GuiBuilder-data flex align-center arrow-right">
-                        <span class="GuiBuilder-section-label Query-label">Data</span>
-                        <div>
-                            <a id="selectTable" class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled">
-                                <span class="px2 py2 text-bold cursor-pointer text-default">
-                                    <span   class="text-grey-4 no-decoration" id="tableNameText">Select a table</span>
-                                    <svg name="chevrondown" fill="currentcolor" viewBox="0 0 32 32" height="8px" width="8px" class="ml1">
-                                    <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z " />
-                                    </svg>
-                                </span>
-                                <span class="hide"></span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="GuiBuilder-section GuiBuilder-filtered-by flex align-center">
-                        <span class="GuiBuilder-section-label Query-label">Filtered by</span>
-                        <div class="Query-section disabled" id="filterWala">
-                            <div style = "display:none" class="Query-filters afterFilter">
-                                <div class="Query-filterList scroll-show scroll-show--horizontal filterRow">
-                                    <div class="Query-filter p1 pl2">
-                                        <div>
+                        <div class="GuiBuilder-section GuiBuilder-filtered-by flex align-center">
+                            <span class="GuiBuilder-section-label Query-label">Filtered by</span>
+                            <div class="Query-section disabled" id="filterWala">
+                                <div style = "display:none" class="Query-filters afterFilter">
+                                    <div class="Query-filterList scroll-show scroll-show--horizontal filterRow">
+                                        <div class="Query-filter p1 pl2">
                                             <div>
-                                                <div style="padding:0.5em;padding-top:0.3em;padding-bottom:0.3em;padding-left:0;" class="flex align-center">
-                                                    <div class="flex align-center">
-                                                        <div class="Filter-section Filter-section-field selected"><span class="QueryOption"><span   class="colQuery">BTC selling price</span></span>
+                                                <div>
+                                                    <div style="padding:0.5em;padding-top:0.3em;padding-bottom:0.3em;padding-left:0;" class="flex align-center">
+                                                        <div class="flex align-center">
+                                                            <div class="Filter-section Filter-section-field selected"><span class="QueryOption"><span   class="colQuery">BTC selling price</span></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="Filter-section Filter-section-operator"><span>&nbsp;</span><a class="QueryOption flex align-center midQuery">is not</a>
                                                         </div>
                                                     </div>
-                                                    <div class="Filter-section Filter-section-operator"><span>&nbsp;</span><a class="QueryOption flex align-center midQuery">is not</a>
-                                                    </div>
-                                                </div>
-                                                <div class="flex align-center flex-wrap">
-                                                    <div class="Filter-section Filter-section-value"><span class="QueryOption valQuery">as</span>
+                                                    <div class="flex align-center flex-wrap">
+                                                        <div class="Filter-section Filter-section-value"><span class="QueryOption valQuery">as</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <a class="text-grey-2 no-decoration px1 flex align-center Query-filter-close">
+                                                <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-close">
+                                                <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
+                                                </svg>
+                                            </a>
                                         </div>
-                                        <a class="text-grey-2 no-decoration px1 flex align-center Query-filter-close">
+                                    </div>
+                                </div>
+                                <div class="mx2">
+                                    <a id="selectFilters" class="no-decoration flex align-center">
+                                        <span class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
+                                            <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
+                                                <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
+                                                <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
+                                                </svg>
+                                            </div>
+                                            <span    id="beforeFilter" class="ml1">Add filters to narrow your answer</span>
+                                        </span>
+                                        <span class="hide"></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="GuiBuilder-row flex flex-full">
+                        <div class="GuiBuilder-section GuiBuilder-view flex align-center px1">
+                            <span class="GuiBuilder-section-label Query-label">View</span>
+                            <div class="Query-section Query-section-aggregation" id="rawDataGroup">
+                                <div class="tether-target tether-element-attached-center tether-target-attached-center tether-element-attached-top tether-target-attached-bottom">
+                                    <div class="Query-section Query-section-aggregation cursor-pointer"><span id="rawDataTextField" class="text-bold no-decoration">Raw data</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="Query-section Query-section-breakout ml1" id="groupByButton">
+                                <div>
+                                    <span class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
+                                        <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
+                                            <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
+                                            <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
+                                            </svg>
+                                        </div>
+                                        <span   class="ml1">Add a grouping</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="display:none" class="Query-section Query-section-breakout ml1 groupingTags">
+                                <span class="text-bold">by</span>
+                                <div class="flex align-center">
+                                    <div class="flex align-center">
+                                        <div class="View-section-breakout SelectionModule p1 selected"><span class="QueryOption"><span  >title</span></span>
+                                        </div>
+                                        <a class="text-grey-2 no-decoration pr1 flex align-center groupingTagAnchor">
                                             <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-close">
                                             <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
                                             </svg>
@@ -7137,245 +6409,452 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
                                     </div>
                                 </div>
                             </div>
-                            <div class="mx2">
-                                <a id="selectFilters" class="no-decoration flex align-center">
-                                    <span class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
-                                        <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
-                                            <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
-                                            <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
-                                            </svg>
-                                        </div>
-                                        <span    id="beforeFilter" class="ml1">Add filters to narrow your answer</span>
+                        </div>
+                        <div class="flex-full"></div>
+
+
+                        <div class="GuiBuilder-section GuiBuilder-sort-limit flex align-center"><a id="sortButton" class="no-decoration flex align-center"><span   class="no-decoration text-bold ">Sort and Limits Option</span></a>
+                        </div>
+                        <div class="GuiBuilder-section GuiBuilder-sort-limit flex align-center">
+                            <a><span class="no-decoration text-bold" id="refresh" >Reset</span></a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="joinContainer" style="display:none;"class="z2">
+            <div class="wrapper">
+                <div class="GuiBuilder rounded shadowed GuiBuilder--expand">
+                    <div class="GuiBuilder-row flex">
+                        <div class="GuiBuilder-section GuiBuilder-data flex align-center arrow-right">
+                            <span class="GuiBuilder-section-label Query-label">Data</span>
+                            <div>
+                                <span class="px2 py2 text-bold cursor-pointer text-default">
+                                    <select class="ui dropdown selectJoin" id="joinType">
+                                        <option value="">Select Join</option>
+                                        <option value="Join">Join</option>
+                                        <option value="Full Outer Join">Outer Join</option>
+                                        <option value="Inner Join">Inner Join</option>
+                                        <option value="Left Join">Left Join</option>
+                                        <option value="Right Join">Right Join</option>
+
+                                    </select>
+                                </span>
+                            </div>
+                            <div>
+                                <a style="display:none;"class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="selectTable2">
+                                    <span class="px2 py2 text-bold cursor-pointer text-default">
+                                        <span id="tableNameText2" class="text-grey-4 no-decoration">Select Database</span>
+                                        <svg class="ml1" width="8px" height="8px" viewBox="0 0 32 32" fill="currentcolor" name="chevrondown">
+                                        <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
+                                        </svg>
                                     </span>
                                     <span class="hide"></span>
                                 </a>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="GuiBuilder-row flex flex-full">
-                    <div class="GuiBuilder-section GuiBuilder-view flex align-center px1">
-                        <span class="GuiBuilder-section-label Query-label">View</span>
-                        <div class="Query-section Query-section-aggregation" id="rawDataGroup">
-                            <div class="tether-target tether-element-attached-center tether-target-attached-center tether-element-attached-top tether-target-attached-bottom">
-                                <div class="Query-section Query-section-aggregation cursor-pointer"><span id="rawDataTextField" class="View-section-aggregation QueryOption py1 pl1">Raw data</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="Query-section Query-section-breakout ml1" id="groupByButton">
-                            <div>
-                                <span class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
-                                    <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
-                                        <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
-                                        <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
-                                        </svg>
-                                    </div>
-                                    <span   class="ml1">Add a grouping</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div style="display:none" class="Query-section Query-section-breakout ml1 groupingTags">
-                            <span class="text-bold">by</span>
-                            <div class="flex align-center">
-                                <div class="flex align-center">
-                                    <div class="View-section-breakout SelectionModule p1 selected"><span class="QueryOption"><span  >title</span></span>
-                                    </div>
-                                    <a class="text-grey-2 no-decoration pr1 flex align-center groupingTagAnchor">
-                                        <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-close">
-                                        <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex-full"></div>
-                    <div class="GuiBuilder-section GuiBuilder-sort-limit flex align-center"><a id="sortButton" class="no-decoration flex align-center"><span   class=" no-decoration text-brand text-bold ">Sort and LIMIT Options</span></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="joinContainer" style="display:none;"class="z2">
-        <div class="wrapper">
-            <div class="GuiBuilder rounded shadowed GuiBuilder--expand">
-                <div class="GuiBuilder-row flex">
-                    <div class="GuiBuilder-section GuiBuilder-data flex align-center arrow-right">
-                        <span class="GuiBuilder-section-label Query-label">Data</span>
-                        <div>
-                            <span class="px2 py2 text-bold cursor-pointer text-default">
-                                <select class="ui dropdown selectJoin" id="joinType">
-                                    <option value="">Select Join</option>
-                                    <option value="Join">Join</option>
-                                    <option value="Full Outer Join">Outer Join</option>
-                                    <option value="Inner Join">Inner Join</option>
-                                    <option value="Left Join">Left Join</option>
-                                    <option value="Right Join">Right Join</option>
-
-                                </select>
-                            </span>
-                        </div>
-                        <div>
-                            <a style="display:none;"class="no-decoration flex align-center tether-target tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="selectTable2">
+                            <div style="display:none;" id="joinTableNameContainer">
                                 <span class="px2 py2 text-bold cursor-pointer text-default">
-                                    <span id="tableNameText2" class="text-grey-4 no-decoration">Select Database</span>
-                                    <svg class="ml1" width="8px" height="8px" viewBox="0 0 32 32" fill="currentcolor" name="chevrondown">
-                                    <path d="M1 12 L16 26 L31 12 L27 8 L16 18 L5 8 z "/>
-                                    </svg>
-                                </span>
-                                <span class="hide"></span>
-                            </a>
-                        </div>
-                        <div style="display:none;" id="joinTableNameContainer">
-                            <span class="px2 py2 text-bold cursor-pointer text-default">
-                                <select class="ui dropdown selectJoinTable" id="selectSecondTable">
-                                    <option value="">Select Table</option>
-
-                                </select>
-                            </span>
-                        </div>
-                        <div style="display:none;" id="SecondContainer">
-                            <div>
-                                <span class="px2 py2 text-bold cursor-pointer text-default">
-                                    ON
-                                </span>
-                            </div>
-                            <div id="joinFirstColoumnNameContainer">
-                                <span class="px2 py2 text-bold cursor-pointer text-default">
-                                    <select class="ui dropdown selectJoinTable"  id="selectFirstJoinCol">
-                                        <option value=""></option>
+                                    <select class="ui dropdown selectJoinTable" id="selectSecondTable">
+                                        <option value="">Select Table</option>
 
                                     </select>
                                 </span>
+                            </div>
+                            <div style="display:none;" id="SecondContainer">
+                                <div>
+                                    <span class="px2 py2 text-bold cursor-pointer text-default">
+                                        ON
+                                    </span>
+                                </div>
+                                <div id="joinFirstColoumnNameContainer">
+                                    <span class="px2 py2 text-bold cursor-pointer text-default">
+                                        <select class="ui dropdown selectJoinTable"  id="selectFirstJoinCol">
+                                            <option value=""></option>
+
+                                        </select>
+                                    </span>
+                                </div>
+                                <div >
+                                    <span class="px2 py2 text-bold cursor-pointer text-default">
+                                        Equals
+                                    </span>
+                                </div>
+                                <div  id="joinSecondColoumnNameContainer">
+                                    <span class="px2 py2 text-bold cursor-pointer text-default">
+                                        <select class="ui dropdown selectJoinTable"  id="selectSecondJoinCol">
+                                            <option value=""></option>
+
+                                        </select>
+                                    </span>
+                                </div>
+
                             </div>
                             <div >
-                                <span class="px2 py2 text-bold cursor-pointer text-default">
-                                    Equals
-                                </span>
-                            </div>
-                            <div  id="joinSecondColoumnNameContainer">
-                                <span class="px2 py2 text-bold cursor-pointer text-default">
-                                    <select class="ui dropdown selectJoinTable"  id="selectSecondJoinCol">
-                                        <option value=""></option>
-
-                                    </select>
-                                </span>
+                               
                             </div>
 
                         </div>
-                        <div >
-                            <input type="submit" id="refresh"class="Button Button--primary circular" value="Refresh"></input>
-                        </div>
-
                     </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="flex z1" id="react_qb_viz">
+            <div class="wrapper full relative mb2 z1 flex flex-column">
+                <div class="relative flex flex-no-shrink mt3 mb1">
+                    <span class="relative z3">
+                        <noscript  ></noscript>
+                    </span>
+                    <form id="formMain" action="javascript:void(0);" method="post" >
+                        <div class="absolute flex layout-centered left right z2">
+                            <input type="submit" class="Button Button--primary circular RunButton" value="Submit" style="width:100px;font-size: 0.9em;font-family: Lato,Helvetica Neue,Helvetica,sans-serif;"/>
+                            &nbsp;
+                            &nbsp;
+                            <input type="button" id="saveQuery" style="width:100px;font-size: 0.9em;font-family: Lato,Helvetica Neue,Helvetica,sans-serif;" value= "Save" class="Button Button--primary circular RunButton"/> 
+                            
+                        </div>
+                    </form>
+                    <div class="absolute right z3 flex align-center"></div>
+                </div>
+                <div class="withoutIE flex flex-full z1 px1">
+
+                    <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0" class="flex-full relative border-bottom">
+                        <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" class="absolute top bottom left Visualization right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+
+                        </div>
+                    </div>    
+                </div>
+                <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" class="withIE absolute top bottom left Visualization right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
+
+                </div>
+            </div>
+        </div>
+        <span class="PopoverContainer tether-element tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="inoutNavContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(85px) translateY(237px) translateZ(0px); z-index: 3;">
+            <div   class="PopoverBody PopoverBody--withArrow outerNav">
+                <div   style="width:300px;" class="text-brand " id="databaseListDummyContainer">
+                    <section style=" display:none;"   class="List-section List-section--open" id="databaseListDummy">
+                        <div   class="p1 border-bottom">
+                            <div   class="List-section-header px1 py1 cursor-pointer full flex align-center">
+                                <span   class="List-section-icon mr2">
+                                    <svg   name="database" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon text-default">
+                                    <path   d="M1.18693219e-08,10.5691766 C-1.48366539e-08,7.99678991 1.18693222e-08,4.59790181 1.18693222e-08,4.59790181 C1.18693222e-08,4.59790181 1.58917246,5.78437724e-10 15.711134,0 C29.8330955,-5.78436122e-10 32,4.16069339 32,4.59790181 L32,10.5405377 C32,10.5405377 30.5498009,15.2177783 16.5227645,15.2177785 C2.49572804,15.2177788 2.1498337e-08,11.4966675 1.18693219e-08,10.5691766 Z M0.265241902,22.2508255 C0.265241902,22.2508255 3.24765892e-17,22.3239396 0,22.9593732 L3.3438581e-16,28.3247528 C3.3438581e-16,28.3247528 1.42644742,32.8877413 15.943795,32.8877413 C30.4611426,32.8877413 32,28.3654698 32,28.3654698 C32,28.3654698 32,22.9095461 32,22.9095462 C32,22.3279008 31.6616273,22.2210746 31.6616273,22.2210746 C31.6616273,22.2210746 29.7117464,26.2784187 16.0116409,26.2784187 C2.31153546,26.2784187 0.265241902,22.2508255 0.265241902,22.2508255 Z M0.265241902,13.3619366 C0.265241902,13.3619366 3.24765892e-17,13.4350508 0,14.0704843 L3.3438581e-16,19.4358639 C3.3438581e-16,19.4358639 1.42644742,23.9988524 15.943795,23.9988524 C30.4611426,23.9988524 32,19.4765809 32,19.4765809 C32,19.4765809 32,14.0206573 32,14.0206573 C32,13.4390119 31.6616273,13.3321857 31.6616273,13.3321857 C31.6616273,13.3321857 29.7117464,17.3895298 16.0116409,17.3895298 C2.31153546,17.3895298 0.265241902,13.3619366 0.265241902,13.3619366 Z"/>
+                                    </svg>
+                                </span>
+                                <h3 class="List-section-title"></h3>
+                            </div>
+                        </div>
+                    </section>
                 </div>
 
             </div>
-        </div>
-    </div>
-    <div class="flex z1" id="react_qb_viz">
-        <div class="wrapper full relative mb2 z1 flex flex-column">
-            <div class="relative flex flex-no-shrink mt3 mb1">
-                <span class="relative z3">
-                    <noscript  ></noscript>
-                </span>
-                <form id="formMain" action="javascript:void(0);" method="post" >
-                    <div class="absolute flex layout-centered left right z2">
-                        <input type="submit" class="Button Button--primary circular RunButton">
-                        </button>
-                    </div>
-                </form>
-                <div class="absolute right z3 flex align-center"></div>
-            </div>
-            <div class="withoutIE flex flex-full z1 px1">
+            <div  style=" display:none;" class="PopoverBody PopoverBody--withArrow outerNav_">
 
-                <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0" class="flex-full relative border-bottom">
-                    <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" class="absolute top bottom left Visualization right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
-
-                    </div>
-                </div>    
-            </div>
-            <div data-reactid=".d.0.1.0.0.0:$1.0.0.1.0.0" class="withIE absolute top bottom left Visualization right scroll-x scroll-show scroll-show--horizontal scroll-show--hover">
-
-            </div>
-        </div>
-    </div>
-    <span class="PopoverContainer tether-element tether-element-attached-top tether-element-attached-left tether-target-attached-bottom tether-target-attached-center tether-enabled" id="inoutNavContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(85px) translateY(227px) translateZ(0px); z-index: 3;">
-        <div   class="PopoverBody PopoverBody--withArrow outerNav">
-            <div   style="width:300px;" class="text-brand " id="databaseListDummyContainer">
-                <section style=" display:none;"   class="List-section List-section--open" id="databaseListDummy">
-                    <div   class="p1 border-bottom">
-                        <div   class="List-section-header px1 py1 cursor-pointer full flex align-center">
-                            <span   class="List-section-icon mr2">
-                                <svg   name="database" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon text-default">
-                                <path   d="M1.18693219e-08,10.5691766 C-1.48366539e-08,7.99678991 1.18693222e-08,4.59790181 1.18693222e-08,4.59790181 C1.18693222e-08,4.59790181 1.58917246,5.78437724e-10 15.711134,0 C29.8330955,-5.78436122e-10 32,4.16069339 32,4.59790181 L32,10.5405377 C32,10.5405377 30.5498009,15.2177783 16.5227645,15.2177785 C2.49572804,15.2177788 2.1498337e-08,11.4966675 1.18693219e-08,10.5691766 Z M0.265241902,22.2508255 C0.265241902,22.2508255 3.24765892e-17,22.3239396 0,22.9593732 L3.3438581e-16,28.3247528 C3.3438581e-16,28.3247528 1.42644742,32.8877413 15.943795,32.8877413 C30.4611426,32.8877413 32,28.3654698 32,28.3654698 C32,28.3654698 32,22.9095461 32,22.9095462 C32,22.3279008 31.6616273,22.2210746 31.6616273,22.2210746 C31.6616273,22.2210746 29.7117464,26.2784187 16.0116409,26.2784187 C2.31153546,26.2784187 0.265241902,22.2508255 0.265241902,22.2508255 Z M0.265241902,13.3619366 C0.265241902,13.3619366 3.24765892e-17,13.4350508 0,14.0704843 L3.3438581e-16,19.4358639 C3.3438581e-16,19.4358639 1.42644742,23.9988524 15.943795,23.9988524 C30.4611426,23.9988524 32,19.4765809 32,19.4765809 C32,19.4765809 32,14.0206573 32,14.0206573 C32,13.4390119 31.6616273,13.3321857 31.6616273,13.3321857 C31.6616273,13.3321857 29.7117464,17.3895298 16.0116409,17.3895298 C2.31153546,17.3895298 0.265241902,13.3619366 0.265241902,13.3619366 Z"/>
-                                </svg>
-                            </span>
-                            <h3 class="List-section-title"></h3>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-        </div>
-        <div  style=" display:none;" class="PopoverBody PopoverBody--withArrow outerNav_">
-
-            <div   style="width:300px;" class="text-brand " id="databaseListDummyContainer2">
-                <section style=" display:none;"   class="List-section List-section--open" id="databaseListDummy2">
-                    <div   class="p1 border-bottom">
-                        <div   class="List-section-header px1 py1 cursor-pointer full flex align-center">
-                            <span   class="List-section-icon mr2">
-                                <svg   name="database" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon text-default">
-                                <path   d="M1.18693219e-08,10.5691766 C-1.48366539e-08,7.99678991 1.18693222e-08,4.59790181 1.18693222e-08,4.59790181 C1.18693222e-08,4.59790181 1.58917246,5.78437724e-10 15.711134,0 C29.8330955,-5.78436122e-10 32,4.16069339 32,4.59790181 L32,10.5405377 C32,10.5405377 30.5498009,15.2177783 16.5227645,15.2177785 C2.49572804,15.2177788 2.1498337e-08,11.4966675 1.18693219e-08,10.5691766 Z M0.265241902,22.2508255 C0.265241902,22.2508255 3.24765892e-17,22.3239396 0,22.9593732 L3.3438581e-16,28.3247528 C3.3438581e-16,28.3247528 1.42644742,32.8877413 15.943795,32.8877413 C30.4611426,32.8877413 32,28.3654698 32,28.3654698 C32,28.3654698 32,22.9095461 32,22.9095462 C32,22.3279008 31.6616273,22.2210746 31.6616273,22.2210746 C31.6616273,22.2210746 29.7117464,26.2784187 16.0116409,26.2784187 C2.31153546,26.2784187 0.265241902,22.2508255 0.265241902,22.2508255 Z M0.265241902,13.3619366 C0.265241902,13.3619366 3.24765892e-17,13.4350508 0,14.0704843 L3.3438581e-16,19.4358639 C3.3438581e-16,19.4358639 1.42644742,23.9988524 15.943795,23.9988524 C30.4611426,23.9988524 32,19.4765809 32,19.4765809 C32,19.4765809 32,14.0206573 32,14.0206573 C32,13.4390119 31.6616273,13.3321857 31.6616273,13.3321857 C31.6616273,13.3321857 29.7117464,17.3895298 16.0116409,17.3895298 C2.31153546,17.3895298 0.265241902,13.3619366 0.265241902,13.3619366 Z"/>
-                                </svg>
-                            </span>
-                            <h3 class="List-section-title"></h3>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </div>
-        <div style="display:none" class="PopoverBody PopoverBody--withArrow innerNav">
-            <div style="width:300px;" class="text-brand ">
-                <section class="List-section List-section--open">
-                    <div class="p1 border-bottom">
-                        <div class="px1 py1 flex align-center">
-                            <h3 class="text-default">
-                                <span   class="flex align-center">
-                                    <span   class="flex align-center text-slate cursor-pointer backOuter">
-                                        <svg   name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
-                                        <path   d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z"/>
-                                        </svg>
-                                        <span   class="ml1 outerNavPointer"></span>
-                                    </span>
-                                    <span  ></span>
+                <div   style="width:300px;" class="text-brand " id="databaseListDummyContainer2">
+                    <section style=" display:none;"   class="List-section List-section--open" id="databaseListDummy2">
+                        <div   class="p1 border-bottom">
+                            <div   class="List-section-header px1 py1 cursor-pointer full flex align-center">
+                                <span   class="List-section-icon mr2">
+                                    <svg   name="database" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon text-default">
+                                    <path   d="M1.18693219e-08,10.5691766 C-1.48366539e-08,7.99678991 1.18693222e-08,4.59790181 1.18693222e-08,4.59790181 C1.18693222e-08,4.59790181 1.58917246,5.78437724e-10 15.711134,0 C29.8330955,-5.78436122e-10 32,4.16069339 32,4.59790181 L32,10.5405377 C32,10.5405377 30.5498009,15.2177783 16.5227645,15.2177785 C2.49572804,15.2177788 2.1498337e-08,11.4966675 1.18693219e-08,10.5691766 Z M0.265241902,22.2508255 C0.265241902,22.2508255 3.24765892e-17,22.3239396 0,22.9593732 L3.3438581e-16,28.3247528 C3.3438581e-16,28.3247528 1.42644742,32.8877413 15.943795,32.8877413 C30.4611426,32.8877413 32,28.3654698 32,28.3654698 C32,28.3654698 32,22.9095461 32,22.9095462 C32,22.3279008 31.6616273,22.2210746 31.6616273,22.2210746 C31.6616273,22.2210746 29.7117464,26.2784187 16.0116409,26.2784187 C2.31153546,26.2784187 0.265241902,22.2508255 0.265241902,22.2508255 Z M0.265241902,13.3619366 C0.265241902,13.3619366 3.24765892e-17,13.4350508 0,14.0704843 L3.3438581e-16,19.4358639 C3.3438581e-16,19.4358639 1.42644742,23.9988524 15.943795,23.9988524 C30.4611426,23.9988524 32,19.4765809 32,19.4765809 C32,19.4765809 32,14.0206573 32,14.0206573 C32,13.4390119 31.6616273,13.3321857 31.6616273,13.3321857 C31.6616273,13.3321857 29.7117464,17.3895298 16.0116409,17.3895298 C2.31153546,17.3895298 0.265241902,13.3619366 0.265241902,13.3619366 Z"/>
+                                    </svg>
                                 </span>
-                            </h3>
+                                <h3 class="List-section-title"></h3>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div style="display:none" class="PopoverBody PopoverBody--withArrow innerNav">
+                <div style="width:300px;" class="text-brand ">
+                    <section class="List-section List-section--open">
+                        <div class="p1 border-bottom">
+                            <div class="px1 py1 flex align-center">
+                                <h3 class="text-default">
+                                    <span   class="flex align-center">
+                                        <span   class="flex align-center text-slate cursor-pointer backOuter">
+                                            <svg   name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
+                                            <path   d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z"/>
+                                            </svg>
+                                            <span   class="ml1 outerNavPointer"></span>
+                                        </span>
+                                        <span  ></span>
+                                    </span>
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="px1 pt1">
+
+                        </div>
+                        <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                            <li style=" display:none;" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer tableName">
+                                    <svg name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                    <g fill-rule="evenodd" fill="currentcolor">
+                                    <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z" />
+                                    </g>
+                                    </svg>
+                                    <h4 class="List-item-title ml2"></h4>
+
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </span>
+        <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="beforeColoumnContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(42px) translateY(227px) translateZ(0px); z-index: 3; display:none;">
+            <div   style="display:none;"  class="PopoverBody PopoverBody--withArrow beforeColoumn">
+                <div   style="" class="FilterPopover" >
+                    <div   style="width:300px;" class="text-purple" >
+                        <section   class="List-section List-section--open">
+                            <div   class="p1 border-bottom">
+                                <div   class="px1 py1 flex align-center">
+                                    <span   class="List-section-icon mr2">
+                                        <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                        <g fill-rule="evenodd" fill="currentcolor">
+                                        <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
+                                        </g>
+                                        </svg>
+                                    </span>
+                                    <h3 class="text-default">Item</h3
+
+                                </div>
+                            </div>
+                            <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                                <li style="display:none;" class="List-item flex">
+                                    <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                        <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                        <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                        </svg>
+                                        <h4 class="List-item-title ml2">BTC selling price</h4>
+                                    </a>
+                                    <div class="flex align-center"></div>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
+            <div style="display:none" class="PopoverBody PopoverBody--withArrow" id="afterColoumn">
+                <div style="" class="FilterPopover">
+                    <div style="width: 300px;">
+                        <div class="FilterPopover-header text-grey-3 p1 mt1 flex align-center">
+                            <a class="cursor-pointer flex align-center coloumnBack">
+                                <svg name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
+                                <path d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z" />
+                                </svg>
+                                <h3 class="inline-block">Item</h3>
+                            </a>
+                            <h3 class="mx1">-</h3>
+                            <h3 class="text-default">BTC selling price</h3>
+                        </div>
+                        <div style="display: none;" data-reactid=".h.$=10.0.1.0" class="border-bottom p1 forDateOnly"><button data-reactid=".h.$=10.0.1.0.0:$relative" class="Button Button-normal Button--medium relativeDate mr1 mb1 Button--Grey">Relative date</button><button  data-reactid=".h.$=10.0.1.0.0:$specific" class="Button Button-normal Button--medium mr1 specificDate mb1">Specific date</button></div>
+                        <div class="filterButtonList">
+                            <div data-reactid=".f.0.1.0"style="display: none;" class="border-bottom p1 buttonContainer buttonContainerString">
+                                <button data-reactid=" LOWER(##addVar##) = LOWER('##addText##')" class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
+                                <button data-reactid=" LOWER(##addVar##) <> LOWER('##addText##')" class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
+                                <button data-reactid=" ##addVar## IS NULL OR ##addVar## = '' " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
+                                <button data-reactid=" ##addVar## <> ''" class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                                <button data-reactid=" ##addVar## ILIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Contains</button>
+                                <button data-reactid=" ##addVar## NOT ILIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Does not contain</button>
+                                <button data-reactid=" ##addVar## ILIKE '##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Starts with</button>
+                                <button data-reactid=" ##addVar## ILIKE '%##addText##'" class="Button Button-normal Button--medium mr1 mb1">Ends with</button>
+                            </div>
+                            <div data-reactid=".g.0.1.0" style="display: none;"class="border-bottom p1 buttonContainer buttonContainerInt">
+                                <button data-reactid="##addVar## = ##addText## " class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
+                                <button data-reactid="##addVar## <> ##addText## " class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
+                                <button data-reactid="##addVar## > ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than</button>
+                                <button data-reactid="##addVar## < ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than</button>
+                                <button data-reactid="##addVar## >= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than or equal to</button>
+                                <button data-reactid="##addVar## <= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than or equal to</button>
+                                <button data-reactid="##addVar## IS NULL " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
+                                <button data-reactid="##addVar## IS NOT NULL " class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
+                            </div>
+                            <div data-reactid=".g.0.1.0"style="display: none;" class="border-bottom p1 buttonContainer buttonContainerCal">
+                                <section data-reactid=".g.$=10.0.1.1.0"><span data-reactid=".g.$=10.0.1.1.0.$0" class="inline-block half pb1 pr1">
+                                        <button data-reactid="DATE(##addVar##) = CURRENT_DATE" class="Button Button-normal Button--medium text-normal text-centered full">Today</button>
+                                    </span>
+                                    <span data-reactid=".g.$=10.0.1.1.0.$1" class="inline-block half pb1">
+                                        <button data-reactid="DATE(##addVar##) = CURRENT_DATE - 1" class="Button Button-normal Button--medium text-normal text-centered full">Yesterday</button>
+                                    </span>
+                                    <span data-reactid=".g.$=10.0.1.1.0.$2" class="inline-block half pb1 pr1">
+                                        <button data-reactid="DATE(##addVar##) > CURRENT_DATE- INTERVAL '7' DAY" class="Button Button-normal Button--medium text-normal text-centered full">Past 7 days</button></span>
+                                    <span data-reactid=".g.$=10.0.1.1.0.$3" class="inline-block half pb1">
+                                        <button data-reactid="DATE(##addVar##) > CURRENT_DATE- INTERVAL '30' DAY" class="Button Button-normal Button--medium text-normal text-centered full">Past 30 days</button></span>
+                                </section>
+                                <section data-reactid=".g.$=10.0.1.1.1:$Last">
+                                    <div data-reactid=".g.$=10.0.1.1.1:$Last.0" class="border-bottom text-uppercase flex layout-centered mb2">
+                                        <h6 data-reactid=".g.$=10.0.1.1.1:$Last.0.0" class="px2" style="position:relative;background-color:white;top:6px;">Last</h6>
+                                    </div>
+                                    <div data-reactid=".g.$=10.0.1.1.1:$Last.1" class="flex">
+                                        <button data-reactid="DATE(##addVar##) BETWEEN CURRENT_DATE ::DATE-EXTRACT(DOW FROM CURRENT_DATE)::INTEGER-7 AND CURRENT_DATE::DATE-EXTRACT(DOW from CURRENT_DATE)::INTEGER" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-last-week">Week</button>
+                                        <button data-reactid="Extract (YEAR from DATE(##addVar##)) = Extract (YEAR from CURRENT_DATE - INTERVAL '1 MONTH') AND Extract (MONTH from DATE(##addVar##)) = Extract (MONTH from CURRENT_DATE - INTERVAL '1 MONTH')" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-last-month">Month</button>
+                                        <button data-reactid="DATE(##addVar##) >= date_trunc('year', CURRENT_DATE - INTERVAL '1 year' ) AND    DATE(##addVar##) <  date_trunc('year', CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1" data-ui-tag="relative-date-shortcut-last-year">Year</button></div>
+                                </section>
+                                <section data-reactid=".g.$=10.0.1.1.1:$This">
+                                    <div data-reactid=".g.$=10.0.1.1.1:$This.0" class="border-bottom text-uppercase flex layout-centered mb2">
+                                        <h6 data-reactid=".g.$=10.0.1.1.1:$This.0.0" class="px2" style="position:relative;background-color:white;top:6px;">This</h6>
+                                    </div>
+                                    <div data-reactid=".g.$=10.0.1.1.1:$This.1" class="flex">
+                                        <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE) AND Extract(week from DATE(##addVar##)) =  Extract(week from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-this-week">Week</button>
+                                        <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE) AND Extract(month from DATE(##addVar##)) =  Extract(month from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-this-month">Month</button>
+                                        <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1" data-ui-tag="relative-date-shortcut-this-year">Year</button>
+                                    </div>
+                                </section>
+
+
+                            </div>
+                            <div>
+                                <ul>
+                                    <li class="FilterInput px1 pt1 relative">
+                                        <input type="text" placeholder="Enter desired text" class="input block full border-purple FilterInputText">
+                                    </li>
+                                </ul>
+                                <div class="p1"></div>
+                            </div>
+                        </div>
+                        <div class="FilterPopover-footer p1">
+                            <button class="Button Button--purple full addFilterButton" data-ui-tag="add-filter">Add filter</button>
+                        </div>
+
+
+                        <div class="p1 forCustomDateOnly" style="display:none;">
+
+                            <section data-reactid=".g.$=10.0.1.1.1:$This">
+                                <div class="flex" data-reactid=".g.$=10.0.1.1.1:$This.1">
+                                    <span style="line-height:50px;width:80px;">From</span>
+                                    <input type="text" placeholder="MM/DD/YYYY" id="dateRangeStart" name="dateRangeStart" class="input block full border-purple" style="width:50%;">
+                                </div>
+                                <div class="flex" data-reactid=".g.$=10.0.1.1.1:$This.1" style="margin-top:20px;">
+                                    <span style="line-height:50px; width:80px;">To</span>
+                                    <input type="text" placeholder="MM/DD/YYYY" id="dateRangeEnd" name="dateRangeEnd" class="input block full border-purple" style="width:50%">
+                                    <span style="line-height:50px;width:60px;"><input type="checkbox" class="tDate">Today</span>
+                                </div>
+                            </section>
+                            <button data-ui-tag="add-filter" style="margin-top:20px;" class="Button Button--purple full addCustomDateFilter" data-attr=" ##addText## &gt;= '##firstVal##' AND ##addText## &lt;= '##secVal##' " data-colname="afterColoumnmy_table_my_date">Add Date</button>
                         </div>
                     </div>
-                    <div class="px1 pt1">
-                      
-                    </div>
-                    <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
-                        <li style=" display:none;" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer tableName">
-                                <svg name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
-                                <g fill-rule="evenodd" fill="currentcolor">
-                                <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z" />
-                                </g>
-                                </svg>
-                                <h4 class="List-item-title ml2"></h4>
-                            </a>
-                        </li>
-                    </ul>
-                </section>
+                </div>
             </div>
-        </div>
-    </span>
-    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="beforeColoumnContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(42px) translateY(217px) translateZ(0px); z-index: 3; display:none;">
-        <div   style="display:none;"  class="PopoverBody PopoverBody--withArrow beforeColoumn">
-            <div   style="" class="FilterPopover" >
-                <div   style="width:300px;" class="text-purple" >
+        </span>
+        <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; position: absolute; transform: translateX(267px) translateY(235px) translateZ(0px); z-index: 3;">
+            <div  style="display:none" class="PopoverBody PopoverBody--withArrow FilterPopover" id="rawDataList">
+                <div   style="width:300px;" class="text-green" >
+                    <section   class="List-section List-section--open">
+                        <ul   class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                            <li   data-attr="Raw data" data-content="count" class="List-item flex List-item--selected">
+                                <a   style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4   class="List-item-title ml2">Raw data</h4>
+                                </a>
+                                <div   class="p1"><span   class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                            <li data-attr="Count(*) as Count" data-content="count" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4 class="List-item-title ml2">Count of rows</h4>
+                                </a>
+                                <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                            <li data-attr="Sum(##addText##)" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4 class="List-item-title ml2">Sum of ...</h4>
+                                </a>
+                                <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                            <li data-attr="Avg(##addText##)" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4 class="List-item-title ml2">Average of ...</h4>
+                                </a>
+                                <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                            <li data-attr="Count(Distinct ##addText##)" data-content="all" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4 class="List-item-title ml2">Number of distinct values of ...</h4>
+                                </a>
+                                <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                            <li data-attr="STDDEV(##addText##)" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4 class="List-item-title ml2">Standard deviation of ...</h4>
+                                </a>
+                                <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                            <li  data-attr="MIN(##addText##)" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4 class="List-item-title ml2">Minimum of ...</h4>
+                                </a>
+                                <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                            <li data-attr="MAX(##addText##)" class="List-item flex">
+                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                    <h4 class="List-item-title ml2">Maximum of ...</h4>
+                                </a>
+                                <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
+                                </div>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+            <div style="display:none" class="PopoverBody PopoverBody--withArrow FilterPopover rawSecondLevel">
+                <div style="width:300px;">
+                    <div class="text-grey-3 p1 py2 border-bottom flex align-center">
+                        <a class="cursor-pointer flex align-center">
+                            <svg name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
+                            <path d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z" />
+                            </svg>
+                            <h3 class="inline-block pl1">Number of distinct values of ...</h3>
+                        </a>
+                    </div>
+                    <div id="ColoumnListContents" style="width:300px;" class="text-green">
+                        <section class="List-section List-section--open">
+                            <div class="p1 border-bottom">
+                                <div class="px1 py1 flex align-center">
+                                    <span class="List-section-icon mr2">
+                                        <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
+                                        <g fill-rule="evenodd" fill="currentcolor">
+                                        <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
+                                        </g>
+                                        </svg>
+                                    </span>
+                                    <h3 class="text-default">window</h3>
+                                </div>
+                            </div>
+                            <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
+                                <li class="List-item flex">
+                                    <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                        <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                        <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                        </svg>
+                                        <h4 class="List-item-title ml2">title</h4>
+                                    </a>
+                                    <div class="flex align-center"></div>
+                                </li>
+                                <li class="List-item flex">
+                                    <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
+                                        <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
+                                        <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
+                                        </svg>
+                                        <h4 class="List-item-title ml2">name</h4>
+                                    </a>
+                                    <div class="flex align-center"></div>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </span>
+        <span id="groupByContainer" class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; display:none; position: absolute; transform: translateX(498px) translateY(233px) translateZ(0px); z-index: 3;">
+            <div   style="display:none" class="PopoverBody PopoverBody--withArrow FieldPopover groupLists">
+                <div   style="width:300px;" class="text-green">
                     <section   class="List-section List-section--open">
                         <div   class="p1 border-bottom">
                             <div   class="px1 py1 flex align-center">
@@ -7386,7 +6865,7 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
                                     </g>
                                     </svg>
                                 </span>
-                                <h3 class="text-default">Item</h3>
+                                <h3 class="text-default">window</h3>
                             </div>
                         </div>
                         <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
@@ -7395,7 +6874,7 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
                                     <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
                                     <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
                                     </svg>
-                                    <h4 class="List-item-title ml2">BTC selling price</h4>
+                                    <h4 class="List-item-title ml2">date</h4>
                                 </a>
                                 <div class="flex align-center"></div>
                             </li>
@@ -7403,190 +6882,63 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
                     </section>
                 </div>
             </div>
-        </div>
-        <div style="display:none" class="PopoverBody PopoverBody--withArrow" id="afterColoumn">
-            <div style="" class="FilterPopover">
-                <div style="width: 300px;">
-                    <div class="FilterPopover-header text-grey-3 p1 mt1 flex align-center">
-                        <a class="cursor-pointer flex align-center coloumnBack">
-                            <svg name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
-                            <path d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z" />
-                            </svg>
-                            <h3 class="inline-block">Item</h3>
+        </span>
+        <span class="PopoverContainer tether-element tether-target-attached-center tether-element-attached-top tether-target-attached-bottom tether-element-attached-right tether-enabled" id="sortSpan" style="display:none;top: 0px; left: 0px; position: absolute; z-index: 3; min-width:350;">
+            <div   class="PopoverBody ">
+                <a class="closeTable" id="closeSortDiv" data-reactid=".2.$=1$modal.0.0.0.1"></a>
+                <div   class="px3 py1">
+                    <div   class="py1 border-bottom">
+                        <div   class="Query-label mb1">Sort by:</div>
+                        <a   id="sortFieldPicker" class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
+                            <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
+                                <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
+                                <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
+                                </svg>
+                            </div>
+                            <span id="beforeSortClick"    class="ml1">Pick a field to sort by</span>
+                            <div id="afterSortClick" style="display:none;" class="flex align-center">
+                                <div class="flex align-center">
+                                    <div class="flex align-center">
+                                        <div class="Filter-section Filter-section-sort-field SelectionModule selected">
+                                            <span class="QueryOption">
+                                                <span id="sortTag"  >
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="SelectionModule selected Filter-section Filter-section-sort-direction">
+                                    <div class="SelectionModule-trigger flex align-center">
+                                        <a id="sortOrder" class="QueryOption p1 flex align-center" data-attr="ASC">ascending</a>
+                                    </div>
+                                </div>
+                                <a id="removeSortTag">
+                                    <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="12px" width="12px" class="Icon Icon-close">
+                                    <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
+                                    </svg>
+                                </a>
+                            </div>
                         </a>
-                        <h3 class="mx1">-</h3>
-                        <h3 class="text-default">BTC selling price</h3>
                     </div>
-                    <div style="display: none;" data-reactid=".h.$=10.0.1.0" class="border-bottom p1 forDateOnly"><button data-reactid=".h.$=10.0.1.0.0:$relative" class="Button Button-normal Button--medium relativeDate mr1 mb1 Button--Grey">Relative date</button><button  data-reactid=".h.$=10.0.1.0.0:$specific" class="Button Button-normal Button--medium mr1 specificDate mb1">Specific date</button></div>
-                    <div class="filterButtonList">
-                        <div data-reactid=".f.0.1.0"style="display: none;" class="border-bottom p1 buttonContainer buttonContainerString">
-                            <button data-reactid="##addVar## = '##addText##'" class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
-                            <button data-reactid="##addVar## <> '##addText##'" class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
-                            <button data-reactid="##addVar## > ''" class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
-                            <button data-reactid="##addVar## <> ''" class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
-                            <button data-reactid="##addVar## LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Contains</button>
-                            <button data-reactid="##addVar## NOT LIKE '%##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Does not contain</button>
-                            <button data-reactid="##addVar## LIKE '##addText##%'" class="Button Button-normal Button--medium mr1 mb1">Starts with</button>
-                            <button data-reactid="##addVar## LIKE '%##addText##'" class="Button Button-normal Button--medium mr1 mb1">Ends with</button>
-                        </div>
-                        <div data-reactid=".g.0.1.0" style="display: none;"class="border-bottom p1 buttonContainer buttonContainerInt">
-                            <button data-reactid="##addVar## = ##addText## " class="Button Button-normal Button--medium mr1 mb1 Button--purple">Equal</button>
-                            <button data-reactid="##addVar## <> ##addText## " class="Button Button-normal Button--medium mr1 mb1">Not equal</button>
-                            <button data-reactid="##addVar## > ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than</button>
-                            <button data-reactid="##addVar## < ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than</button>
-                            <button data-reactid="##addVar## >= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Greater than or equal to</button>
-                            <button data-reactid="##addVar## <= ##addText## " class="Button Button-normal Button--medium mr1 mb1">Less than or equal to</button>
-                            <button data-reactid="##addVar## IS NULL " class="Button Button-normal Button--medium mr1 mb1">Is empty</button>
-                            <button data-reactid="##addVar## IS NOT NULL " class="Button Button-normal Button--medium mr1 mb1">Not empty</button>
-                        </div>
-                        <div data-reactid=".g.0.1.0"style="display: none;" class="border-bottom p1 buttonContainer buttonContainerCal">
-                            <section data-reactid=".g.$=10.0.1.1.0"><span data-reactid=".g.$=10.0.1.1.0.$0" class="inline-block half pb1 pr1">
-                                    <button data-reactid="DATE(##addVar##) = CURRENT_DATE" class="Button Button-normal Button--medium text-normal text-centered full">Today</button>
-                                </span>
-                                <span data-reactid=".g.$=10.0.1.1.0.$1" class="inline-block half pb1">
-                                    <button data-reactid="DATE(##addVar##) = CURRENT_DATE - 1" class="Button Button-normal Button--medium text-normal text-centered full">Yesterday</button>
-                                </span>
-                                <span data-reactid=".g.$=10.0.1.1.0.$2" class="inline-block half pb1 pr1">
-                                    <button data-reactid="DATE(##addVar##) > CURRENT_DATE- INTERVAL '7' DAY" class="Button Button-normal Button--medium text-normal text-centered full">Past 7 days</button></span>
-                                <span data-reactid=".g.$=10.0.1.1.0.$3" class="inline-block half pb1">
-                                    <button data-reactid="DATE(##addVar##) > CURRENT_DATE- INTERVAL '30' DAY" class="Button Button-normal Button--medium text-normal text-centered full">Past 30 days</button></span>
-                            </section>
-                            <section data-reactid=".g.$=10.0.1.1.1:$Last">
-                                <div data-reactid=".g.$=10.0.1.1.1:$Last.0" class="border-bottom text-uppercase flex layout-centered mb2">
-                                    <h6 data-reactid=".g.$=10.0.1.1.1:$Last.0.0" class="px2" style="position:relative;background-color:white;top:6px;">Last</h6>
-                                </div>
-                                <div data-reactid=".g.$=10.0.1.1.1:$Last.1" class="flex">
-                                    <button data-reactid="DATE(##addVar##) BETWEEN CURRENT_DATE ::DATE-EXTRACT(DOW FROM CURRENT_DATE)::INTEGER-7 AND CURRENT_DATE::DATE-EXTRACT(DOW from CURRENT_DATE)::INTEGER" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-last-week">Week</button>
-                                    <button data-reactid="Extract (YEAR from DATE(##addVar##)) = Extract (YEAR from CURRENT_DATE - INTERVAL '1 MONTH') AND Extract (MONTH from DATE(##addVar##)) = Extract (MONTH from CURRENT_DATE - INTERVAL '1 MONTH')" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-last-month">Month</button>
-                                    <button data-reactid="DATE(##addVar##) >= date_trunc('year', CURRENT_DATE - INTERVAL '1 year' ) AND    DATE(##addVar##) <  date_trunc('year', CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1" data-ui-tag="relative-date-shortcut-last-year">Year</button></div>
-                            </section>
-                            <section data-reactid=".g.$=10.0.1.1.1:$This">
-                                <div data-reactid=".g.$=10.0.1.1.1:$This.0" class="border-bottom text-uppercase flex layout-centered mb2">
-                                    <h6 data-reactid=".g.$=10.0.1.1.1:$This.0.0" class="px2" style="position:relative;background-color:white;top:6px;">This</h6>
-                                </div>
-                                <div data-reactid=".g.$=10.0.1.1.1:$This.1" class="flex">
-                                    <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE) AND Extract(week from DATE(##addVar##)) =  Extract(week from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-this-week">Week</button>
-                                    <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE) AND Extract(month from DATE(##addVar##)) =  Extract(month from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1 mr1" data-ui-tag="relative-date-shortcut-this-month">Month</button>
-                                    <button data-reactid="Extract(year from DATE(##addVar##)) =  Extract(year from CURRENT_DATE)" class="Button Button-normal Button--medium flex-full mb1" data-ui-tag="relative-date-shortcut-this-year">Year</button>
-                                </div>
-                            </section>
-
-
-                        </div>
-                        <div>
-                            <ul>
-                                <li class="FilterInput px1 pt1 relative">
-                                    <input type="text" placeholder="Enter desired text" class="input block full border-purple FilterInputText">
-                                </li>
-                            </ul>
-                            <div class="p1"></div>
-                        </div>
-                    </div>
-                    <div class="FilterPopover-footer p1">
-                        <button class="Button Button--purple full addFilterButton" data-ui-tag="add-filter">Add filter</button>
-                    </div>
-
-
-                    <div style="display: none;" class="p1 forCustomDateOnly">
-
-                        <section  data-reactid=".g.$=10.0.1.1.1:$This">
-                            <div data-reactid=".g.$=10.0.1.1.1:$This.1" class="flex">
-                                <span>Start Date</span>
-                                <input type="text"  class="input block full border-purple" name="dateRangeStart" id="dateRangeStart" value="01/01/2015" />
-
-                            </div>
-                            <div data-reactid=".g.$=10.0.1.1.1:$This.1" class="flex">
-                                <span>End Date</span>
-                                <input type="text" class="input block full border-purple"  name="dateRangeEnd" id="dateRangeEnd" value="01/01/2015" />
-
-                            </div>
-                        </section>
-                        <button data-attr=" ##addText## >= '##firstVal##' AND ##addText## <= '##secVal##' " class="Button Button--purple full addCustomDateFilter" data-ui-tag="add-filter">Add Date</button>
+                    <div id="limit" class="py1">
+                        <div class="Query-label mb1">Limit:</div>
+                        <ul class="Button-group Button-group--blue">
+                            <li class="Button">10</li>
+                            <li class="Button">25</li>
+                            <li class="Button Button--active">100</li>
+                            <li class="Button">250</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    </span>
-    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; position: absolute; transform: translateX(267px) translateY(225px) translateZ(0px); z-index: 3;">
-        <div  style="display:none" class="PopoverBody PopoverBody--withArrow FilterPopover" id="rawDataList">
-            <div   style="width:300px;" class="text-green" >
-                <section   class="List-section List-section--open">
-                    <ul   class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
-                        <li   data-attr="Raw data" class="List-item flex List-item--selected">
-                            <a   style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4   class="List-item-title ml2">Raw data</h4>
-                            </a>
-                            <div   class="p1"><span   class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                        <li data-attr="Count(*) as Count" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4 class="List-item-title ml2">Count of rows</h4>
-                            </a>
-                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                        <li data-attr="Sum(##addText##)" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4 class="List-item-title ml2">Sum of ...</h4>
-                            </a>
-                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                        <li data-attr="Avg(##addText##)" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4 class="List-item-title ml2">Average of ...</h4>
-                            </a>
-                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                        <li data-attr="Count(Distinct ##addText##)" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4 class="List-item-title ml2">Number of distinct values of ...</h4>
-                            </a>
-                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                        <li data-attr="STDDEV(##addText##)" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4 class="List-item-title ml2">Standard deviation of ...</h4>
-                            </a>
-                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                        <li  data-attr="MIN(##addText##)" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4 class="List-item-title ml2">Minimum of ...</h4>
-                            </a>
-                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                        <li data-attr="MAX(##addText##)" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <h4 class="List-item-title ml2">Maximum of ...</h4>
-                            </a>
-                            <div class="p1"><span class="QuestionTooltipTarget"><span   class="hide"></span></span>
-                            </div>
-                        </li>
-                    </ul>
-                </section>
-            </div>
-        </div>
-        <div style="display:none" class="PopoverBody PopoverBody--withArrow FilterPopover rawSecondLevel">
-            <div style="width:300px;">
-                <div class="text-grey-3 p1 py2 border-bottom flex align-center">
-                    <a class="cursor-pointer flex align-center">
-                        <svg name="chevronleft" fill="currentcolor" viewBox="0 0 32 32" height="18" width="18" class="Icon Icon-chevronleft">
-                        <path d="M20 1 L24 5 L14 16 L24 27 L20 31 L6 16 z" />
-                        </svg>
-                        <h3 class="inline-block pl1">Number of distinct values of ...</h3>
-                    </a>
-                </div>
-                <div id="ColoumnListContents" style="width:300px;" class="text-green">
-                    <section class="List-section List-section--open">
-                        <div class="p1 border-bottom">
-                            <div class="px1 py1 flex align-center">
-                                <span class="List-section-icon mr2">
+        </span>
+        <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="sortColoumnContainer" style="top: 0px; left: 0px; position: absolute;  z-index: 4;">
+            <div   style="display:none;"  class="PopoverBody PopoverBody--withArrow FieldPopover sortColoumn">
+                <div   style="width:300px;" class="text-brand " >
+                    <section    class="List-section List-section--open">
+                        <div   class="p1 border-bottom">
+                            <div   class="px1 py1 flex align-center">
+                                <span   class="List-section-icon mr2">
                                     <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
                                     <g fill-rule="evenodd" fill="currentcolor">
                                     <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
@@ -7597,21 +6949,12 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
                             </div>
                         </div>
                         <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
-                            <li class="List-item flex">
+                            <li style="display:none;" class="List-item flex">
                                 <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
                                     <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
                                     <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
                                     </svg>
-                                    <h4 class="List-item-title ml2">title</h4>
-                                </a>
-                                <div class="flex align-center"></div>
-                            </li>
-                            <li class="List-item flex">
-                                <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                    <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
-                                    <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
-                                    </svg>
-                                    <h4 class="List-item-title ml2">name</h4>
+                                    <h4 class="List-item-title ml2">time</h4>
                                 </a>
                                 <div class="flex align-center"></div>
                             </li>
@@ -7619,165 +6962,1272 @@ $s = " select table_name from INFORMATION_SCHEMA.views WHERE table_schema = ANY 
                     </section>
                 </div>
             </div>
+        </span>
+
+        <form action="csvDownload.php" method="post" class="nossl_disable_protection" id="export-form">
+            <input type="hidden" value='' id='hidden-type' name='ExportType'/>
+        </form>
+
+
+        <div style="display:none;" id="iconContainer" >
+            <svg data-reactid=".d.0.0.$0.2.$0.0.0" name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string"><path data-reactid=".d.0.0.$0.2.$0.0.0.0" d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z"/></svg>
+            <svg data-reactid=".d.0.0.$0.2.$2.0.0" name="int" fill="currentcolor" viewBox="0 0 24, 24" height="18" width="18" class="Icon Icon-int"><path data-reactid=".d.0.0.$0.2.$2.0.0.0" d="M15.141,15.512 L14.294,20 L13.051,20 C12.8309989,20 12.6403341,19.9120009 12.479,19.736 C12.3176659,19.5599991 12.237,19.343668 12.237,19.087 C12.237,19.0503332 12.2388333,19.0155002 12.2425,18.9825 C12.2461667,18.9494998 12.2516666,18.9146668 12.259,18.878 L12.908,15.512 L10.653,15.512 L10.015,19.01 C9.94899967,19.3620018 9.79866784,19.6149992 9.564,19.769 C9.32933216,19.9230008 9.06900143,20 8.783,20 L7.584,20 L8.42,15.512 L7.155,15.512 C6.92033216,15.512 6.74066729,15.4551672 6.616,15.3415 C6.49133271,15.2278328 6.429,15.0390013 6.429,14.775 C6.429,14.6723328 6.43999989,14.5550007 6.462,14.423 L6.605,13.554 L8.695,13.554 L9.267,10.518 L6.913,10.518 L7.122,9.385 C7.17333359,9.10633194 7.28699912,8.89916734 7.463,8.7635 C7.63900088,8.62783266 7.92499802,8.56 8.321,8.56 L9.542,8.56 L10.224,5.018 C10.282667,4.7246652 10.4183323,4.49733414 10.631,4.336 C10.8436677,4.17466586 11.0929986,4.094 11.379,4.094 L12.611,4.094 L11.775,8.56 L14.019,8.56 L14.866,4.094 L16.076,4.094 C16.3326679,4.094 16.5416659,4.1673326 16.703,4.314 C16.8643341,4.4606674 16.945,4.64766553 16.945,4.875 C16.945,4.9483337 16.9413334,5.00333315 16.934,5.04 L16.252,8.56 L18.485,8.56 L18.276,9.693 C18.2246664,9.97166806 18.1091676,10.1788327 17.9295,10.3145 C17.7498324,10.4501673 17.4656686,10.518 17.077,10.518 L15.977,10.518 L15.416,13.554 L16.978,13.554 C17.2126678,13.554 17.3904994,13.6108328 17.5115,13.7245 C17.6325006,13.8381672 17.693,14.0306653 17.693,14.302 C17.693,14.4046672 17.6820001,14.5219993 17.66,14.654 L17.528,15.512 L15.141,15.512 Z M10.928,13.554 L13.183,13.554 L13.744,10.518 L11.5,10.518 L10.928,13.554 Z"/></svg>
+            <svg data-reactid=".d.0.0.$0.2.$5.0.0" name="calendar" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-calendar"><path data-reactid=".d.0.0.$0.2.$5.0.0.0" d="M21,2 L21,0 L18,0 L18,2 L6,2 L6,0 L3,0 L3,2 L2.99109042,2 C1.34177063,2 0,3.34314575 0,5 L0,6.99502651 L0,20.009947 C0,22.2157067 1.78640758,24 3.99005301,24 L20.009947,24 C22.2157067,24 24,22.2135924 24,20.009947 L24,6.99502651 L24,5 C24,3.34651712 22.6608432,2 21.0089096,2 L21,2 L21,2 Z M22,8 L22,20.009947 C22,21.1099173 21.1102431,22 20.009947,22 L3.99005301,22 C2.89008272,22 2,21.1102431 2,20.009947 L2,8 L22,8 L22,8 Z M6,12 L10,12 L10,16 L6,16 L6,12 Z"/></svg>
         </div>
-    </span>
-    <span id="groupByContainer" class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" style="top: 0px; left: 0px; display:none; position: absolute; transform: translateX(498px) translateY(223px) translateZ(0px); z-index: 3;">
-        <div   style="display:none" class="PopoverBody PopoverBody--withArrow FieldPopover groupLists">
-            <div   style="width:300px;" class="text-green">
-                <section   class="List-section List-section--open">
-                    <div   class="p1 border-bottom">
-                        <div   class="px1 py1 flex align-center">
-                            <span   class="List-section-icon mr2">
-                                <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
-                                <g fill-rule="evenodd" fill="currentcolor">
-                                <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
-                                </g>
-                                </svg>
-                            </span>
-                            <h3 class="text-default">window</h3>
+        <div id="loader-icon">
+            <img src="LoaderIcon.gif" />
+        </div>
+        <div data-reactid=".2.$=1$modal.0" class="Modal Modal1" style="display:none;" >
+            <a data-reactid=".2.$=1$modal.0.0.0.1" id="closeSaveDiv"  class="closeTable"></a>
+            <div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm"><div data-reactid=".2.$=1$modal.0.0.0" class="Modal-header Form-header flex align-center"><h2 data-reactid=".2.$=1$modal.0.0.0.0" class="flex-full">Save Question</h2></div><div data-reactid=".2.$=1$modal.0.0.1" class="Modal-body"><div data-reactid=".2.$=1$modal.0.0.1.0.0" class="Form-inputs"><div data-reactid=".2.$=1$modal.0.0.1.0.0.1" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.1.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.0">Name</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.1"> </span></label><input data-reactid=".2.$=1$modal.0.0.1.0.0.1.1"  placeholder="Name your Query" name="tagName" id="tagName" class="Form-input full"></div><div data-reactid=".2.$=1$modal.0.0.1.0.0.2" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.2.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.0">Description (optional)</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.1"> </span></label><textarea  data-reactid=".2.$=1$modal.0.0.1.0.0.2.1" placeholder="Describe" name="tagDescription" id="tagDescription"class="Form-input full"></textarea></div></div><div data-reactid=".2.$=1$modal.0.0.1.0.1" class="Form-actions"><input type="hidden" value="" name="queryColTagForm" id="queryColTagForm"></input><button data-reactid=".2.$=1$modal.0.0.1.0.1.0" class="Button Button--primary" id="saveTag">Save</button></div></div></div></div>
+
+        <div data-reactid=".2.$=1$modal.0" class="Modal" style="z-index:9; display:none;" id="formAfterClick">
+            <a id="closeTable" href="#" class="closeTable"></a>
+            <div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm">
+                <div data-reactid=".7.2.0.0" class="Grid ObjectDetail-headingGroup">
+                    <div data-reactid=".7.2.0.0.0" class="Grid-cell ObjectDetail-infoMain px4 py3 ml2 arrow-right">
+                        <div data-reactid=".7.2.0.0.0.0" class="text-brand text-bold">
+                            <span data-reactid=".7.2.0.0.0.0.0" id="tableName_Form"></span>
+                            <h1 data-reactid=".7.2.0.0.0.0.1" id="clickedId_Form"></h1>
                         </div>
                     </div>
-                    <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
-                        <li style="display:none;" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
-                                <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
-                                </svg>
-                                <h4 class="List-item-title ml2">date</h4>
-                            </a>
-                            <div class="flex align-center"></div>
-                        </li>
-                    </ul>
-                </section>
-            </div>
-        </div>
-    </span>
-    <span class="PopoverContainer tether-element tether-target-attached-center tether-element-attached-top tether-target-attached-bottom tether-element-attached-right tether-enabled" id="sortSpan" style="display:none;top: 0px; left: 0px; position: absolute; transform: translateX(917px) translateY(234px) translateZ(0px); z-index: 3;">
-        <div   class="PopoverBody ">
-            <div   class="px3 py1">
-                <div   class="py1 border-bottom">
-                    <div   class="Query-label mb1">Sort by:</div>
-                    <a   id="sortFieldPicker" class="text-grey-2 text-bold flex align-center text-grey-4-hover cursor-pointer no-decoration transition-color">
-                        <div   style="width:28px;height:28px;border-width:1px;border-style:solid;border-color:currentcolor;border-radius:3px;" class="flex layout-centered">
-                            <svg   name="add" fill="currentcolor" viewBox="0 0 32 32" height="14px" width="14px" class="Icon Icon-add">
-                            <path   d="M19,13 L19,2 L14,2 L14,13 L2,13 L2,18 L14,18 L14,30 L19,30 L19,18 L30,18 L30,13 L19,13 Z"/>
-                            </svg>
-                        </div>
-                        <span id="beforeSortClick"    class="ml1">Pick a field to sort by</span>
-                        <div id="afterSortClick" style="display:none;" class="flex align-center">
-                            <div class="flex align-center">
-                                <div class="flex align-center">
-                                    <div class="Filter-section Filter-section-sort-field SelectionModule selected">
-                                        <span class="QueryOption">
-                                            <span id="sortTag"  >
-                                            </span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="SelectionModule selected Filter-section Filter-section-sort-direction">
-                                <div class="SelectionModule-trigger flex align-center">
-                                    <a id="sortOrder" class="QueryOption p1 flex align-center" data-attr="ASC">ascending</a>
-                                </div>
-                            </div>
-                            <a id="removeSortTag">
-                                <svg name="close" fill="currentcolor" viewBox="0 0 32 32" height="12px" width="12px" class="Icon Icon-close">
-                                <path d="M4 8 L8 4 L16 12 L24 4 L28 8 L20 16 L28 24 L24 28 L16 20 L8 28 L4 24 L12 16 z " />
-                                </svg>
-                            </a>
-                        </div>
-                    </a>
                 </div>
-                <div id="limit" class="py1">
-                    <div class="Query-label mb1">Limit:</div>
-                    <ul class="Button-group Button-group--blue">
-                        <li class="Button">None</li>
-                        <li class="Button">1</li>
-                        <li class="Button">10</li>
-                        <li class="Button">25</li>
-                        <li class="Button Button--active">100</li>
-                        <li class="Button">1000</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </span>
-    <span class="PopoverContainer tether-element tether-element-attached-center tether-target-attached-center tether-enabled tether-element-attached-top tether-target-attached-bottom" id="sortColoumnContainer" style="top: 0px; left: 0px; position: absolute; transform: translateX(805px) translateY(302px) translateZ(0px); z-index: 4;">
-        <div   style="display:none;"  class="PopoverBody PopoverBody--withArrow FieldPopover sortColoumn">
-            <div   style="width:300px;" class="text-brand " >
-                <section    class="List-section List-section--open">
-                    <div   class="p1 border-bottom">
-                        <div   class="px1 py1 flex align-center">
-                            <span   class="List-section-icon mr2">
-                                <svg   name="table2" fill="currentcolor" viewBox="0 0 32 28" height="18" width="18" class="Icon Icon-table2">
-                                <g fill-rule="evenodd" fill="currentcolor">
-                                <path d="M10,19 L10,15 L3,15 L3,13 L10,13 L10,9 L12,9 L12,13 L20,13 L20,9 L22,9 L22,13 L29,13 L29,15 L22,15 L22,19 L29,19 L29,21 L22,21 L22,25 L20,25 L20,21 L12,21 L12,25 L10,25 L10,21 L3,21 L3,19 L10,19 L10,19 Z M12,19 L12,15 L20,15 L20,19 L12,19 Z M30.5,0 L32,0 L32,28 L30.5,28 L1.5,28 L0,28 L0,0 L1.5,0 L30.5,0 Z M29,3 L29,25 L3,25 L3,3 L29,3 Z M3,7 L29,7 L29,9 L3,9 L3,7 Z"/>
-                                </g>
-                                </svg>
-                            </span>
-                            <h3 class="text-default">window</h3>
+                <div data-reactid=".7.2.0.1.0"  style="display:none;" class="Grid-cell ObjectDetail-infoMain p4">
+
+                    <div data-reactid=".7.2.0.1.0.$19" class="Grid mb2 gridList_f" >
+                        <div data-reactid=".7.2.0.1.0.$19.0" class="Grid-cell">
+                            <div class="f_colName" data-reactid=".7.2.0.1.0.$19.0.$cl19_field"></div>
+                        </div>
+                        <div data-reactid=".7.2.0.1.0.$19.1" class="Grid-cell text-bold text-dark" style="word-wrap:break-word;">
+                            <div data-reactid=".7.2.0.1.0.$19.1.$cl19_value"><span class="f_colVal" data-reactid=".7.2.0.1.0.$19.1.$cl19_value.0.0"></span></div>
                         </div>
                     </div>
-                    <ul class="p1 border-bottom scroll-y scroll-show" style="max-height:400px;">
-                        <li style="display:none;" class="List-item flex">
-                            <a style="padding-top:0.25rem;padding-bottom:0.25rem;" class="flex-full flex align-center px1 cursor-pointer">
-                                <svg name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string">
-                                <path d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z" />
-                                </svg>
-                                <h4 class="List-item-title ml2">time</h4>
-                            </a>
-                            <div class="flex align-center"></div>
-                        </li>
-                    </ul>
-                </section>
+                </div>
+                <div data-reactid=".7.2.0.1.0" id="f_GridContainer" class="Grid-cell ObjectDetail-infoMain p4">
+
+
+                </div>
+
             </div>
         </div>
-    </span>
 
-    <form action="csvDownload.php" method="post" id="export-form">
-        <input type="hidden" value='' id='hidden-type' name='ExportType'/>
-    </form>
+<footer><div id="wrapper" style="text-align: center; background:#B0C4DE;position: fixed;bottom: 0;width: 100%;">  
+                <div style="display: inline-block;width:517px;padding-left: 2em;text-indent: --7em;">IntelliSpyre Inc. Copyright 2016 </div>
+            </div></footer>
+        <!-- jQuery -->
+        <script src="js/jquery-latest.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
 
+        <!-- Demo stuff -->
+        <link class="ui-theme" rel="stylesheet" href="css/jquery-ui.min.css">
+        <script src="js/prettify.js"></script>
+        <script src="js/docs.js"></script>
+        <style>
+            /* override jQuery UI overriding Bootstrap */
+            .accordion .ui-widget-content a {
+                color: #337ab7;
+            }
+        </style>
 
-    <div style="display:none;" id="iconContainer" >
-        <svg data-reactid=".d.0.0.$0.2.$0.0.0" name="string" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-string"><path data-reactid=".d.0.0.$0.2.$0.0.0.0" d="M14.022,18 L11.533,18 C11.2543319,18 11.0247509,17.935084 10.84425,17.80525 C10.6637491,17.675416 10.538667,17.5091677 10.469,17.3065 L9.652,14.8935 L4.389,14.8935 L3.572,17.3065 C3.50866635,17.4838342 3.38516758,17.6437493 3.2015,17.78625 C3.01783241,17.9287507 2.79300133,18 2.527,18 L0.019,18 L5.377,4.1585 L8.664,4.1585 L14.022,18 Z M5.13,12.7085 L8.911,12.7085 L7.638,8.918 C7.55566626,8.67733213 7.45908389,8.3939183 7.34825,8.06775 C7.23741611,7.7415817 7.12816721,7.3885019 7.0205,7.0085 C6.91916616,7.39483527 6.8146672,7.75266502 6.707,8.082 C6.5993328,8.41133498 6.49800047,8.69633213 6.403,8.937 L5.13,12.7085 Z M21.945,18 C21.6663319,18 21.4557507,17.9620004 21.31325,17.886 C21.1707493,17.8099996 21.0520005,17.6516679 20.957,17.411 L20.748,16.8695 C20.5009988,17.078501 20.2635011,17.2621659 20.0355,17.4205 C19.8074989,17.5788341 19.5715846,17.7134161 19.32775,17.82425 C19.0839154,17.9350839 18.8242514,18.0174164 18.54875,18.07125 C18.2732486,18.1250836 17.9676683,18.152 17.632,18.152 C17.1823311,18.152 16.7738352,18.0934173 16.4065,17.97625 C16.0391648,17.8590827 15.7272513,17.6865011 15.47075,17.4585 C15.2142487,17.2304989 15.016334,16.947085 14.877,16.60825 C14.737666,16.269415 14.668,15.8783355 14.668,15.435 C14.668,15.0866649 14.7566658,14.7288352 14.934,14.3615 C15.1113342,13.9941648 15.4184978,13.6600848 15.8555,13.35925 C16.2925022,13.0584152 16.8814963,12.8066677 17.6225,12.604 C18.3635037,12.4013323 19.297661,12.2873335 20.425,12.262 L20.425,11.844 C20.425,11.2676638 20.3062512,10.8512513 20.06875,10.59475 C19.8312488,10.3382487 19.4940022,10.21 19.057,10.21 C18.7086649,10.21 18.4236678,10.2479996 18.202,10.324 C17.9803322,10.4000004 17.7824175,10.4854995 17.60825,10.5805 C17.4340825,10.6755005 17.2646675,10.7609996 17.1,10.837 C16.9353325,10.9130004 16.7390011,10.951 16.511,10.951 C16.3083323,10.951 16.1357507,10.9019172 15.99325,10.80375 C15.8507493,10.7055828 15.7383337,10.5836674 15.656,10.438 L15.124,9.5165 C15.7193363,8.99083071 16.3795797,8.59975128 17.10475,8.34325 C17.8299203,8.08674872 18.6073292,7.9585 19.437,7.9585 C20.0323363,7.9585 20.5690809,8.05508237 21.04725,8.24825 C21.5254191,8.44141763 21.9307483,8.71058161 22.26325,9.05575 C22.5957517,9.40091839 22.8506658,9.81099763 23.028,10.286 C23.2053342,10.7610024 23.294,11.2803305 23.294,11.844 L23.294,18 L21.945,18 Z M18.563,16.2045 C18.9430019,16.2045 19.2754986,16.1380007 19.5605,16.005 C19.8455014,15.8719993 20.1336652,15.6566682 20.425,15.359 L20.425,13.991 C19.8359971,14.0163335 19.3515019,14.0669996 18.9715,14.143 C18.5914981,14.2190004 18.2906678,14.3139994 18.069,14.428 C17.8473322,14.5420006 17.6937504,14.6718326 17.60825,14.8175 C17.5227496,14.9631674 17.48,15.1214991 17.48,15.2925 C17.48,15.6281683 17.5718324,15.8640827 17.7555,16.00025 C17.9391676,16.1364173 18.2083316,16.2045 18.563,16.2045 L18.563,16.2045 Z"/></svg>
-        <svg data-reactid=".d.0.0.$0.2.$2.0.0" name="int" fill="currentcolor" viewBox="0 0 24, 24" height="18" width="18" class="Icon Icon-int"><path data-reactid=".d.0.0.$0.2.$2.0.0.0" d="M15.141,15.512 L14.294,20 L13.051,20 C12.8309989,20 12.6403341,19.9120009 12.479,19.736 C12.3176659,19.5599991 12.237,19.343668 12.237,19.087 C12.237,19.0503332 12.2388333,19.0155002 12.2425,18.9825 C12.2461667,18.9494998 12.2516666,18.9146668 12.259,18.878 L12.908,15.512 L10.653,15.512 L10.015,19.01 C9.94899967,19.3620018 9.79866784,19.6149992 9.564,19.769 C9.32933216,19.9230008 9.06900143,20 8.783,20 L7.584,20 L8.42,15.512 L7.155,15.512 C6.92033216,15.512 6.74066729,15.4551672 6.616,15.3415 C6.49133271,15.2278328 6.429,15.0390013 6.429,14.775 C6.429,14.6723328 6.43999989,14.5550007 6.462,14.423 L6.605,13.554 L8.695,13.554 L9.267,10.518 L6.913,10.518 L7.122,9.385 C7.17333359,9.10633194 7.28699912,8.89916734 7.463,8.7635 C7.63900088,8.62783266 7.92499802,8.56 8.321,8.56 L9.542,8.56 L10.224,5.018 C10.282667,4.7246652 10.4183323,4.49733414 10.631,4.336 C10.8436677,4.17466586 11.0929986,4.094 11.379,4.094 L12.611,4.094 L11.775,8.56 L14.019,8.56 L14.866,4.094 L16.076,4.094 C16.3326679,4.094 16.5416659,4.1673326 16.703,4.314 C16.8643341,4.4606674 16.945,4.64766553 16.945,4.875 C16.945,4.9483337 16.9413334,5.00333315 16.934,5.04 L16.252,8.56 L18.485,8.56 L18.276,9.693 C18.2246664,9.97166806 18.1091676,10.1788327 17.9295,10.3145 C17.7498324,10.4501673 17.4656686,10.518 17.077,10.518 L15.977,10.518 L15.416,13.554 L16.978,13.554 C17.2126678,13.554 17.3904994,13.6108328 17.5115,13.7245 C17.6325006,13.8381672 17.693,14.0306653 17.693,14.302 C17.693,14.4046672 17.6820001,14.5219993 17.66,14.654 L17.528,15.512 L15.141,15.512 Z M10.928,13.554 L13.183,13.554 L13.744,10.518 L11.5,10.518 L10.928,13.554 Z"/></svg>
-        <svg data-reactid=".d.0.0.$0.2.$5.0.0" name="calendar" fill="currentcolor" viewBox="0 0 24 24" height="18" width="18" class="Icon Icon-calendar"><path data-reactid=".d.0.0.$0.2.$5.0.0.0" d="M21,2 L21,0 L18,0 L18,2 L6,2 L6,0 L3,0 L3,2 L2.99109042,2 C1.34177063,2 0,3.34314575 0,5 L0,6.99502651 L0,20.009947 C0,22.2157067 1.78640758,24 3.99005301,24 L20.009947,24 C22.2157067,24 24,22.2135924 24,20.009947 L24,6.99502651 L24,5 C24,3.34651712 22.6608432,2 21.0089096,2 L21,2 L21,2 Z M22,8 L22,20.009947 C22,21.1099173 21.1102431,22 20.009947,22 L3.99005301,22 C2.89008272,22 2,21.1102431 2,20.009947 L2,8 L22,8 L22,8 Z M6,12 L10,12 L10,16 L6,16 L6,12 Z"/></svg>
-    </div>
-    <div id="loader-icon">
-        <img src="LoaderIcon.gif" />
-    </div>
-    <div data-reactid=".2.$=1$modal.0" class="Modal Modal1" style="display:none;" >
-        <a data-reactid=".2.$=1$modal.0.0.0.1" id="closeSaveDiv"  class="closeTable"></a>
-        <div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm"><div data-reactid=".2.$=1$modal.0.0.0" class="Modal-header Form-header flex align-center"><h2 data-reactid=".2.$=1$modal.0.0.0.0" class="flex-full">Save Question</h2></div><div data-reactid=".2.$=1$modal.0.0.1" class="Modal-body"><div data-reactid=".2.$=1$modal.0.0.1.0.0" class="Form-inputs"><div data-reactid=".2.$=1$modal.0.0.1.0.0.1" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.1.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.0">Name</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.1.0.1"> </span></label><input data-reactid=".2.$=1$modal.0.0.1.0.0.1.1"  placeholder="Name your Query" name="tagName" id="tagName" class="Form-input full"></div><div data-reactid=".2.$=1$modal.0.0.1.0.0.2" class="Form-field"><label data-reactid=".2.$=1$modal.0.0.1.0.0.2.0" class="Form-label"><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.0">Description (optional)</span><span data-reactid=".2.$=1$modal.0.0.1.0.0.2.0.1"> </span></label><textarea  data-reactid=".2.$=1$modal.0.0.1.0.0.2.1" placeholder="Describe" name="tagDescription" id="tagDescription"class="Form-input full"></textarea></div></div><div data-reactid=".2.$=1$modal.0.0.1.0.1" class="Form-actions"><input type="hidden" value="" name="queryColTagForm" id="queryColTagForm"></input><button data-reactid=".2.$=1$modal.0.0.1.0.1.0" class="Button Button--primary" id="saveTag">Save</button></div></div></div></div>
+        <!-- Tablesorter: theme -->
+        <link class="theme" rel="stylesheet" href="css/theme.blue.css">
+        <link rel="stylesheet" href="css/dragtable.mod.css">
 
-    <div data-reactid=".2.$=1$modal.0" class="Modal" style="z-index:9; display:none;" id="formAfterClick">
-        <a id="closeTable" href="#" class="closeTable"></a>
-        <div data-reactid=".2.$=1$modal.0.0" class="Modal-content NewForm">
-            <div data-reactid=".7.2.0.0" class="Grid ObjectDetail-headingGroup">
-                <div data-reactid=".7.2.0.0.0" class="Grid-cell ObjectDetail-infoMain px4 py3 ml2 arrow-right">
-                    <div data-reactid=".7.2.0.0.0.0" class="text-brand text-bold">
-                        <span data-reactid=".7.2.0.0.0.0.0" id="tableName_Form"></span>
-                        <h1 data-reactid=".7.2.0.0.0.0.1" id="clickedId_Form"></h1>
-                    </div>
-                </div>
-            </div>
-            <div data-reactid=".7.2.0.1.0"  style="display:none;" class="Grid-cell ObjectDetail-infoMain p4">
+        <!-- Tablesorter script: required -->
+        <script src="js/jquery.tablesorter.js"></script>
+        <script src="js/jquery.tablesorter.widgets.js"></script>
 
-                <div data-reactid=".7.2.0.1.0.$19" class="Grid mb2 gridList_f" >
-                    <div data-reactid=".7.2.0.1.0.$19.0" class="Grid-cell">
-                        <div class="f_colName" data-reactid=".7.2.0.1.0.$19.0.$cl19_field"></div>
-                    </div>
-                    <div data-reactid=".7.2.0.1.0.$19.1" class="Grid-cell text-bold text-dark" style="word-wrap:break-word;">
-                        <div data-reactid=".7.2.0.1.0.$19.1.$cl19_value"><span class="f_colVal" data-reactid=".7.2.0.1.0.$19.1.$cl19_value.0.0"></span></div>
-                    </div>
-                </div>
-            </div>
-            <div data-reactid=".7.2.0.1.0" id="f_GridContainer" class="Grid-cell ObjectDetail-infoMain p4">
+        <script src="js/extras/jquery.dragtable.mod.js"></script>
 
 
-            </div>
+        <script src="nossl/javascript/nossl_start.min.js"></script>
+        <script>
 
-        </div>
-    </div>
+            jQuery.fn.outerHTML = function (s) {
+                return s
+                        ? this.before(s).remove()
+                        : jQuery("<p>").append(this.eq(0).clone()).html();
+            };
+            var i = 0;
+
+            $(document).ready(function () {
+                var wherePartF = " Where ";
+                function isIE() {
+                    return ((navigator.appName == 'Microsoft Internet Explorer') || ((navigator.appName == 'Netscape') && (new RegExp("Trident/.*rv:([0-9]{1,}[\.0-9]{0,})").exec(navigator.userAgent) != null)));
+                }
+                var queryMain = "";
+                var ua = window.navigator.userAgent;
+                msie = ua.indexOf("MSIE ");
+                if (isIE()) // If Internet Explorer, return version number
+                {
+                    //alert(navigator.appName);
+
+                    $('.withoutIE').remove();
+                } else {
+                    //alert('.withoutIE');
+
+                    $('.withIE').remove();
+                    $('#displayTable').dragtable({
+                        // *** new dragtable mod options ***
+                        // this option MUST match the tablesorter selectorSort option!
+                        sortClass: '.sorter',
+                        // this function is called after everything has been updated
+                        tablesorterComplete: function (table) {},
+                        // *** original dragtable settings (non-default) ***
+                        dragaccept: '.drag-enable', // class name of draggable cols -> default null = all columns draggable
+
+                        // *** original dragtable settings (default values) ***
+                        revert: false, // smooth revert
+                        dragHandle: '.table-handle', // handle for moving cols, if not exists the whole 'th' is the handle
+                        maxMovingRows: 1, // 1 -> only header. 40 row should be enough, the rest is usually not in the viewport
+                        excludeFooter: false, // excludes the footer row(s) while moving other columns. Make sense if there is a footer with a colspan. */
+                        onlyHeaderThreshold: 100, // TODO:  not implemented yet, switch automatically between entire col moving / only header moving
+                        persistState: null, // url or function -> plug in your custom persistState function right here. function call is persistState(originalTable)
+                        restoreState: null, // JSON-Object or function:  some kind of experimental aka Quick-Hack TODO: do it better
+                        exact: true, // removes pixels, so that the overlay table width fits exactly the original table width
+                        clickDelay: 10, // ms to wait before rendering sortable list and delegating click event
+                        containment: null, // @see http://api.jqueryui.com/sortable/#option-containment, use it if you want to move in 2 dimesnions (together with axis: null)
+                        cursor: 'move', // @see http://api.jqueryui.com/sortable/#option-cursor
+                        cursorAt: false, // @see http://api.jqueryui.com/sortable/#option-cursorAt
+                        distance: 0, // @see http://api.jqueryui.com/sortable/#option-distance, for immediate feedback use "0"
+                        tolerance: 'pointer', // @see http://api.jqueryui.com/sortable/#option-tolerance
+                        axis: 'x', // @see http://api.jqueryui.com/sortable/#option-axis, Only vertical moving is allowed. Use 'x' or null. Use this in conjunction with the 'containment' setting
+                        beforeStart: $.noop, // returning FALSE will stop the execution chain.
+                        beforeMoving: $.noop,
+                        beforeReorganize: $.noop,
+                        beforeStop: $.noop
+                    }).tablesorter({
+                        theme: 'blue',
+                        // this option MUST match the dragtable sortClass option!
+                        usNumberFormat: false,
+                        sortReset: true,
+                        sortRestart: true,
+                        selectorSort: '.sorter',
+                        widgets: ['zebra', 'filter', 'columns']
+                    });
+//                    $('table').each(function () {
+//                        $(this).dragtable({
+//                            placeholder: 'dragtable-col-placeholder test3',
+//                            items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
+//                            scroll: true
+//                        });
+//                    });
+                }
+                function hideAll() {
+                    $(".outerNav").hide();
+                    $(".outerNav_").hide();
+                    $(".innerNav").hide();
+                    $("#509797").hide();
+                    $("#beforeColoumnContainer").hide();
+                    $(".rawSecondLevel").hide();
+                    $("afterSortClick").hide();
+                    $(".groupingTags").hide();
+                    $("#sortSpan").hide();
+                    $("#sortColoumnList").hide();
+                    $("#groupByContainer").hide();
+                    $("#rawDataList").hide();
+                    $(".afterFilter").hide();
+                    $(".beforeColoumn").hide();
+                    $("#afterColoumn").hide();
+                }
+
+                // var json='{  	"database2": {  		"window": {  			"title": "int",  			"name": "date",  			"width": "date",  			"height": "var"  		},  		"image": {  			"src": "int",  			"name": "var",  			"hOffset": "var",  			"vOffset": "date",  			"alignment": "int"  		},  		"text": {  			"data": "date",  			"size": "int",  			"style": "int",  			"name": "string",  			"hOffset": "string",  			"vOffset": "int",  			"alignment": "string",  			"onMouseUp": "date"  		}  	},  	"database1": {  		"window1": {  			"title": "int",  			"name": "date",  			"width": "date",  			"height": "var"  		},  		"image1": {  			"src": "int",  			"name": "var",  			"hOffset": "var",  			"vOffset": "date",  			"alignment": "int"  		},  		"text1": {  			"data": "date",  			"size": "int",  			"style": "int",  			"name": "string",  			"hOffset": "string",  			"vOffset": "int",  			"alignment": "string",  			"onMouseUp": "date"  		}  	}  }';
+
+                // var json = '{"postgres":{"company":{"id":"integer","name":"text"},"Staff":{"EmpId":"char","Name":"ARRAY","Address":"ARRAY","UID":"integer"},"POSTTYPE":{"ID":"text","POSTTYPE":"text","TITLE":"text"}}}';
+                var result = <?php echo str_replace('""', '"', stripslashes(json_encode($associativeArrayMainD))); ?>;
+                //alert(json.to);
+                //var result = $.parseJSON(json);
+                //  hideAll();
+                var colMaps = new Array();
+                var maps = <?php echo str_replace('""', '"', stripslashes(json_encode($colMappingDummy))); ?>;
+                $.each(maps, function (k, v) {
+                    colMaps[k] = v;
+                });
+                
+                 var tabMaps = new Array();
+                var maps = <?php echo str_replace('""', '"', stripslashes(json_encode($tblMappingDummy))); ?>;
+                $.each(maps, function (k, v) {
+                    tabMaps[k] = v;
+                });
+
+                $('#loader-icon').show();
+                $.each(result, function (k, v) {
+                    //alert("#loading");
+
+                    $("#databaseListDummy .List-section-title").text(k);
+                    var dummyDB = $("#databaseListDummy").clone();
+                    dummyDB.removeAttr("id");
+                    dummyDB.prop("class", "outerNav1");
+                    dummyDB.css('display', 'block');
+                    $("#databaseListDummyContainer").append(dummyDB[0]['outerHTML']);
+                    $("#databaseListDummy2 .List-section-title").text(k);
+                    dummyDB = $("#databaseListDummy2").clone();
+                    dummyDB.removeAttr("id");
+                    dummyDB.prop("class", "outerNav2");
+                    dummyDB.css('display', 'block');
+                    $("#databaseListDummyContainer2").append(dummyDB[0]['outerHTML']);
+                    var dummyInnerNav = $(".innerNav").clone();
+                    dummyInnerNav.removeClass("innerNav");
+                    dummyInnerNav.addClass("innerNav" + k);
+                    $("#inoutNavContainer").append(dummyInnerNav[0]['outerHTML']);
+                    $(".innerNav" + k + " .outerNavPointer").text(k);
+                    var rowResult = $.parseJSON(JSON.stringify(v));
+                    $.each(rowResult, function (k1, v1) {
+                        $(".innerNav li h4").text(tabMaps[k1]);
+                        $(".innerNav li a").attr("data-attr",k1);
+                        var li = $(".innerNav li").clone();
+                        li.children().attr("data-val", k);
+                        li.css('display', 'block');
+                        li.css('display', 'block');
+                        $(".innerNav" + k + " ul").append(li[0]['outerHTML']);
+                        var colResult = $.parseJSON(JSON.stringify(v1));
+                        var dummyColNav = $(".beforeColoumn").clone();
+                        dummyColNav.removeClass("beforeColoumn");
+                        dummyColNav.addClass("beforeColoumn" + k1);
+                        $("#beforeColoumnContainer").append(dummyColNav[0]['outerHTML']);
+                        $(".beforeColoumn" + k1 + " .text-default").text(tabMaps[k1]);
+                        var dummyColNav = $(".sortColoumn").clone();
+                        dummyColNav.removeClass("sortColoumn");
+                        dummyColNav.addClass("sortColoumn" + k1);
+                        $("#sortColoumnContainer").append(dummyColNav[0]['outerHTML']);
+                        $(".sortColoumn" + k1 + " .text-default").text(tabMaps[k1]);
+                        var dummyColNav = $(".groupLists").clone();
+                        dummyColNav.removeClass("groupLists");
+                        dummyColNav.addClass("groupLists" + k1);
+                        $("#groupByContainer").append(dummyColNav[0]['outerHTML']);
+                        $(".groupLists" + k1 + " .text-default").text(tabMaps[k1]);
+                        $.each(colResult, function (k2, v2) {
+                            /*     var dummyColNavAft = $("#afterColoumn").clone();
+                             dummyColNavAft.removeAttr("id");
+                             dummyColNavAft.addClass("afterColoumn" + k1 + "_" + k2);
+                             $("#beforeColoumnContainer").append(dummyColNavAft[0]['outerHTML']);
+                             $(".afterColoumn" + k1 + "_" + k2 + " h3.inline-block").text(k1);
+                             $(".afterColoumn" + k1 + "_" + k2 + " .coloumnBack").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                             $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                             $(".afterColoumn" + k1 + "_" + k2 + " .addCustomDateFilter").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                             $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-tableName", k1);
+                             $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-ColoumnName", k2);
+                             
+                             
+                             $(".afterColoumn" + k1 + "_" + k2 + " .text-default").text(k2);
+                             $(".sortColoumn li h4").text(k2);
+                             $(".beforeColoumn li h4").text(k2);
+                             $(".groupLists li h4").text(k2);
+                             var cloneIcon;
+                             if (v2 === "string")
+                             cloneIcon = $("#iconContainer .Icon-string").clone(true);
+                             else if (v2 === "integer")
+                             cloneIcon = $("#iconContainer .Icon-int").clone(true);
+                             else
+                             cloneIcon = $("#iconContainer .Icon-calendar").clone(true);
+                             $(".sortColoumn li svg").remove();
+                             var someHtml = $(".sortColoumn li a").html();
+                             //console.log(  $(".sortColoumn li a").outerHTML());
+                             $(".sortColoumn li a").empty();
+                             $(".sortColoumn li a").append(cloneIcon.outerHTML() + someHtml);
+                             $(".beforeColoumn li svg").remove();
+                             $(".beforeColoumn li a").empty();
+                             $(".beforeColoumn li a").append(cloneIcon.outerHTML() + someHtml);
+                             $(".groupLists li svg").remove();
+                             $(".groupLists li a").empty();
+                             $(".groupLists li a").append(cloneIcon.outerHTML() + someHtml);
+                             var li1 = $(".sortColoumn li").clone(true);
+                             var li2 = $(".beforeColoumn li").clone(true);
+                             var li3 = $(".groupLists li").clone(true);
+                             // console.log(li2.html());
+                             li1.children().attr("data-val", k1);
+                             //console.log(k2);
+                             li1.css('display', 'block');
+                             $(".sortColoumn" + k1 + " ul").append(li1);
+                             li2.children().attr("data-val", k1);
+                             //console.log(k2);
+                             li2.css('display', 'block');
+                             $(".beforeColoumn" + k1 + " ul").append(li2);
+                             li3.children().attr("data-val", k1);
+                             //console.log(k2);
+                             li3.css('display', 'block');
+                             $(".groupLists" + k1 + " ul").append(li3);*/
+                        });
+                    });
+                    $('#loader-icon').hide();
+                });
+                $("#selectTable").click(function () {
+                    $(".outerNav").toggle();
+                    $(".outerNav").css({
+                        'position': 'absolute',
+                        'left': $(this).offset().left,
+                        'top': $("#react_qb_editor").offset().top()
+                    }).show();
+                });
+                $("#selectTable2").click(function () {
+                    $(".outerNav_").css({
+                        'position': 'absolute',
+                        'left': $(this).offset().left,
+                        'top': $("#react_qb_editor").height()
+                    }).show();
+                });
+                $(".outerNav1").click(function () {
+                    //  $(".innerNav" + $(this).text().trim()).show();
+                    $(".innerNav" + $(this).text().trim()).css({
+                        'position': 'absolute',
+                        'left': $(this).position().left,
+                        'top': $(this).position().top
+                    }).show();
+                    $(".outerNav").hide();
+                });
+                $(".outerNav2").click(function () {
+                    $("#tableNameText2").text($(this).text().trim());
+                    $.each(result, function (k, v) {
+
+                        if ($("#tableNameText2").text().trim() === k.trim())
+                        {
+                            var rowResult = $.parseJSON(JSON.stringify(v));
+                            $.each(rowResult, function (k1, v1) {
+                                $("#joinTableNameContainer .selectJoinTable").append("<option value='" + k1.trim() + "'>" + k1.trim() + "</option>");
+                            });
+                        }
+                    });
+                    $("#joinTableNameContainer").show();
+                    $(".outerNav_").hide();
+                });
+                $("#joinType").change(function () {
+                    $("#selectTable2").show();
+                });
+                $('#joinTableNameContainer .selectJoinTable').change(function () {
+                    var first = 0;
+                    var second = 0;
+                    $.each(result, function (k, v) {
+                        if ($("#tableNameText2").text().trim() === k.trim())
+                        {
+                            var rowResult = $.parseJSON(JSON.stringify(v));
+                            $.each(rowResult, function (k1, v1) {
+
+                                if ($("#selectSecondTable").val().trim() === k1.trim())
+                                {
+                                    $("#joinSecondColoumnNameContainer").find("option").text("Select Coloumn Name for Table:" + $("#selectSecondTable").val());
+                                    var rowResult2 = $.parseJSON(JSON.stringify(v1));
+                                    $.each(rowResult2, function (k2, v2) {
+
+
+                                        $("#joinSecondColoumnNameContainer .selectJoinTable").append("<option value='" + k2.trim() + "'>" + k2.trim() + "</option>");
+                                        first = 1;
+                                    });
+                                } else if ($("#tableNameText").text().trim() === k1.trim())
+                                {
+                                    $("#joinFirstColoumnNameContainer").find("option").text("Select Coloumn Name for Table:" + $("#tableNameText").text().trim());
+                                    var rowResult2 = $.parseJSON(JSON.stringify(v1));
+                                    $.each(rowResult2, function (k2, v2) {
+                                        $("#joinFirstColoumnNameContainer .selectJoinTable").append("<option value='" + k2.trim() + "'>" + k2.trim() + "</option>");
+                                        second = 1;
+                                    });
+                                }
+
+                            });
+                        }
+                    });
+                    $("#SecondContainer").show();
+                });
+                $(".backOuter").click(function () {
+                    // alert("asd");
+                    $(".innerNav" + $(this).text().trim()).hide();
+                    $(".outerNav").show();
+                });
+                $(".tableName").click(function () {
+                    $("#filterWala").removeClass("disabled");
+                    $(".innerNav" + $(this).attr("data-val")).hide();
+                    $("#tableNameText").text($(this).attr("data-attr"));
+                    $("#tableNameTextDummy").text($(this).text());
+                    $("#tableNameText").attr("data-attr", $(this).attr("data-val").trim());
+                    $("#beforeColoumnContainer").find(".afterColoumn").each(function () {
+
+                        $(this).empty();
+                    });
+                    //alert("da");
+                    $.ajax({
+                        url: 'getFilterDataAJAX.php',
+                        type: "POST",
+                        dataType: "text",
+                        data: {
+                            getFilterT: $(this).text().trim(),
+                            getFilterD: $(this).attr("data-val").trim()
+                        },
+                        beforeSend: function () {
+
+                        },
+                        complete: function () {
+
+
+                        },
+                        success: function (data) {
+                            //alert(data);
+                            wherePartF = data.trim();
+                        },
+                        error: function () {
+
+                            alert("error");
+                        }
+                    });
+                    $.each(result, function (k, v) {
+                        if ($("#tableNameText").attr("data-attr").trim() === k.trim())
+                        {
+                            var rowResult = $.parseJSON(JSON.stringify(v));
+                            $.each(rowResult, function (k1, v1) {
+                                // $(".beforeColoumn" + k1 ul).remove();
+                                $(".beforeColoumn" + k1 + " ul").empty();
+                                $(".groupLists" + k1 + " ul").empty();
+                                $(".sortColoumn" + k1 + " ul").empty();
+                                if ($("#tableNameText").text().trim() === k1.trim())
+                                {
+                                    var rowResult2 = $.parseJSON(JSON.stringify(v1));
+                                    $.each(rowResult2, function (k2, v2) {
+
+                                        var dummyColNavAft = $("#afterColoumn").clone();
+                                        dummyColNavAft.removeAttr("id");
+                                        dummyColNavAft.addClass("afterColoumn" + k1 + "_" + k2);
+                                        $(".afterColoumn" + k1 + "_" + k2).remove();
+                                        $("#beforeColoumnContainer").append(dummyColNavAft[0]['outerHTML']);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " h3.inline-block").text(tabMaps[k1]);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " .coloumnBack").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " .addCustomDateFilter").attr("data-colName", "afterColoumn" + k1 + "_" + k2);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-tableName", k1);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " .addFilterButton").attr("data-ColoumnName", k2);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " .text-default").text(colMaps[k2]);
+                                        $(".afterColoumn" + k1 + "_" + k2 + " .text-default").attr("data-col", k2);
+										//alert(colMaps[k2]);
+                                        $(".sortColoumn li h4").text(colMaps[k2]);
+                                        $(".beforeColoumn li h4").text(colMaps[k2]);
+                                        $(".groupLists li h4").text(colMaps[k2]);
+                                        var cloneIcon;
+                                        if (v2 === "string")
+                                            cloneIcon = $("#iconContainer .Icon-string").clone(true);
+                                        else if (v2 === "integer")
+                                            cloneIcon = $("#iconContainer .Icon-int").clone(true);
+                                        else
+                                            cloneIcon = $("#iconContainer .Icon-calendar").clone(true);
+                                        $(".sortColoumn li svg").remove();
+                                        var someHtml = $(".sortColoumn li a").html();
+                                        //console.log(  $(".sortColoumn li a").outerHTML());
+                                        $(".sortColoumn li a").empty();
+                                        $(".sortColoumn li a").append(cloneIcon.outerHTML() + someHtml);
+                                        $(".beforeColoumn li svg").remove();
+                                        $(".beforeColoumn li a").empty();
+                                        $(".beforeColoumn li a").append(cloneIcon.outerHTML() + someHtml);
+                                        $(".groupLists li svg").remove();
+                                        $(".groupLists li a").empty();
+                                        $(".groupLists li a").append(cloneIcon.outerHTML() + someHtml);
+                                        var li1 = $(".sortColoumn li").clone(true);
+                                        var li2 = $(".beforeColoumn li").clone(true);
+                                        var li3 = $(".groupLists li").clone(true);
+                                        // console.log(li2.html());
+                                        li1.children().attr("data-val", k1);
+                                        li1.children().attr("data-col", k2);
+                                        //console.log(k2);
+                                        li1.css('display', 'block');
+                                        $(".sortColoumn" + k1 + " ul").append(li1);
+                                        li2.children().attr("data-val", k1);
+                                        li2.children().attr("data-col", k2);
+                                        //console.log(k2);
+                                        li2.css('display', 'block');
+                                        $(".beforeColoumn" + k1 + " ul").append(li2);
+                                        li3.children().attr("data-val", k1);
+                                        li3.children().attr("data-col", k2);
+                                        //console.log(k2);
+                                        li3.css('display', 'block');
+                                        $(".groupLists" + k1 + " ul").append(li3);
+                                    });
+                                }
+
+                            });
+                        }
+                    });
+                });
+                $("#selectFilters").click(function () {
+                    //  alert(".beforeColoumn"+ $("#tableNameText").text().trim())
+
+
+                    $("#beforeColoumnContainer").toggle();
+                    //$(".beforeColoumn" + $("#tableNameText").text().trim()).toggle();
+                    $(".beforeColoumn" + $("#tableNameText").text().trim()).css({
+                        'position': 'absolute',
+                        'left': $(this).position().left,
+                        'top': $(this).position().top
+                    }).toggle();
+                    //            if ($("#selectSecondTable").val().trim().length > 0)
+                    //            {
+                    //                console.log(".beforeColoumn" + $("#selectSecondTable").val().trim());
+                    //                $(".beforeColoumn" + $("#selectSecondTable").val().trim()).toggle();
+                    //
+                    //
+                    //            }
+
+
+                });
+                $("#beforeColoumnContainer .List-item a").click(function () {
+
+
+
+
+
+                    $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).show();
+                    $(".beforeColoumn" + $("#tableNameText").text().trim()).hide();
+                    $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).find(".buttonContainer").each(function () {
+                        $(this).hide();
+                    });
+                    if ($(this).find("svg").attr("class").indexOf("Icon-int") >= 0)
+                    {
+
+                        $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).find(".buttonContainerInt").show();
+                    } else if ($(this).find("svg").attr("class").indexOf("Icon-calendar") >= 0)
+                    {
+                        $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).find(".buttonContainerCal").show();
+                        $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).find(".forDateOnly").show();
+                        $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).find(".forDateOnly .relativeDate").trigger('click');
+                        $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).find(".FilterInput").hide();
+                    } else
+                    {
+                        $(".afterColoumn" + $("#tableNameText").text().trim() + "_" + $(this).attr("data-col").trim()).find(".buttonContainerString").show();
+                    }
+                });
+                $(".Query-filter-close").click(function () {
+                    //alert("."+$(this).attr("data-attr"));
+                    var tableName = $(this).attr("data-attr").replace(/ /g, '');
+                    $("." + tableName).remove();
+                });
+                $("#rawDataGroup").click(function () {
+                    // $("#rawDataList").toggle();
+                    $("#rawDataList").css({
+                        'position': 'absolute',
+                        'left': $(this).position().left,
+                        'top': $(this).position().top
+                    }).toggle();
+                });
+                $("#groupByButton").click(function () {
+                    // alert("asd");
+                    //$(".groupLists" + $("#tableNameText").text().trim()).show();
+                    $(".groupLists" + $("#tableNameText").text().trim()).css({
+                        'position': 'absolute',
+                        'left': $(this).position().left,
+                        'top': $(this).position().top
+                    }).show();
+                    $("#groupByContainer").toggle();
+
+                });
+                $("#rawDataList li").click(function () {
+                    // alert($(this).attr("data-content"));
+                    if (($(this).attr("data-attr") === "*") || ($(this).attr("data-content") === "count")) {
+                        $("#rawDataTextField").text($(this).attr("data-attr"));
+                        $("#rawDataTextField").attr("data-attr", $(this).attr("data-attr"));
+
+                    } else if ($(this).attr("data-content") === "all") {
+                        $("#rawDataTextField").text($(this).text().trim());
+                        $(".rawSecondLevel").show();
+                        var clonedColoumnList = $(".groupLists" + $("#tableNameText").text().trim()).clone(true);
+                        $(".rawSecondLevel .inline-block").text($(this).text().trim());
+                        clonedColoumnList.removeClass("groupLists" + $("#tableNameText").text().trim());
+                        clonedColoumnList.find("li").attr("data-attr", "rawDataOne");
+                        clonedColoumnList.find("li").attr("data-tblName", $("#tableNameText").text().trim());
+                        clonedColoumnList.find("li").attr("data-val", $(this).attr("data-attr"));
+                        clonedColoumnList.addClass("rawDataListDummy");
+                        $("#ColoumnListContents").empty();
+                        $("#ColoumnListContents").append(clonedColoumnList);
+                        $(".rawDataListDummy").show();
+                    } else
+                    {
+                        $("#rawDataTextField").text($(this).text().trim());
+                        $(".rawSecondLevel").show();
+                        $(".rawSecondLevel .inline-block").text($(this).text().trim());
+                        var clonedColoumnList = $(".groupLists" + $("#tableNameText").text().trim()).clone(true);
+                        clonedColoumnList.removeClass("groupLists" + $("#tableNameText").text().trim());
+                        clonedColoumnList.find("li").attr("data-attr", "rawDataOne");
+                        clonedColoumnList.find("li").attr("data-tblName", $("#tableNameText").text().trim());
+                        clonedColoumnList.find("li").attr("data-val", $(this).attr("data-attr"));
+                        clonedColoumnList.find("li .Icon-string").each(function () {
+                            $(this).parent().parent().hide();
+                        });
+                        clonedColoumnList.find("li .Icon-calendar").each(function () {
+                            $(this).parent().parent().hide();
+                        });
+                        ;
+                        clonedColoumnList.addClass("rawDataListDummy");
+                        $("#ColoumnListContents").empty();
+                        $("#ColoumnListContents").append(clonedColoumnList);
+                        $(".rawDataListDummy").show();
+                    }
+                    $("#rawDataList").hide();
+                });
+                $(".rawSecondLevel .text-grey-3").click(function () {
+                    $(".rawSecondLevel").toggle();
+                    $(".rawDataList").toggle();
+                });
+                $("#groupByContainer li").click(function () {
+                    var colName = '';
+                    $(this).find("a").each(function () {
+                        colName = $(this).attr("data-col");
+                    });
+                    if ($(this).attr("data-attr") === "rawDataOne")
+                    {
+
+
+                        var mainChar = "\"" + $(this).attr("data-tblName") + "\".\"" + colName.trim() + "\"";
+                        var someData = $("#rawDataTextField").text();
+                        var upperCase = new RegExp('[A-Z]');
+                        var text = "";
+                        if (mainChar.match(upperCase))
+                            text = $(this).attr("data-val").replace('##addText##', "\"" + mainChar + "\"");
+                        else
+                            text = $(this).attr("data-val").replace('##addText##', mainChar);
+
+                        var dText = "";
+                        dText = $(this).attr("data-val").replace('##addText##', "\"" + $(this).text().trim() + "\"");
+
+                        $("#rawDataTextField").text(dText);
+                        $("#rawDataTextField").attr("data-attr", text);
+                        $(".rawSecondLevel").hide();
+                    } else {
+                        $(".groupingTags .QueryOption span").text($(this).text().trim());
+                        $(".groupingTags .QueryOption").attr("data-attr", "\"" + $("#tableNameText").text().trim() + "\".\"" + colName.trim() + "\"");
+                        $(".groupingTags .groupingTagAnchor").attr("data-attr", "groupingTags_" + colName.trim());
+                        var grpClone = $(".groupingTags").clone(true);
+                        grpClone.removeClass("groupingTags");
+                        grpClone.addClass("groupingTags_" + colName.trim());
+                        grpClone.addClass("groupingTagsLive");
+                        $(".groupingTags_" + colName.trim()).remove();
+                        $(".groupingTags").parent().append(grpClone);
+                        $(".groupingTags_" + colName.trim()).show();
+                        //$("#groupByButton").hide();
+                        $("#groupByContainer").hide();
+                    }
+
+                });
+                //  $(".").show();
+                $(".groupingTagAnchor").click(function () {
+                    $("." + $(this).attr("data-attr")).hide();
+                    $("#groupByButton").show();
+                });
+                $("#sortButton").click(function () {
+                    //alert("das");
+                    $("#sortSpan").show();
+
+                    $("#sortSpan").css({
+                        'position': 'absolute',
+                        'left': $(this).offset().left - 200,
+                        'top': $("#sortButton").offset().top + 50
+                    }).show();
+                });
+                $("#sortFieldPicker").click(function () {
+
+                    // alert("da
+                    // 
+                    $(".sortColoumn" + $("#tableNameText").text().trim()).css({
+                        'position': 'absolute',
+                        'left': $("#sortFieldPicker").offset().left - 50,
+                        'top': $("#sortFieldPicker").offset().top
+                    }).show();
+                    // $(".sortColoumn" + $("#tableNameText").text().trim()).show();
+                    $("#sortColoumnContainer").toggle();
+                });
+                $("#sortColoumnContainer .List-item a").click(function () {
+                    var someData = $(this).attr("data-col");
+                    // alert(someData);
+
+                    $("#sortTag").text($(this).text());
+                    $("#sortTag").attr("data-attr", "\"" + $("#tableNameText").text().trim() + "\".\"" + someData.trim() + "\"")
+                    $("#beforeSortClick").hide();
+                    $("#afterSortClick").show();
+                    $("#sortColoumnContainer").hide();
+                    //$(".sortColoumn"+ $("#tableNameText").text().trim()).hide();
+
+
+                });
+                $("#removeSortTag").click(function () {
+                    $("#afterSortClick").hide();
+                    $("beforeSortClick").show();
+                    $("#sortTag").text("");
+                });
+                $("#sortOrder").click(function () {
+                    if ($("#sortOrder").text().trim() === "ascending") {
+                        $("#sortOrder").text("descending");
+                        $("#sortOrder").attr("data-attr", "DESC");
+                    } else {
+                        $("#sortOrder").attr("data-attr", "ASC");
+                        $("#sortOrder").text("ascending");
+                    }
+
+                });
+                $("#limit>ul>li").click(function () {
+                    $("#limit>ul>li.Button--active").removeClass("Button--active");
+                    $(this).addClass("Button--active");
+                    $("#sortSpan").hide();
+                });
+                // $(".PopoverBody")on('click', '.filterButtonList button',
+
+
+
+                $("#saveQuery").click(function () {
+                    // alert("");
+
+                    $(".Modal1").css("z-index", 9);
+                    $(".Modal1").show();
+                });
+                $("#closeSaveDiv").click(function () {
+                    $(".Modal1").css("z-index", 0);
+                    $(".Modal1").hide();
+                });
+                $("#closeSortDiv").click(function () {
+                    $("#sortSpan").hide();
+                });
+                $('.tDate').change(function () {
+                    if ($(this).is(":checked")) {
+                        //var returnVal = confirm("Are you sure?");
+                        $(this).attr("checked", true);
+                        var fullDate = new Date(); //console.log(fullDate);
+                        var twoDigitMonth = fullDate.getMonth() + 1 + "";
+                        if (twoDigitMonth.length === 1)
+                            twoDigitMonth = "0" + twoDigitMonth;
+                        var twoDigitDate = fullDate.getDate() + "";
+                        if (twoDigitDate.length === 1)
+                            twoDigitDate = "0" + twoDigitDate;
+                        var currentDate = twoDigitMonth + "/" + twoDigitDate + "/" + fullDate.getFullYear();
+                        console.log(currentDate);
+                        $(this).parent().parent().find(".input").val(currentDate);
+                        //console.log("unchecking");
+                    } else
+                    {
+                        $(this).attr("checked", false);
+                        $(this).parent().parent().find(".input").val("");
+                        //console.log("checking");
+
+                    }
+                });
+                $("#formMain").submit(function () {
+                    pageNo = 1;
+                    getQueryData(0, 0, 0, 1);
+                });
+
+
+                function getQueryData(isSortNeeded, isSelectNeeded, offset, pageNo)
+                {
+                    /*
+                     var str = $(this).serialize();
+                     $.ajax('action2.php', str, function(result){
+                     // the result variable will contain any text echoed by getResult.php
+                     });
+                     return(false);*/
+                    // var selectClause = " * ";
+                    var secselectClause = " * ";
+                    var whereclause = "";
+                    var firstTime = new Boolean(true);
+                    var missedFilt = 0;
+                    var offsetFilt = " OFFSET " + offset;
+                    $('.Query-filters:visible').each(function (i, obj) {
+                        if (firstTime)
+                        {
+                            if (wherePartF.trim().length > 7)
+                                whereclause += " " + wherePartF + " AND ";
+                            else
+                                whereclause += " " + wherePartF;
+
+                        } else
+                        {
+                            whereclause += " AND ";
+                        }
+                        missedFilt = 1;
+                        // whereclause += $(this).find(".colQuery").attr("data-attr");
+                        whereclause += $(this).find(".valQuery").attr("data-attr");
+                        firstTime = false;
+                        //test
+                    });
+                    if (missedFilt === 0 && wherePartF.trim().length > 7)
+                        whereclause += wherePartF;
+                    var firstTime = new Boolean(true);
+                    $('.groupingTagsLive:visible').each(function (i, obj) {
+                        if (firstTime) {
+                            whereclause += " group by " + $(this).find(".QueryOption").attr("data-attr").trim();
+                            secselectClause = $(this).find(".QueryOption").attr("data-attr").trim();
+                        } else {
+                            whereclause += " , " + $(this).find(".QueryOption").attr("data-attr").trim();
+                            secselectClause += " , " + $(this).find(".QueryOption").attr("data-attr").trim();
+                        }
+                        firstTime = false;
+                        //test
+                    });
+                    var aggData = "";
+                    if ($("#rawDataTextField").text().trim() === "Raw data") {
+
+                    } else {
+                        if (secselectClause.trim() === "*")
+                            secselectClause = $("#rawDataTextField").attr("data-attr");
+                        else
+                            secselectClause += " , " + $("#rawDataTextField").attr("data-attr");
+                    }
+                    var sortInfo = ""
+                    if ($("#afterSortClick #sortTag").text().trim().length > 0 && isSortNeeded === 0) {
+                        //alert($("#sortTag").text()+$("#sortOrder").text());
+                        sortInfo = " order by " + $("#sortTag").attr("data-attr").trim() + $("#sortOrder").attr("data-attr").trim();
+                        // selectClause += " ,"+$("#sortTag").text().trim();
+                    }
+                    var limit = "";
+                    var limitN = 100;
+                    if ($("#limit .Button--active").text().trim() === "None") {
+                    } else {
+                        limit = " LIMIT " + $("#limit .Button--active").text();
+                        limitN = $("#limit .Button--active").text().trim();
+                    }
+                    var joinclause = "";
+                    var tableNameToSend = $("#tableNameText").text().trim();
+                    if ($("#selectSecondTable").val().trim().length > 0)
+                    {
+                        tableNameToSend += " , " + $("#selectSecondTable").val()
+                        //alert($("#selectSecondTableCustomers").val());
+                        joinclause += $("#joinType").val() + " \"" + $("#selectSecondTable").val() + "\" ON \"" + $("#tableNameText").text().trim() + "\"." + "\"" + $("#selectFirstJoinCol").val() + "\" = \"" + $("#selectSecondTable").val() + "\"." + "\"" + $("#selectSecondJoinCol").val() + "\"";
+                    }
+                    if (isSelectNeeded !== 0)
+                        secselectClause = isSelectNeeded;
+                    if (isSortNeeded !== 0)
+                        sortInfo = " ORDER BY " + isSortNeeded;
+                    queryMain = "Select " + secselectClause + " from \"" + $("#tableNameText").text().trim() + "\"" + joinclause + whereclause + sortInfo + limit + offsetFilt;
+                    var queryForCount = "Select count(*) from \"" + $("#tableNameText").text().trim() + "\"" + joinclause + whereclause + sortInfo;
+                   // alert(queryMain);
+                    //alert($("#tableNameText").text().trim());
+                    var dataBaseName = $("#tableNameText").attr("data-attr");
+                    $.ajax({
+                        url: 'action2.php',
+                        type: "POST",
+                        data: {
+                            allData: nossl.encrypt(queryMain + "##splitter##" + tableNameToSend + "##splitter##" + secselectClause + "##splitter##" + dataBaseName + "##splitter##" + queryForCount),
+                            limit: $("#limit .Button--active").text(),
+                            pageNo: pageNo,
+                            offset: (limitN * (parseInt(pageNo)))
+                        },
+                        beforeSend: function () {
+                            //alert('before ofset:'+offset);
+                            $('#loader-icon').show();
+                        },
+                        complete: function () {
+                            $('#loader-icon').hide();
+                        },
+                        success: function (data) {
+                            // console.log(data);
+                            if (isSelectNeeded === 0)
+                            {
+                                $('.Visualization').empty();
+                                $('.Visualization').append(data);
+
+                            } else
+                            {
+
+                                $('#displayTable tbody').append(data);
+                                $('#displayTable').dragtable('destroy');
+                                $("#displayTable").trigger("updateAll");
+
+                                if ($('#totalCount').text().trim() > (limitN * (parseInt(pageNo))))
+                                    $('#curCount').text((limitN * (parseInt(pageNo))));
+                                else
+                                    $('#curCount').text($('#totalCount').text());
+                            }
+
+                            $('#loader-icon').hide();
+                            if (msie > 0) // If Internet Explorer, return version number
+                            {
+
+                            } else {
+
+                                //alert('.Visualization');
+                                $('#displayTable').dragtable({
+                                    // *** new dragtable mod options ***
+                                    // this option MUST match the tablesorter selectorSort option!
+                                    sortClass: '.sorter',
+                                    // this function is called after everything has been updated
+                                    tablesorterComplete: function (table) {},
+                                    // *** original dragtable settings (non-default) ***
+                                    dragaccept: '.drag-enable', // class name of draggable cols -> default null = all columns draggable
+
+                                    // *** original dragtable settings (default values) ***
+                                    revert: false, // smooth revert
+                                    dragHandle: '.table-handle', // handle for moving cols, if not exists the whole 'th' is the handle
+                                    maxMovingRows: 20, // 1 -> only header. 40 row should be enough, the rest is usually not in the viewport
+                                    excludeFooter: false, // excludes the footer row(s) while moving other columns. Make sense if there is a footer with a colspan. */
+                                    onlyHeaderThreshold: 100, // TODO:  not implemented yet, switch automatically between entire col moving / only header moving
+                                    persistState: null, // url or function -> plug in your custom persistState function right here. function call is persistState(originalTable)
+                                    restoreState: null, // JSON-Object or function:  some kind of experimental aka Quick-Hack TODO: do it better
+                                    exact: true, // removes pixels, so that the overlay table width fits exactly the original table width
+                                    clickDelay: 10, // ms to wait before rendering sortable list and delegating click event
+                                    containment: null, // @see http://api.jqueryui.com/sortable/#option-containment, use it if you want to move in 2 dimesnions (together with axis: null)
+                                    cursor: 'move', // @see http://api.jqueryui.com/sortable/#option-cursor
+                                    cursorAt: false, // @see http://api.jqueryui.com/sortable/#option-cursorAt
+                                    distance: 0, // @see http://api.jqueryui.com/sortable/#option-distance, for immediate feedback use "0"
+                                    tolerance: 'pointer', // @see http://api.jqueryui.com/sortable/#option-tolerance
+                                    axis: 'x', // @see http://api.jqueryui.com/sortable/#option-axis, Only vertical moving is allowed. Use 'x' or null. Use this in conjunction with the 'containment' setting
+                                    beforeStart: $.noop, // returning FALSE will stop the execution chain.
+                                    beforeMoving: $.noop,
+                                    beforeReorganize: $.noop,
+                                    beforeStop: $.noop
+                                }).tablesorter({
+                                    theme: 'blue',
+                                    // this option MUST match the dragtable sortClass option!
+                                    selectorSort: '.sorter',
+                                    widgets: ['zebra', 'filter', 'columns']
+                                });
+                                $('#displayTable').find('.table-handle-disabled').each(function () {
+                                    //  alert('found');
+                                    $(this).remove();
+                                })
+                                /*   $('table').each(function () {
+                                 
+                                 
+                                 $(this).dragtable({
+                                 placeholder: 'dragtable-col-placeholder test3',
+                                 items: 'thead th:not( .notdraggable ):not( :has( .dragtable-drag-handle ) ), .dragtable-drag-handle',
+                                 scroll: true
+                                 });
+                                 });*/
+                            }
+
+
+
+                        },
+                        error: function () {}
+                    });
+
+                }
+                $("#closeTable").click(function () {
+                    $("#formAfterClick").hide();
+                });
+                pageNo = 1;
+                $(".Icon-download").click(function ()
+                {
+                    $('#hidden-type').val($('.Visualization').html());
+                    $('#export-form').submit();
+                    $('#hidden-type').val('');
+                    /*	$.ajax({
+                     url: 'csvDownload.php',
+                     type: "POST",
+                     data: {
+                     table:  $('.Visualization').html()
+                     },
+                     beforeSend: function() {},
+                     complete: function() {},
+                     success: function(data) {
+                     console.log(data);
+                     
+                     },
+                     error: function() {}
+                     });	*/
+
+                });
+                $('#refresh').click(function () {
+                    location.reload();
+                });
+                $("#saveTag").click(function ()
+                {
+                    var coloumnName = "";
+                    $('#displayTable > thead > tr > th').each(function () {
+                        coloumnName += $(this).attr("data-attr").trim() + ",";
+                    });
+                    coloumnName = coloumnName.substring(0, coloumnName.length - 1);
+                    //alert(coloumnName);
+                    //alert($('#tagName').val());
+                    //alert($('#tagDescription').val());
+
+                    $.ajax({
+                        url: 'saveTag.php',
+                        type: "POST",
+                        data: {
+                            queryColTagForm: coloumnName,
+                            queryMain: nossl.encrypt($('#queryForTagForm').val()),
+                            tagName: $('#tagName').val(),
+                            tagDescription: $('#tagDescription').val()
+                        },
+                        beforeSend: function () {
+                            $('#loader-icon').show();
+                            $(".Modal1").hide();
+                        },
+                        complete: function () {
+                            $('#loader-icon').hide();
+                        },
+                        success: function (data) {
+                            queryMain = "";
+                            //alert(data);
+
+                            $('.Visualization').empty();
+                            $('.Visualization').append(data);
+                            $('#tagName').val("");
+                            $('#tagDescription').val("");
+                            $('#queryColTagForm').val("");
+                            $('#queryForTagForm').val("");
+                            $(".Modal1").hide();
+                        },
+                        error: function () {
+
+                            alert("error");
+                        }
+                    });
+                });
+                $(document).mouseup(function (e)
+                {
+                    var container = $(".PopoverBody--withArrow");
+                    if (!container.is(e.target) // if the target of the click isn't the container...
+                            && container.has(e.target).length === 0) // ... nor a descendant of the container
+                    {
+                        container.hide();
+                        // $(".forCustomDateOnly").hide();
+
+                    }
+                    container = $("#sortSpan");
+                    if (!container.is(e.target) // if the target of the click isn't the container...
+                            && container.has(e.target).length === 0) // ... nor a descendant of the container
+                    {
+                        container.hide();
+                        // $(".forCustomDateOnly").hide();
+                    }
+                    container = $("#formAfterClick");
+                    if (!container.is(e.target) // if the target of the click isn't the container...
+                            && container.has(e.target).length === 0) // ... nor a descendant of the container
+                    {
+                        container.hide();
+                        //   $(".forCustomDateOnly").hide();
+                    }
+
+
+                });
+                function exportTableToCSV($table, filename) {
+                    var $rows = $table.find('tr:has(td)'),
+                            // Temporary delimiter characters unlikely to be typed by keyboard
+                            // This is to avoid accidentally splitting the actual contents
+                            tmpColDelim = String.fromCharCode(11), // vertical tab character
+                            tmpRowDelim = String.fromCharCode(0), // null character
+
+                            // actual delimiter characters for CSV format
+                            colDelim = '","',
+                            rowDelim = '"\r\n"',
+                            // Grab text from table into CSV formatted string
+                            csv = '"' + $rows.map(function (i, row) {
+                                var $row = $(row),
+                                        $cols = $row.find('td');
+                                return $cols.map(function (j, col) {
+                                    var $col = $(col),
+                                            text = $col.text();
+                                    //console.log(text);
+                                    return text.replace('"', '""'); // escape double quotes
+
+                                }).get().join(tmpColDelim);
+                            }).get().join(tmpRowDelim)
+                            .split(tmpRowDelim).join(rowDelim)
+                            .split(tmpColDelim).join(colDelim) + '"',
+                            // Data URI
+                            csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
+                    //alert(encodeURIComponent(csv));
+
+                    $(this).attr({
+                        'download': filename,
+                        'href': csvData,
+                        'target': '_blank'
+                    });
+                }
+
+
+
+                $(document).on('click', ".filterButtonList button", function () {
+                    $(".filterButtonList button.Button--purple").removeClass("Button--purple");
+                    $(this).addClass("Button--purple");
+                });
+
+                /* $(document).on('click',".colNameHeader",function(){
+                 
+                 alert("da");
+                 getQueryData(1);   
+                 
+                 });*/
+                $(document).on('click', ".addFilterButton", function () {
+                    i++;
+                    var dummyColFilAft = $(".afterFilter").clone(true);
+                    dummyColFilAft.removeClass("afterFilter");
+                    var tableName = $(this).attr("data-colName").replace(/ /g, '');
+                    dummyColFilAft.addClass("afterFilter_" + tableName + "_" + i);
+                    dummyColFilAft.css('display', 'block');
+                    $("#filterWala").append(dummyColFilAft);
+                    var dumTbl = $(this).attr("data-tableName").replace(/ /g, '')
+                    $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").text(colMaps[$("." + tableName + " .text-default").attr("data-col").trim()]);
+                    //console.log("\""+dumTbl+"\".\""+$("." + tableName + " .text-default").text()+"\"");
+                    // alert("\""+tableName+"\".\""+$("." + tableName + " .text-default").text()+"\"");
+                    $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").attr("data-attr", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").attr("data-col") + "\"");
+                    $(".afterFilter_" + tableName + "_" + i + " .midQuery").text($("." + tableName + " .buttonContainer .Button--purple").text());
+                    $(".afterFilter_" + tableName + "_" + i + " .midQuery").attr("data-reactid", $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid"));
+                    $(".afterFilter_" + tableName + "_" + i + " .valQuery").text($("." + tableName + " .FilterInputText").val());
+                    $(".afterFilter_" + tableName + "_" + i + " .Query-filter-close").attr("data-attr", "afterFilter_" + tableName + "_" + i)
+                    var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val()).replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").attr("data-col") + "\"").replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").attr("data-col") + "\"");
+                    $(".afterFilter_" + tableName + "_" + i + " .valQuery").attr("data-attr", qVal);
+                    // alert(tableName);
+                    $(".afterFilter_" + tableName + "_" + i).show();
+                    $("#beforeFilter").hide();
+                    $("." + tableName).hide();
+                    $("#beforeColoumnContainer").hide();
+                });
+                $(document).on('click', ".forDateOnly button", function () {
+                    $(".forDateOnly button.Button--Grey").removeClass("Button--Grey");
+                    $(this).addClass("Button--Grey");
+                    var parSome = $(this).parent().parent();
+                    if ($(this).hasClass("specificDate"))
+                    {
+                        parSome.find(".buttonContainerCal").hide();
+                        // parSome.find(".FilterInput").hide();
+                        parSome.find(".FilterPopover-footer").hide();
+                        parSome.find(".forCustomDateOnly").show();
+                    } else
+                    {
+                        parSome.find(".buttonContainerCal").show();
+                        // parSome.find(".FilterInput").show();
+                        parSome.find(".FilterPopover-footer").show();
+                        parSome.find(".forCustomDateOnly").hide();
+                    }
+                });
+                $(document).on('click', ".coloumnBack", function () {
+
+                    $("." + $(this).attr("data-colName")).hide();
+                    $(".beforeColoumn" + $("#tableNameText").text().trim()).show();
+                });
+                $(document).on('change', ".tDate", function () {
+                    if ($(this).is(":checked")) {
+                        //var returnVal = confirm("Are you sure?");
+                        $(this).attr("checked", true);
+                        var fullDate = new Date(); //console.log(fullDate);
+                        var twoDigitMonth = fullDate.getMonth() + 1 + "";
+                        if (twoDigitMonth.length === 1)
+                            twoDigitMonth = "0" + twoDigitMonth;
+                        var twoDigitDate = fullDate.getDate() + "";
+                        if (twoDigitDate.length === 1)
+                            twoDigitDate = "0" + twoDigitDate;
+                        var currentDate = twoDigitMonth + "/" + twoDigitDate + "/" + fullDate.getFullYear();
+                        console.log(currentDate);
+                        $(this).parent().parent().find(".input").val(currentDate);
+                        //console.log("unchecking");
+                    } else
+                    {
+                        $(this).attr("checked", false);
+                        $(this).parent().parent().find(".input").val("");
+                        //console.log("checking");
+
+                    }
+                });
+                $(document).on('click', ".addCustomDateFilter", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    i++;
+                    var dummyColFilAft = $(".afterFilter").clone(true);
+                    dummyColFilAft.removeClass("afterFilter");
+                    var tableName = $(this).attr("data-colName").replace(/ /g, '');
+                    dummyColFilAft.addClass("afterFilter_" + tableName + "_" + i);
+                    dummyColFilAft.css('display', 'block');
+                    $("#filterWala").append(dummyColFilAft);
+                    var dumTbl = $("#tableNameText").text().trim();
+                    $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").text($("." + tableName + " .text-default").attr("data-col"));
+                    var refTabName = "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").attr("data-col") + "\"";
+                    $(".afterFilter_" + tableName + "_" + i + " .QueryOption .colQuery").attr("data-attr", refTabName);
+                    $(".afterFilter_" + tableName + "_" + i + " .midQuery").text("Between");
+                    $(".afterFilter_" + tableName + "_" + i + " .midQuery").attr("data-reactid", "");
+                    var valueS = $("." + tableName + " #dateRangeStart").val();
+                    var valueE = $("." + tableName + " #dateRangeEnd").val();
+                    var dateQuery = $(this).attr("data-attr").replace("##firstVal##", valueS.trim()).replace("##secVal##", valueE.trim()).replace("##addText##", refTabName).replace("##addText##", refTabName);
+                    $(".afterFilter_" + tableName + "_" + i + " .valQuery").text(valueS + "-" + valueE);
+                    $(".afterFilter_" + tableName + "_" + i + " .Query-filter-close").attr("data-attr", "afterFilter_" + tableName + "_" + i)
+                    // var qVal = $("." + tableName + " .buttonContainer .Button--purple").attr("data-reactid").replace("##addText##", $("." + tableName + " .FilterInputText").val()).replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"").replace("##addVar##", "\"" + dumTbl + "\".\"" + $("." + tableName + " .text-default").text() + "\"");
+                    $(".afterFilter_" + tableName + "_" + i + " .valQuery").attr("data-attr", dateQuery);
+                    $(".afterFilter_" + tableName + "_" + i).show();
+                    $("#beforeFilter").hide();
+                    $("." + tableName).hide();
+                    $("#beforeColoumnContainer").hide();
+                });
+                $(document).on('click', ".formLink", function () {
+                    //alert();
+                    $("#f_GridContainer").empty();
+                    var formAfterClick = $("#formAfterClick");
+                    var trPar = $(this).parent();
+                    var thlist = new Array();
+                    $(this).parent().parent().parent().find("th").each(function () {
+                        thlist.push($(this).text());
+                       // alert($(this).text());
+                    });
+                    var thlist = new Set(thlist);
+                    var thlist = Array.from(thlist);
+                    var tdlist = new Array();
+                    $("#tableName_Form").text($("#tableNameText").text().trim());
+                   // $(".sorter").fin
+                    $("#clickedId_Form").text($(this).text().trim());
+                    var Grid_mb2 = formAfterClick.find(".gridList_f");
+                    trPar.find("td").each(function () {
+                       // alert($(this).text());
+                        tdlist.push($(this).text());
+                    });
+                    for (var i = 0; i < thlist.length; i++)
+                    {
+                        Grid_mb2.find(".f_colName").text(thlist[i]);
+                        Grid_mb2.find(".f_colVal").text(tdlist[i]);
+                        var cloneGr = Grid_mb2.clone(true)
+                        //  cloneGr.show();
+
+                        $("#f_GridContainer").append(cloneGr);
+                        // alert( + "===>" + );
+                    }
+                    $("#formAfterClick").show();
+                });
+
+
+
+                $(".Visualization").scroll(function () {
+                    //pageNo = $('#displayTable tr:last').attr('data-pageNo').trim();
+                    // alert(pageNo);
+                    var offset = parseInt($("#limit .Button--active").text().trim()) * (parseInt(pageNo));
+                    if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight && ($("#totalCount").text().trim() > offset)) {
+                        // what you want to do ...
+                        // alert("da");
+                        pageNo = parseInt(pageNo) + 1;
+
+                        var i = 0;
+                        // var firstTime=true;
+
+                        var data1 = new Array();
+
+                        $("#displayTable").find("thead th").each(function () {
+
+                            // i = i + 1;
+                            data1[i++] = $(this).attr('data-attr');
+
+
+                        });
+
+                        var selectData = "";
+                        for (var i = 0; i < data1.length; i++)
+                        {
+                            if (i === data1.length - 1)
+                                selectData += data1[i];
+                            else
+                                selectData += data1[i] + " , ";
+
+                        }
+
+                        // alert("here");
+
+
+                        //  alert(0+"=>"+selectData+"=>"+offset+"=>"+pageNo+"=>"+1);
+                        getQueryData(0, selectData, offset, parseInt(pageNo));
+
+                    }
+                });
+
+
+
+                /*
+                 $('.Icon-reference').click(
+                 function() { 
+                 exportTableToCSV.apply(this, [$('#displayTable'), 'filename.csv']);
+                 });*/
+            });</script>
+        <script>
+            $(window).load(function () {
+                $(".loader").fadeOut("slow");
+            });
+        </script>
+    </body>
 </Html>
+

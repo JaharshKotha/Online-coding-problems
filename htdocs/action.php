@@ -20,8 +20,10 @@ try
 		$pc=trim($row[2]);
 		if($p==$pc)
 		{
-			$_SESSION['uname']=$row[1];
-			$_SESSION['utype']=$row[3];
+			$_SESSION['uname']=trim($row[1]);
+			$_SESSION['displayname']=strtoupper(trim($row[5][0])).strtoupper(trim($row[6][0]));
+                        			//$_SESSION['uname']='PS1';
+			$_SESSION['utype']=trim($row[3]);
 			$_SESSION['login_ok']=1;
 			$_SESSION['timestamp']=time();
 			

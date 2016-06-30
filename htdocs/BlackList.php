@@ -1,0 +1,3 @@
+<?php
+define('BLACKLISTED_TABLES' , 'v_posts_related_hacking,russianproducts_map,t_marketplace_language,t_classification,v_item_related_hacking,t_item_cluster_mapping,labels_training,t_language,t_cluster,t_item_selling_price_usd,t_forums,t_marketplace_langauge,t_topic_classification_map,train_item_ve_cat,t_algorithm,t_item_algorithm_map,t_item_classification_map,t_currency_master,t_vendors,t_item_selling_price,t_posts,t_items,t_protocol_type,t_topics,t_marketplaces,t_users,v_distinct_items,v_t_items_latest');
+?>
