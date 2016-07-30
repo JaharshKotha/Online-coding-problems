@@ -1,4 +1,5 @@
 <?php
+ include("admin_check.php");
 session_set_cookie_params(0);
 session_start();
 ob_start();
@@ -23,6 +24,7 @@ window.location.href='logout.php';
 
    
    ?>
+   
 <meta http-equiv="content-type" content="text/html; charset=UTF-8"><script src="admin.php_files/jquery.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
