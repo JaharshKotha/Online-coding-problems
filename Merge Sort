@@ -1,0 +1,122 @@
+package summer;
+import java.util.Scanner;
+
+public class MSort {
+
+	public static void main(String[] args)
+	{
+		System.out.print("Enter the length of the array :");
+		
+		Scanner in = new Scanner(System.in);
+		int len= in.nextInt();
+		int a[]= new int[len];
+		
+		for(int i=0;i<len;i++)
+		{
+		a[i]=(int)(Math.random()*100);
+		
+		}
+		for(int i=0;i<len;i++)
+		{
+			System.out.print(a[i]+" ");
+		
+		}
+		System.out.println(" ");
+		a=Mergesort(a);
+		
+		for(int i=0;i<len;i++)
+		{
+			System.out.print(a[i]+" ");
+		
+		}
+		
+		
+		
+	}
+	
+	public static int [] Mergesort(int [] a)
+	{
+		int len=a.length;
+		int mid=len/2;
+		int ls=mid,rs=(len-mid);
+		int b[]=new int[ls];
+		int c[]=new int[rs];
+		if(a.length==1)
+		{
+			return a;
+		}
+		
+		for(int i=0;i<len;i++)
+		{
+			if(i<ls)
+			{
+				b[i]=a[i];
+			}
+			else
+			{
+				c[i-mid]=a[i];
+			}
+		}
+		
+		b=Mergesort(b);
+		c=Mergesort(c);
+		a=Merge(b,c);
+		return a;
+				
+	}
+	
+	public static int [] Merge(int [] b, int [] c)
+	{
+		int len=b.length+c.length;
+		int m[]=new int[len];
+		int bc=0,cc=0,cnt=0;
+		int i=0;
+		for(i=0;i<len;i++)
+		{
+		if(bc == b.length)
+		{
+			cnt=1;
+			break;
+		}
+		else if(cc== c.length)
+		{
+			cnt=2;
+			break;
+		}
+		else
+		{
+			if(b[bc] > c[cc])
+			{
+				m[i]=c[cc];
+				cc++;
+			}
+			else
+			{
+				m[i]=b[bc];
+				bc++;
+			}
+		}
+			
+		}
+		
+		for(int j=i;j<len;j++)
+		{
+			if(cnt==1)
+			{
+				m[j]=c[cc];
+				++cc;
+			}
+			else
+			{
+				m[j]=b[bc];
+				++bc;
+			}
+			
+		}
+		
+		cnt=0;
+		return m;
+	}
+	
+	
+}
