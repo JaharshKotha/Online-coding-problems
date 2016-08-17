@@ -1,0 +1,111 @@
+import java.util.Scanner;
+
+public class QuickSort{
+    
+     public static int split(int [] a, int low , int high)
+     {
+         int left= low+1;
+         int right =high;
+        int pivot=a[low];
+         while(true)
+         {
+             while(left <= right)
+             {
+                 if(a[left]>pivot )
+                {
+                    break;
+                } 
+                else
+                {
+                left++;
+                }
+             }
+             
+             while(right > left)
+             {
+                 if(a[right ]< pivot )
+                {
+                    break;
+                }
+                else
+                {
+                right --;
+                }
+             }
+             
+             int temp;
+             temp=a[low];
+             a[low]=a[high];
+             a[high]=a[low];
+             
+             low++;
+             right--;
+             
+             
+             
+             
+             if(left >= right)
+             {
+                 break;
+             }
+         }
+         
+         a[low]=a[left-1];
+         a[left-1]=pivot;
+         return left-1;
+         
+         
+     }
+
+
+    public static void sort(int [] a,int low,int high)
+     {
+         if((low-high) <=0)
+         {return ;}
+         
+         int sp = split(a,low,high);
+         sort(a,low,sp-1);
+         sort(a,sp+1,high);
+         
+     }
+     
+     
+      public static void quicksort(int [] a)
+     {
+         sort(a,0,a.length);
+     }
+     
+     public static void main(String []args){
+         
+       System.out.println("enter the length");
+       Scanner sc= new Scanner(System.in);
+       int len= sc.nextInt();
+       
+       int a[]=new int[len];
+       
+       for(int i=0;i<len;i++)
+       {
+           
+          a[i]=sc.nextInt();
+       }
+       
+     quicksort(a);
+     System.out.println("****");
+       
+       for(int i=0;i<a.length;i++)
+       {
+           System.out.println(a[i]);
+       }
+       
+     }
+     
+    
+     
+     
+     
+    
+     
+     
+     
+     
+}
