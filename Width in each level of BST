@@ -1,0 +1,129 @@
+package summer;
+
+public class BST{
+
+    public class Node
+    {
+        int data;
+        Node left,right;
+        
+        Node(int dat)
+        {
+            this.data=dat;
+            left=right=null;
+        }
+    }
+    
+    Node root;
+    
+    BST()
+    {
+        root=null;
+    }
+    
+    void insert(int dat)
+    {
+        if(this.root==null)
+        {
+           // System.out.println("inside");
+            this.root=new Node(dat);
+            return;
+        }
+        Node m=this.root;
+        Node z=m;
+        int cnt=1;
+        while(m != null )
+        {
+            z=m;
+        
+            if(m.data < dat)
+            {
+                
+                m=m.right;
+                cnt =1;
+            }
+            else if (m.data > dat)
+            {
+                m=m.left;
+                cnt =2;
+            }
+            
+        }
+       
+       if(cnt ==1 )
+       {
+           z.right = new Node(dat);
+       }
+       else
+       {
+           z.left = new Node(dat);
+       }
+        
+        return;
+    }
+    
+    void inorder(Node root)
+    {
+        if(root!=null)
+        {
+            inorder(root.left);
+            System.out.print("  "+root.data);
+            inorder(root.right);
+        }
+            
+        }
+    void incr(int[] lcnt,int l)
+    {
+    	lcnt[l]++;
+    }
+    
+    void genlc(Node t,int[] lcnt,int l )
+    {
+    	if(t!=null)
+    	{
+    		l++;
+    		genlc(t.left,lcnt,l);
+    		incr(lcnt,l-1);
+    		genlc(t.right,lcnt,l);
+    		
+    	}
+    	
+    }
+    
+    
+    
+    void getwid(Node rt)
+    {
+    	int level=0;
+    	int[] lcnt=new int[3];
+    	genlc(rt,lcnt,level);
+    	System.out.println("Lcnt  ");
+    	for(int i=0;i<lcnt.length;i++)
+    	{
+    		System.out.print("  "+lcnt[i]);
+    		
+    	}
+    	
+    }
+    
+        
+    
+     public static void main(String []args){
+    
+    BST list = new BST();
+    
+    list.insert(50);
+        list.insert(30);
+        list.insert(20);
+        list.insert(40);
+        list.insert(70);
+        list.insert(60);
+        list.insert(80);
+ 
+        // print inorder traversal of the BST
+        //list.inorder(list.root);
+        list.getwid(list.root);
+    
+    
+     }
+}
