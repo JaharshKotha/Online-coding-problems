@@ -1,0 +1,38 @@
+/*
+ * Complete the function below.
+ */
+    
+    static Set<String> set = new TreeSet<>();
+    static String[] buildSubsequences(String s) {
+        
+        if(s == null) {
+            return null;
+        }
+        
+        if(s.length() == 1) {
+            String[] array = new String[1];
+            array[0] = s;
+            return array;
+        }
+        
+        return sequence(s);       
+    }
+
+    static String[] sequence(String s) {
+        if(!s.trim().equals("")) {
+            set.add(s);    
+        }
+        for(int i=0; i<s.length(); i++) {
+            char c = s.charAt(i);
+            StringBuilder builder = new StringBuilder();
+            builder.append(s.substring(0, i));
+            builder.append(s.substring(i+1, s.length()));
+            if(!builder.toString().trim().equals("")) {
+                 set.add(builder.toString());                
+            }
+
+            sequence(builder.toString());
+                
+        }
+        return set.toArray(new String[set.size()]);
+    }
