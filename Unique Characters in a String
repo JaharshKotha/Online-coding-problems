@@ -1,0 +1,37 @@
+import java.util.*;
+
+public class Solution {
+
+    public static void main(String[] args) {
+     String a;
+       Scanner sc = new Scanner(System.in);
+        int ac [] = new int [26];
+        for(int i=0;i<ac.length;i++)
+            ac[i]=0;
+        
+        a = sc.nextLine();
+        int c=0;
+        for(char ab : a.toCharArray() )
+        {
+            c=ab;
+            c= Character.isUpperCase(ab)? c-65:c-97;
+            System.out.println(c);
+            ac[c] +=1;
+        }
+        int flg=0;
+        for(int i=0;i<ac.length;i++)
+            {
+            if(ac[i]>1)
+                {
+                System.out.println("Non-unique characters in String");
+                flg=1;
+                break;
+            }
+        }
+        if(flg==0)
+            {
+            System.out.println("Unique characters in String");
+        }
+    }
+    
+}
