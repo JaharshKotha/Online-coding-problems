@@ -1,0 +1,20 @@
+	static int height(Node root) {
+        int level=0,height[] = new int [1];
+        
+        height[0] = 0;
+        heightcnt(root,level,height);
+        return --height[0];
+        
+    }
+    
+static void heightcnt(Node root ,int level ,int height []) {
+    if(root!=null)
+            {
+        //System.out.println(level);
+            ++level;
+            height[0] = height[0] < level ? level : height[0];
+            heightcnt(root.left,level,height);
+            heightcnt(root.right,level,height);
+        }
+    
+}
