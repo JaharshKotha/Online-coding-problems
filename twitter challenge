@@ -1,0 +1,74 @@
+import java.io.*;
+import java.util.*;
+import java.text.*;
+import java.math.*;
+import java.util.regex.*;
+import java.lang.*;
+
+public class Solution {
+    public static void main(String args[] ) throws Exception {
+       Scanner sc = new Scanner(System.in);
+        String s="ab";
+        s=sc.nextLine();
+        int i=0,cnt=0,opos=0,cpos=0;
+        while(s!="")
+            {
+            
+            String [] exp = s.split("/");
+            StringBuilder sb=new StringBuilder();
+sb.append(exp[1]);
+for(i=0;i<exp[1].length();i++)
+                {
+				if(exp[1].charAt(i)=='S' && exp[1].charAt(i+1)=='S')
+				{
+				continue;
+				}
+				if(exp[1].charAt(i)=='R' && exp[1].charAt(i+1)=='R')
+				{
+				continue;
+				}
+				  
+                if(exp[1].charAt(i)=='S')
+                    {
+                       
+                    cnt =0,opos=0,cpos=0;
+                    for(i=0;i<exp[0].length();i++)
+                        {
+                        if(exp[1].charAt(i)=='(')
+                            {
+                            opos = (cnt == 0) ? i : opos;
+                            ++cnt;
+                        }
+                        if(exp[1].charAt(i)==')')
+                            {
+                            --cnt;
+                            cpos = (cnt == 0 )? i : cpos;
+                            
+                        }
+                    }
+                     
+                     if(opos!=0 && cpos!=0)
+						{
+						sb.delete
+					 }
+					 else{
+                    
+                     System.out.println(exp[0]);
+					 }
+                }
+            }
+            
+          if(exp.length > 1)
+        {sb.append(exp[1]);
+              System.out.println(sb.toString());
+          }
+            else
+                {
+                System.out.println(exp[0]);
+            }
+            
+            
+            s =sc.nextLine();
+        }
+    }
+}
