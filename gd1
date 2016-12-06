@@ -1,0 +1,21 @@
+/*
+ * Complete the function below.
+ */
+
+    static int countDuplicates(int[] numbers) {
+       Map map = new HashMap();
+        Set set = new HashSet();
+       for(int i : numbers) {
+           if(map.get(i) != null) {
+               //This is duplicate
+               set.add(i);
+           } 
+           else {
+                map.put(i, 1);
+           }
+
+       }
+        return set.size();
+
+    }
+
