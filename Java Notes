@@ -6,9 +6,17 @@ int - 32 bit (-2,147,483,648 2,147,483,647)
 long - 64 bit (91) [used for replacing int]
 float - 32 bit ()
 double - 64 bit () [used for replacing float] 
+######################################################
 
 #In Matrix problems have the var_names as row and col.
 
 Arrays.sort(a_name);  // can sort arrays of all data-types
+
+##### To obtain the fraction part of a double ####
+double num;
+iPart = (long) num;
+fPart = num - iPart;
+######################################################
+
 
 
