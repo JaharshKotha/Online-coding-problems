@@ -9,3 +9,6 @@ double - 64 bit () [used for replacing float]
 
 #In Matrix problems have the var_names as row and col.
 
+Arrays.sort(a_name);  // can sort arrays of all data-types
+
+
