@@ -29,7 +29,11 @@ Static variable - common for all the objects
 this keyword  - when there is ambig. between the class member's and the local var's [both have same names] , this resolves 
                 the conflict by pointing to the class members.
                 
-
+                
+Inheritance : class A extends B{}
+              Multiple - One parent many child . (not supported as both parents may have same function names which causes ambiguity)
+final :
+              
 
 
 
