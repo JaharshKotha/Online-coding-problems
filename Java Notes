@@ -18,5 +18,18 @@ iPart = (long) num;
 fPart = num - iPart;
 ######################################################
 
+Method overloading - Same name diff parameters
+       overriding - 
+       
+Static variable - common for all the objects
+       method - does not belong to any object and can be called only with class_name.fun() directly 
+                can use only static var's inside it.
+       block - used for initialization ,will be invoked first.
+
+this keyword  - when there is ambig. between the class member's and the local var's [both have same names] , this resolves 
+                the conflict by pointing to the class members.
+                
+
+
 
 
