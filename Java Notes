@@ -32,7 +32,7 @@ this keyword  - when there is ambig. between the class member's and the local va
                 
 Inheritance : class A extends B{}
               Multiple - One parent many child . (not supported as both parents may have same function names which causes ambiguity)
-final :
+final :       fixes the value of a variable.
               
 
 
