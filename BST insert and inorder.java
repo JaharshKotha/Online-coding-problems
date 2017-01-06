@@ -1,4 +1,5 @@
 public class Bst{
+    //a program for inserting in binary tree and inorder traversal
 
     public class Node
     {
