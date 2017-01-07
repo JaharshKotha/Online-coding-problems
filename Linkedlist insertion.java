@@ -1,5 +1,5 @@
 public class Linkedl{
-    
+    //Linked list implemetation
     class Node
     {
         int data;
