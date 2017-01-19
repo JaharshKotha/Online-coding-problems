@@ -35,7 +35,6 @@ Inheritance : class A extends B{}
 final :       fixes the value of a variable.
               final methods are 
               
-              Regex in java
-chang
-
+when you want to read an Int and then a string , give an additional sc.nextLine() in between to buffer out the extra newline you get after reading the int and making your cursor
+wait at the new line for the next line input
 
