@@ -1,0 +1,36 @@
+/*
+Node is defined as 
+  class Node {
+     int data;
+     Node next;
+  }
+*/
+
+Node RemoveDuplicates(Node head) {
+  
+Node temp = head;
+    Node stemp = null;
+    Node next = temp.next;
+    boolean flg=true;
+    while(next!=null)
+        {flg=true;
+        if(temp.data==next.data)
+            {
+            temp.next = next.next;
+            
+            stemp = next;
+            
+            next = next.next;
+            stemp.next = null;
+            flg=false;
+            
+        }
+         if(flg)
+             {
+             temp=next;
+             next = next.next;
+         }
+    }
+    return head;
+
+}
