@@ -9,30 +9,36 @@
 */
 
 Node MergeLists(Node headA, Node headB) {
-    Node temp = headA;
-    
-    Node temp1 = headB;
-    Node stemp=null;
+   
     if(headA == null)
         return headB;
     if(headB == null )
         return headA;
-    Node next =temp.next ;
-    if(next==null)
+    Node temp = null, temp1=null;
+    if(headA.data > headB.data)
         {
-      
-           if(temp.data<temp1.data)
-           {temp.next=temp1;  return headA;}
-           else
-               {temp1.next = temp ; return headB;}
-           
-       
-       
+     temp = headB;
+     temp1 = headA;   
     }
-    while(next.next!=null && temp1.next!=null)
+    else
+        {
+     temp = headA;
+     temp1 = headB;   
+    }
+    if(temp.next==null)
+        {
+        
+        temp.next = temp1;
+        return temp;
+    }
+    Node stemp=null;
+    Node next =temp.next ;
+    int flg = 0;
+    while(next!=null && temp1!=null)
         {
         if((temp.data < temp1.data)&&(temp1.data < next.data))
             {
+            
             stemp = temp1;
             temp1 = temp1.next;
             temp.next = stemp;
@@ -41,9 +47,12 @@ Node MergeLists(Node headA, Node headB) {
         }
         temp = temp.next;
         next= temp.next;
+    flg=1;
     }
-    next = next.next;
-    if(temp1!=null)
-        {next.next=temp1;}
+  if(temp1!=null)
+      {
+      temp.next = temp1;
+  }
+    
 return headA;
 }
