@@ -1,0 +1,49 @@
+/*
+  Merge two linked lists 
+  head pointer input could be NULL as well for empty list
+  Node is defined as 
+  class Node {
+     int data;
+     Node next;
+  }
+*/
+
+Node MergeLists(Node headA, Node headB) {
+    Node temp = headA;
+    
+    Node temp1 = headB;
+    Node stemp=null;
+    if(headA == null)
+        return headB;
+    if(headB == null )
+        return headA;
+    Node next =temp.next ;
+    if(next==null)
+        {
+      
+           if(temp.data<temp1.data)
+           {temp.next=temp1;  return headA;}
+           else
+               {temp1.next = temp ; return headB;}
+           
+       
+       
+    }
+    while(next.next!=null && temp1.next!=null)
+        {
+        if((temp.data < temp1.data)&&(temp1.data < next.data))
+            {
+            stemp = temp1;
+            temp1 = temp1.next;
+            temp.next = stemp;
+            stemp.next = next;
+            
+        }
+        temp = temp.next;
+        next= temp.next;
+    }
+    next = next.next;
+    if(temp1!=null)
+        {next.next=temp1;}
+return headA;
+}
