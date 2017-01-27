@@ -1,0 +1,54 @@
+public class Solution {
+    
+	public int sqrt(int a) {
+	   
+	    int i=0;
+	    if(a==1)
+	   { return 1;}
+	    if(a==0)
+	   { return 0;}
+	   else
+	   {return fs(0,a,a); }
+	   /*{
+	       int c= fs(1,a/2,a);
+	       
+	       for(i=c;i<(a/2);i++)
+	       {
+	           if((i*i)>a)
+	           {break;}
+	       }
+	       return --i;
+	   }
+	   */
+        
+	}
+	public static int prev=0;
+	public static int flg=0;
+	public static int fs(int s,int e,int a)
+	{
+	    int m = (s+e)/2;
+	    if(m==prev)
+	    {flg=1;
+	    return prev;}
+	    if(flg==1)
+	    {
+	        return m;
+	    }
+	    if(s>=e || ((m*m)==a))
+	    {flg =1;return m;}
+	    else if((m*m)< a)
+	    {
+	       // System.out.println(m+"moving right ");
+	        prev = m;
+	        m=fs(m,e, a);
+	        
+	    }
+	    else
+	    { //System.out.println(m+"moving left");
+	    prev= m;m=fs(s,m, a);}
+	    return m;
+	    
+	}
+	
+	
+}
