@@ -56,5 +56,5 @@ public static void insert(Node root, int x)
         {
         prev.right = t;
     }
-}
+} 
 
