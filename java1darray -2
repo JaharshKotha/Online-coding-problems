@@ -1,0 +1,53 @@
+import java.util.*;
+
+public class Solution {
+   //public static boolean  flg = false;
+    public static boolean canWin(int leap, int[] game) {
+        
+      boolean ans =  helper(leap,game,0,false);
+        return ans;
+        
+    }
+    
+    public static boolean helper(int leap, int[] game,int pos, boolean flg)
+        {
+        if(flg)
+            {
+            return true;
+        }
+        System.out.println(pos+" , "+flg);
+        int l = game.length-1;
+        if(pos == l || (pos+leap) >=l )
+            {
+            flg=true;
+            return flg;
+        }
+             
+                if(game[pos+1]==0)
+                    {
+                   helper(leap,game,pos+1,flg); 
+                }
+             if(game[pos+leap]==0)
+                    {
+                   helper(leap,game,pos+leap,flg); 
+                }
+       
+        return flg;
+    }
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        int q = scan.nextInt();
+        while (q-- > 0) {
+            int n = scan.nextInt();
+            int leap = scan.nextInt();
+            
+            int[] game = new int[n];
+            for (int i = 0; i < n; i++) {
+                game[i] = scan.nextInt();
+            }
+
+            System.out.println( (canWin(leap, game)) ? "YES" : "NO" );
+        }
+        scan.close();
+    }
+}
