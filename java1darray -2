@@ -51,3 +51,80 @@ public class Solution {
         scan.close();
     }
 }
+#########LOOKS GOOD#######
+
+import java.util.*;
+
+public class Solution {
+   //public static boolean  flg = false;
+    public static boolean canWin(int leap, int[] game) {
+        
+      boolean ans =  helper(leap,game,0,false,0);
+        return ans;
+        
+    }
+    
+    public static boolean helper(int leap, int[] game,int pos, boolean flg,int fl)
+        {
+        if(game[pos]==1 || fl==1)
+        {
+           
+            fl=1;
+            
+            return false;
+        }
+        if(flg)
+            {
+            return true;
+        }
+        //System.out.println(pos+" , "+flg);
+        int l = game.length-1;
+        if(pos == l || (pos+leap) >=l )
+            {
+            //System.out.println("i'm in");
+           
+            return true;
+        }
+             
+                if(game[pos+1]==0 && flg!=true)
+                    {
+                    //System.out.println("i'm in again");
+                    game[pos]=1;
+                  flg= helper(leap,game,pos+1,flg,0); 
+                }
+             if(game[pos+leap]==0 && flg!=true)
+                    {
+                  //System.out.println("i'm in again");
+                 game[pos]=1;
+                   flg = helper(leap,game,pos+leap,flg,0); 
+                }
+        if(pos>0)
+        {
+            if(game[pos-1]==0 && flg!=true)
+                    {
+                 //System.out.println("i'm in again");
+                game[pos]=1;
+                  flg = helper(leap,game,pos-1,flg,0); 
+                }
+            
+        }
+       
+        return flg;
+    }
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        int q = scan.nextInt();
+        while (q-- > 0) {
+            int n = scan.nextInt();
+            int leap = scan.nextInt();
+            
+            int[] game = new int[n];
+            for (int i = 0; i < n; i++) {
+                game[i] = scan.nextInt();
+            }
+
+            System.out.println( (canWin(leap, game)) ? "YES" : "NO" );
+        }
+        scan.close();
+    }
+}
