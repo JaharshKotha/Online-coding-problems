@@ -1,0 +1,84 @@
+public class Solution {
+	// DO NOT MODIFY BOTH THE LISTS
+	public double findMedianSortedArrays(final List<Integer> a, final List<Integer> b) {
+	   
+	  
+	   List<Integer> l = new ArrayList<Integer>();
+	    
+	    int j=0,i=0,flg=0;
+	    if(a.size()==0)
+	    {if(b.size()%2 == 0)
+	   {int p=b.get(b.size()/2);
+	      int m=b.get((b.size()/2)-1);
+	      
+	      float x=(float)(p+m)/2;
+	      return x; }
+	      else{
+	       return b.get(b.size()/2);
+	      }
+	   
+	    }
+	    if(b.size()==0)
+	   { if(a.size()%2 == 0)
+	   {int p=a.get(a.size()/2);
+	      int m=a.get((a.size()/2)-1);
+	      
+	      float x=(float)(p+m)/2;
+	      return x; }
+	      else{
+	       return a.get(a.size()/2);
+	      }
+	      }
+	      
+	   while(true)
+	   {
+	        if(j==b.size())
+	        {flg =1; break;}
+	        if(i==a.size())
+	        {flg =0; break;}
+	        int ac=a.get(i);
+	        int bc=b.get(j);
+	        //System.out.println(ac+" "+bc);
+	        if(a.get(i)<b.get(j))
+	        {
+	            //  System.out.println(l+"z"+i+j+l.size());
+	            l.add(a.get(i));
+	            ++i;
+	        }
+	        else
+	        { l.add(b.get(j));++j;
+	            // System.out.println(l+"y"+i+j+l.size());
+	        }
+	    }
+	   
+	    
+	    if(j==b.size())
+	    {
+	         for(int k=i;k<a.size();k++)
+	    {
+	         l.add(a.get(k));
+	    }
+	        
+	    }
+	    else
+	    {
+	       for(int k=j;k<b.size();k++)
+	    {
+	         l.add(b.get(k));
+	    }  
+	    }
+	  //System.out.print(l);
+	  if((l.size()%2)==0)
+	  {
+	      int p=l.get(l.size()/2);
+	      int m=l.get((l.size()/2)-1);
+	      float x=(float)(p+m)/2;
+	      return x;
+	      
+	  }
+	  else
+	  {
+	    return l.get((a.size()+b.size())/2);
+	  }
+	}
+}
