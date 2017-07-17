@@ -1,0 +1,44 @@
+public class Solution {
+	public String longestPalindrome(String a) {
+	    int len = a.length();
+	    --len;
+	    int max=0, x=0,y=0;
+	    for(int i=0;i<len;i++)
+	    {
+	        for(int j=i+1;j<(len+1);j++)
+	        {
+	            if(a.charAt(i)==a.charAt(j))
+	            { System.out.println(a.charAt(i));
+	                if(cp(a.substring(i,j+1)))
+	                {
+	                   
+	                    if((j-i) >max)
+	                    {
+	                        x=i;y=j;
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	   
+	     return a.substring(x,y+1);
+	}
+	
+	public static boolean cp(String s)
+	{
+	    System.out.println(s);
+	    int l = s.length();
+	    int e=l-1;
+	    l=l/2;
+	    for(int i=0;i<l;i++)
+	    {
+	        if(s.charAt(i)!=s.charAt(e))
+	        {
+	            return false;
+	        }
+	        --e;
+	    }
+	    return true;
+	}
+}
