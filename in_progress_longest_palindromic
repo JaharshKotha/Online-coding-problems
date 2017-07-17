@@ -7,13 +7,15 @@ public class Solution {
 	    {
 	        for(int j=i+1;j<(len+1);j++)
 	        {
+	            
 	            if(a.charAt(i)==a.charAt(j))
-	            { System.out.println(a.charAt(i));
+	            { 
 	                if(cp(a.substring(i,j+1)))
 	                {
 	                   
 	                    if((j-i) >max)
 	                    {
+                            max= (j-i);
 	                        x=i;y=j;
 	                    }
 	                }
@@ -21,13 +23,13 @@ public class Solution {
 	        }
 	    }
 	    
-	   
+	     //System.out.println(a.substring(x,y+1));
 	     return a.substring(x,y+1);
 	}
 	
 	public static boolean cp(String s)
 	{
-	    System.out.println(s);
+	    //System.out.println(s);
 	    int l = s.length();
 	    int e=l-1;
 	    l=l/2;
