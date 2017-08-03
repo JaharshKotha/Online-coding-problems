@@ -1,0 +1,29 @@
+package main
+
+import (
+	"fmt"
+)
+
+cnt= 0
+func Sqrt(x float64) float64 {
+
+if cnt = cnt +1;cnt<10
+{
+return x
+}
+
+var a int
+
+z := x*2
+
+a=  z - (((z*z) - x)/(2*z))
+
+cnt = cnt +1
+
+Sqrt(a)
+
+}
+
+func main() {
+	fmt.Println(Sqrt(2))
+}
