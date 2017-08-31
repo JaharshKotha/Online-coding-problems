@@ -1,0 +1,141 @@
+import java.io.*;
+import java.util.*;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.text.DecimalFormat;
+import java.util.Formatter;
+
+public class Main {
+
+	public static HashMap<String, Double> bench_values = new HashMap<String, Double>();
+
+	public static class Stock {
+		String stock_name;
+		double price;
+		double qty;
+
+		Stock(String input_contstructor) {
+			String[] stock_details = input_contstructor.split(",");
+			stock_name = stock_details[0];
+			qty = Double.parseDouble(stock_details[1]);
+			price = Double.parseDouble(stock_details[2]);
+
+		}
+	}
+
+	public static class Portfolio {
+		String portfolio;
+		double total;
+		Stock s[];
+
+		Portfolio(String input) {
+
+			String[] portfolio_parse = input.split(":");
+			portfolio_parse[0] = portfolio_parse[0].replaceAll("\\s", "");
+			portfolio = portfolio_parse[0];
+
+			boolean b = (portfolio.equals("BENCH")) ? true : false;
+
+			int s_count = input.length() - input.replace(";", "").length();
+			++s_count;
+
+			s = new Stock[s_count];
+
+			String[] stock_parse = portfolio_parse[1].split(";");
+
+			for (int j = 0; j < s_count; j++) {
+
+				s[j] = new Stock(stock_parse[j]);
+
+				total += (s[j].qty * s[j].price);
+
+			}
+
+			if (b) {
+				populateHashMap(s, total);
+			}
+
+		}
+
+		public void populateHashMap(Stock h[], double total) {
+			for (int i = 0; i < h.length; i++) {
+				bench_values.put(h[i].stock_name, ((h[i].qty * h[i].price) * 100) / total);
+			}
+
+		}
+
+		public void printResult() {
+			String pattern = "#0.00";
+			DecimalFormat decimalFormat = new DecimalFormat(pattern);
+			String ans = "";
+
+			for (int i = 0; i < s.length; i++) {
+				double bench_val = 0;
+
+				if (bench_values.containsKey(s[i].stock_name)) {
+					bench_val = bench_values.get(s[i].stock_name);
+
+				}
+
+				double percentage = (((s[i].qty * s[i].price) * 100) / total);
+				double a = (double) Math.round((percentage - bench_val) * 100) / 100;
+				String format = decimalFormat.format(a);
+				ans += (s[i].stock_name + ":" + format + ",");
+
+			}
+
+			ans = ans.substring(0, ans.length() - 1);
+			Iterator it = bench_values.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry pair = (Map.Entry) it.next();
+				// String k = pair.getKey();
+				if (!ans.contains(String.valueOf(pair.getKey()))) {
+
+					String tem = String.valueOf(pair.getValue());
+
+					String format = decimalFormat.format(Double.parseDouble(tem));
+
+					ans += "," + pair.getKey() + ":-" + format;
+				}
+
+				it.remove();
+			}
+			System.out.println(ans);
+
+		}
+
+	}
+
+	public static void main(String[] args) throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		String s;
+		while ((s = in.readLine()) != null) {
+
+			ArrayList<String> portfolios = new ArrayList<String>();
+			String port_count = s;
+			int cnt = 0, t = 0;
+			int p_count = port_count.length() - port_count.replace("|", "").length();
+			++p_count;
+
+			Portfolio p[] = new Portfolio[p_count];
+
+			for (int i = -1; (i = s.indexOf("|", i + 1)) != -1; i++) {
+
+				p[t] = new Portfolio(s.substring(cnt, i));
+				cnt = i + 1;
+				++t;
+
+			}
+
+			p[t] = new Portfolio(s.substring(cnt, s.length()));
+
+			for (int h = 0; h < p.length; h++) {
+				if (!p[h].portfolio.equals("BENCH")) {
+					p[h].printResult();
+				}
+
+			}
+
+		}
+	}
+}
