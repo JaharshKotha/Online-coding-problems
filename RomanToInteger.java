@@ -31,12 +31,12 @@ public static int romanToInt(String s) {
             flg = (h.get(s.charAt(i))>=h.get(s.charAt(x))) ? true:false;
             if(flg)
             {
-                System.out.println(s.charAt(i)+" True");
+                
                 res+=t;
             }
             else
             {
-                System.out.println(s.charAt(i)+" False");
+                
                 res-=t;
             }
             System.out.println(res);
