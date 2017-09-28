@@ -30,29 +30,19 @@ public static int romanToInt(String s) {
             t=h.get(s.charAt(i));
             flg = (h.get(s.charAt(i))>=h.get(s.charAt(x))) ? true:false;
             if(flg)
-            {
-                
                 res+=t;
-            }
             else
-            {
-                
                 res-=t;
-            }
-            System.out.println(res);
+
             --x;
         }
         
          t=h.get(s.charAt(0));
         flg = (h.get(s.charAt(0))>=h.get(s.charAt(1))) ? true:false;
             if(flg)
-            {
                 res+=t;
-            }
             else
-            {
                 res-=t;
-            }
         return res;
 }
     
