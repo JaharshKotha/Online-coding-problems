@@ -13,10 +13,12 @@ public class Solution {
     {
         int x;
         int y;
-        pos(int x,int y)
+        String c;
+        pos(int x,int y,String c)
         {
             this.x = x;
             this.y =y;
+            this.c = c;
         }
     }
     static boolean check(int i_start, int j_start, int i_end, int j_end,int r,int c)
@@ -32,41 +34,50 @@ public class Solution {
         ArrayList<pos> tem = new ArrayList<pos>();
       if(check(i_start,j_start,i_end,j_end,i_start-2,j_start-1))
         {
-            pos p = new pos(i_start-2,j_start-1);
+            pos p = new pos(i_start-2,j_start-1,"UL");
            tem.add(p); 
         }
         if(check(i_start,j_start,i_end,j_end,i_start-2,j_start+1))
         {
-            pos p = new pos(i_start-2,j_start+1);
+            pos p = new pos(i_start-2,j_start+1,"UR");
            tem.add(p); 
         }
         if(check(i_start,j_start,i_end,j_end,i_start+2,j_start-1))
         {
-            pos p = new pos(i_start-2,j_start+1);
+            pos p = new pos(i_start+2,j_start+1,"LR");
            tem.add(p); 
         }
         if(check(i_start,j_start,i_end,j_end,i_start+2,j_start+1))
         {
-            pos p = new pos(i_start+2,j_start+1);
+            pos p = new pos(i_start+2,j_start-1,"LL");
            tem.add(p); 
         }
         if(check(i_start,j_start,i_end,j_end,i_start,j_start-2))
         {
-            pos p = new pos(i_start,j_start-2);
+            pos p = new pos(i_start,j_start-2,"L");
            tem.add(p); 
         }
         if(check(i_start,j_start,i_end,j_end,i_start,j_start+2))
         {
-            pos p = new pos(i_start,j_start+2);
+            pos p = new pos(i_start,j_start+2,"R");
            tem.add(p); 
         }
         
         return tem;
     }
+    static boolean checkpathrepetition(ArrayList<pos> next , pos p)
+    {
+        for(int i=0;i<next.size();i++)
+        {
+            if(p.x == next.get(i).x && p.y == next.get(i).y)
+                return false;
+        }
+        return true;
+    }
     static void printShortestPath(int n, int i_start, int j_start, int i_end, int j_end) {
         //  Print the distance along with the sequence of moves.
         Queue<ArrayList<pos>> q = new LinkedList<ArrayList<pos>>();
-        pos p = new pos(i_start,j_start);
+        pos p = new pos(i_start,j_start,"S");
         ArrayList<pos> tem= new ArrayList<pos>();
         tem.add(p);
         ArrayList<ArrayList<pos>> result = new ArrayList<ArrayList<pos>>();
@@ -77,12 +88,16 @@ public class Solution {
             ArrayList<pos> path = q.remove();
             pos cur = path.get(path.size()-1);
             ArrayList<pos> temp = populate(cur.x,cur.y,i_end,j_end);
+            if(temp.size()==0)
+                continue;
             
-            for(int i=0;i<tem.size();i++)
+            for(int i=0;i<temp.size();i++)
         {
-         ArrayList<pos> next = new ArrayList<pos>(path); 
-         next.add(temp.get(i));
-         System.out.println(next);       
+         ArrayList<pos> next = new ArrayList<pos>(path);
+                if(!checkpathrepetition(next,temp.get(i)))
+                    continue;
+                
+         next.add(temp.get(i));      
           if(flg==1 && next.size()>min)
               continue;
          if(temp.get(i).x == i_end && temp.get(i).y==j_end)
@@ -106,7 +121,14 @@ public class Solution {
         if(result.size()==0)
           System.out.println("Impossible");
         else
-            System.out.println(result);
+        {
+            ArrayList<pos> prin = result.get(0);
+            System.out.println(prin.size()-1);
+            for(int i=1;i<prin.size();i++)
+            {
+                System.out.print(prin.get(i).c+" ");
+            }
+        }
         
          
     }
