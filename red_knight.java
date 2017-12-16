@@ -1,5 +1,3 @@
-//https://www.hackerrank.com/contests/world-codesprint-12/challenges/red-knights-shortest-path
-
 import java.io.*;
 import java.util.*;
 import java.text.*;
@@ -83,9 +81,13 @@ public class Solution {
         ArrayList<ArrayList<pos>> result = new ArrayList<ArrayList<pos>>();
         q.add(tem);
         int min =10000,flg=0;
+        int itr=0;
         while(!q.isEmpty())
         {
+            if(itr>50)
+                break;
             ArrayList<pos> path = q.remove();
+            //System.out.println(path);
             pos cur = path.get(path.size()-1);
             ArrayList<pos> temp = populate(cur.x,cur.y,i_end,j_end);
             if(temp.size()==0)
@@ -117,6 +119,7 @@ public class Solution {
                 }               
                 
         }
+            ++itr;
         }
         if(result.size()==0)
           System.out.println("Impossible");
