@@ -1,5 +1,0 @@
-CREATE TABLE `files` (
-  `name` varchar(256) DEFAULT NULL,
-  `password` varchar(256) DEFAULT NULL,
-  `content` blob
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
