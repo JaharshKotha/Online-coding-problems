@@ -1,13 +1,5 @@
-/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode(int x) { val = x; }
- * }
- */
 class Solution {
+//Keeps track of all the permitted values
     public static ArrayList<Integer> al = new ArrayList<Integer>();
     
     public TreeNode trimBST(TreeNode root, int L, int R) {
@@ -24,7 +16,8 @@ class Solution {
         return rt;
         
     }
-    
+    // Populates the array list with permitted values ; We do an preorder traversal to maintain the order of the elements in the tree
+
     static void populate(TreeNode root, int L, int R)
     {
         if(root == null)
@@ -38,6 +31,7 @@ class Solution {
         
     }
     
+//creates a new tree by inserting the values one by one
     static TreeNode insert(TreeNode rt ,int n)
     {
         if(rt == null)
