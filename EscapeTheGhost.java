@@ -16,9 +16,8 @@ class Solution {
             rgjumps = Math.abs(target[1])+Math.abs(ghosts[i][1]); 
         }else{
             rgjumps = Math.abs(ghosts[i][1] -target[1]);
-        }
-            int gjumps = rgjumps + lgjumps;            
-            if(gjumps<=jumps)
+        }                       
+            if((rgjumps + lgjumps)<=jumps)
                 return false;
         }
         return true;
